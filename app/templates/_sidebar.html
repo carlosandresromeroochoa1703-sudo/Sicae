@@ -1,0 +1,214 @@
+<button class="menu-movil-boton" type="button" aria-label="Abrir menú">
+    ☰
+</button>
+
+<div class="menu-movil-overlay"></div>
+
+<aside class="sidebar">
+
+    <div class="sidebar-encabezado">
+        <div class="sidebar-identidad">
+            <span class="sidebar-marca" aria-hidden="true">S</span>
+            <div>
+                <h1>{{ configuracion.nombre_sistema or "SICAE WEB" }}</h1>
+                <span class="sidebar-subtitulo">GESTIÓN ESCOLAR</span>
+            </div>
+        </div>
+
+        <button class="menu-movil-cerrar" type="button" aria-label="Cerrar menú">
+            ×
+        </button>
+    </div>
+
+    {% if request.session.get("rol") == "docente" %}
+    <ul class="menu">
+        <li><a href="/asistencia-maestro" data-active-paths="/asistencia-maestro,/clases/">📋 Mis clases y asistencias</a></li>
+        <li><a href="/logout">🚪 Cerrar sesión</a></li>
+    {% elif request.session.get("rol") == "operador" %}
+    <ul class="menu">
+        <li><a href="/inicio-plantel">🏠 Inicio</a></li>
+        <li><a href="/escaner">📷 Asistencias</a></li>
+        <li><a href="/alumnos">👨‍🎓 Alumnos</a></li>
+        <li><a href="/grupos">🏫 Grupos</a></li>
+        <li><a href="/reportes">📊 Reportes</a></li>
+        <li><a href="/estadisticas">📈 Estadísticas</a></li>
+        <li><a href="/actividad-alumnos">🔎 Actividad de alumnos</a></li>
+        <li><a href="/eventos-fuera" data-active-paths="/eventos-fuera">🚌 Eventos fuera del plantel</a></li>
+        <li><a href="/logout">🚪 Cerrar sesión</a></li>
+    </ul>
+    {% elif request.session.get("rol") == "administrador" %}
+    <ul class="menu">
+
+        <li>
+            <a href="/inicio-plantel">
+                🏠 Inicio
+            </a>
+        </li>
+
+        <li>
+            <a href="/alumnos">
+                👨‍🎓 Alumnos
+            </a>
+        </li>
+
+        <li>
+            <a href="/actividad-alumnos">
+                🔎 Actividad de alumnos
+            </a>
+        </li>
+
+        <li>
+            <a href="/correos-alumnos">
+                ✉️ Correos de alumnos
+            </a>
+        </li>
+
+        <li>
+            <a href="/grupos">
+                🏫 Grupos
+            </a>
+        </li>
+
+        <li>
+            <a href="/escaner">
+                📷 Asistencias
+            </a>
+        </li>
+
+        <li>
+            <a href="/eventos-fuera" data-active-paths="/eventos-fuera">
+                🚌 Eventos fuera del plantel
+            </a>
+        </li>
+
+        <li>
+            <a href="/horarios" data-active-paths="/horarios">
+                🗓️ Horarios
+            </a>
+        </li>
+
+        <li>
+            <a href="/clases" data-active-paths="/clases">
+                📚 Registro de clases
+            </a>
+        </li>
+
+        <li>
+            <a href="/reportes">
+                📊 Reportes
+            </a>
+        </li>
+
+        <li>
+            <a href="/estadisticas">
+                📈 Estadísticas
+            </a>
+        </li>
+
+        <li>
+            <a href="/credencial/configuracion" data-active-paths="/credencial/configuracion,/credencial/configuracion-personal">
+                <span class="menu-icon credencial-menu-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" focusable="false">
+                        <rect x="3" y="5" width="18" height="14" rx="2.5"></rect>
+                        <circle cx="8" cy="11" r="2"></circle>
+                        <path d="M5.5 16c.6-1.5 1.5-2.2 2.5-2.2s1.9.7 2.5 2.2M13 10h5M13 14h5"></path>
+                    </svg>
+                </span>
+                <span>Diseño de credenciales</span>
+            </a>
+        </li>
+
+        <li>
+            <a href="/credenciales-especiales" data-active-paths="/credenciales-especiales">
+                🪪 Credenciales especiales
+            </a>
+        </li>
+
+        <li>
+            <a href="/configuracion/sistema">
+                ⚙️ Configuración del sistema
+            </a>
+        </li>
+
+        <li>
+            <a href="/configuracion/asistencia">
+                🕐 Horarios y asistencia
+            </a>
+        </li>
+
+        <li>
+            <a href="/notificaciones/configuracion">
+                📧 Correo y notificaciones
+            </a>
+        </li>
+
+        <li>
+            <a href="/administracion">
+                ⚙️ Administración
+            </a>
+        </li>
+
+        <li>
+            <a href="/logout">
+                🚪 Cerrar sesión
+            </a>
+        </li>
+
+    </ul>
+    {% else %}
+    <ul class="menu">
+        <li><a href="/logout">🚪 Cerrar sesión</a></li>
+    </ul>
+    {% endif %}
+
+</aside>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const botonAbrir = document.querySelector(".menu-movil-boton");
+    const botonCerrar = document.querySelector(".menu-movil-cerrar");
+    const overlay = document.querySelector(".menu-movil-overlay");
+    const sidebar = document.querySelector(".sidebar");
+
+    const rutaActual = window.location.pathname.replace(/\/$/, "") || "/";
+    if (sidebar) {
+        sidebar.querySelectorAll(".menu a[href]").forEach(function (enlace) {
+            const rutaEnlace = new URL(enlace.href, window.location.origin).pathname.replace(/\/$/, "") || "/";
+            const rutasActivas = (enlace.dataset.activePaths || rutaEnlace).split(",");
+            if (rutasActivas.includes(rutaActual) || rutasActivas.some(function (ruta) {
+                return ruta !== "/" && rutaActual.startsWith(ruta + "/");
+            })) {
+                enlace.classList.add("active");
+                enlace.setAttribute("aria-current", "page");
+            }
+        });
+    }
+
+    if (!botonAbrir || !botonCerrar || !overlay || !sidebar) {
+        return;
+    }
+
+    function abrirMenu() {
+        sidebar.classList.add("menu-movil-abierto");
+        overlay.classList.add("menu-movil-overlay-visible");
+        document.body.classList.add("menu-movil-activo");
+    }
+
+    function cerrarMenu() {
+        sidebar.classList.remove("menu-movil-abierto");
+        overlay.classList.remove("menu-movil-overlay-visible");
+        document.body.classList.remove("menu-movil-activo");
+    }
+
+    botonAbrir.addEventListener("click", abrirMenu);
+    botonCerrar.addEventListener("click", cerrarMenu);
+    overlay.addEventListener("click", cerrarMenu);
+
+    sidebar.querySelectorAll("a").forEach(function (enlace) {
+        enlace.addEventListener("click", cerrarMenu);
+    });
+
+});
+</script>
+

@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Nuevo Grupo - SICAE WEB</title>
+
+    <link
+        rel="stylesheet"
+        href="/static/css/style.css?v=20261018-3"
+    >
+
+</head>
+
+
+<body>
+
+    <!-- ================================= -->
+    <!-- BARRA LATERAL -->
+    <!-- ================================= -->
+
+        {% include "_sidebar.html" %}
+
+
+    <!-- ================================= -->
+    <!-- CONTENIDO -->
+    <!-- ================================= -->
+
+    <main class="content">
+
+        <header class="header">
+
+            <h2>
+                Nuevo grupo
+            </h2>
+
+            <p>
+                Registrar un nuevo grupo escolar
+            </p>
+
+        </header>
+
+
+        <!-- ================================= -->
+        <!-- FORMULARIO -->
+        <!-- ================================= -->
+
+        <div class="card">
+
+            <form
+                method="post"
+                action="/grupos/nuevo"
+            >
+
+                <!-- ================================= -->
+                <!-- NOMBRE DEL GRUPO -->
+                <!-- ================================= -->
+
+                <div style="margin-bottom: 20px;">
+
+                    <label
+                        for="nombre_grupo"
+                    >
+                        Nombre del grupo
+                    </label>
+
+                    <br>
+
+                    <input
+                        id="nombre_grupo"
+                        type="text"
+                        name="nombre_grupo"
+                        maxlength="100"
+                        required
+                        placeholder="Ejemplo: Tercero B"
+                        style="
+                            width: 100%;
+                            padding: 12px;
+                            margin-top: 8px;
+                            border: 1px solid #d1d5db;
+                            border-radius: 8px;
+                            box-sizing: border-box;
+                        "
+                    >
+
+                </div>
+
+
+                <!-- ================================= -->
+                <!-- GRADO -->
+                <!-- ================================= -->
+
+                <div style="margin-bottom: 20px;">
+
+                    <label
+                        for="grado"
+                    >
+                        Grado
+                    </label>
+
+                    <br>
+
+                    <input
+                        id="grado"
+                        type="number"
+                        name="grado"
+                        min="1"
+                        max="6"
+                        required
+                        placeholder="Ejemplo: 3"
+                        style="
+                            width: 100%;
+                            padding: 12px;
+                            margin-top: 8px;
+                            border: 1px solid #d1d5db;
+                            border-radius: 8px;
+                            box-sizing: border-box;
+                        "
+                    >
+
+                </div>
+
+
+                <!-- ================================= -->
+                <!-- GRUPO -->
+                <!-- ================================= -->
+
+                <div style="margin-bottom: 20px;">
+
+                    <label
+                        for="nombre"
+                    >
+                        Grupo
+                    </label>
+
+                    <br>
+
+                    <input
+                        id="nombre"
+                        type="text"
+                        name="nombre"
+                        maxlength="10"
+                        required
+                        placeholder="Ejemplo: B"
+                        style="
+                            width: 100%;
+                            padding: 12px;
+                            margin-top: 8px;
+                            border: 1px solid #d1d5db;
+                            border-radius: 8px;
+                            box-sizing: border-box;
+                            text-transform: uppercase;
+                        "
+                    >
+
+                </div>
+
+
+                <!-- ================================= -->
+                <!-- TURNO -->
+                <!-- ================================= -->
+
+                <div style="margin-bottom: 20px;">
+
+                    <label
+                        for="turno"
+                    >
+                        Turno
+                    </label>
+
+                    <br>
+
+                    <select
+                        id="turno"
+                        name="turno"
+                        required
+                        style="
+                            width: 100%;
+                            padding: 12px;
+                            margin-top: 8px;
+                            border: 1px solid #d1d5db;
+                            border-radius: 8px;
+                            box-sizing: border-box;
+                        "
+                    >
+
+                        <option value="">
+                            Seleccionar turno
+                        </option>
+
+                        <option value="Matutino">
+                            Matutino
+                        </option>
+
+                        <option value="Vespertino">
+                            Vespertino
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- ================================= -->
+                <!-- BOTONES -->
+                <!-- ================================= -->
+
+                <div>
+
+                    <button
+                        type="submit"
+                        style="
+                            padding: 12px 20px;
+                            border: none;
+                            border-radius: 8px;
+                            background-color: #111827;
+                            color: white;
+                            cursor: pointer;
+                            font-size: 15px;
+                        "
+                    >
+                        Guardar grupo
+                    </button>
+
+
+                    <a
+                        href="/grupos"
+                        style="
+                            display: inline-block;
+                            margin-left: 15px;
+                            color: #374151;
+                            text-decoration: none;
+                        "
+                    >
+                        Cancelar
+                    </a>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </main>
+
+    <script src="/static/js/navigation.js"></script>
+</body>
+
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Nuevo Personal - SICAE WEB
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="/static/css/style.css?v=20261018-3"
+    >
+
+    <style>
+
+        .personal-form-page {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .form-card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow:
+                0 4px 15px
+                rgba(0,0,0,.08);
+        }
+
+        .form-header {
+            margin-bottom: 25px;
+        }
+
+        .form-header h2 {
+            margin-bottom: 5px;
+        }
+
+        .form-header p {
+            margin: 0;
+            color: #6b7280;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns:
+                repeat(2, minmax(0, 1fr));
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+        }
+
+        .form-group.full {
+            grid-column: 1 / -1;
+        }
+
+        .form-group label {
+            font-weight: bold;
+        }
+
+        .form-group input,
+        .form-group select {
+            padding: 11px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 15px;
+            box-sizing: border-box;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #2563eb;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 30px;
+        }
+
+        .btn-guardar {
+            border: none;
+            padding: 11px 20px;
+            border-radius: 9px;
+            background: #2563eb;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .btn-cancelar {
+            display: inline-block;
+            padding: 11px 20px;
+            border-radius: 9px;
+            background: #374151;
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .btn-guardar:hover,
+        .btn-cancelar:hover {
+            opacity: .9;
+        }
+
+        @media (max-width: 700px) {
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-group.full {
+                grid-column: auto;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <!-- ====================================================
+         MENÚ LATERAL
+    ===================================================== -->
+
+    {% include "_sidebar.html" %}
+
+
+    <!-- ====================================================
+         CONTENIDO
+    ===================================================== -->
+
+    <main class="content">
+
+        <div class="personal-form-page">
+
+            <div class="form-card">
+
+
+                <div class="form-header">
+
+                    <h2>
+                        Nuevo personal
+                    </h2>
+
+                    <p>
+                        Registra una nueva persona en el sistema.
+                    </p>
+
+                </div>
+
+                {% if error %}
+                <div role="alert" style="margin:14px 0;padding:12px 14px;border-radius:9px;background:#fee2e2;color:#991b1b">{{ error }}</div>
+                {% endif %}
+
+
+                <!-- ====================================================
+                     FORMULARIO
+                ===================================================== -->
+
+                <form
+                    method="POST"
+                    action="/administracion/personal/nuevo"
+		    enctype="multipart/form-data"
+                >
+
+
+                    <div class="form-grid">
+
+
+                        <!-- NÚMERO DE EMPLEADO -->
+
+                        <div class="form-group">
+
+                            <label for="numero_empleado">
+                                Número de empleado
+                            </label>
+
+                            <input
+                                type="text"
+                                id="numero_empleado"
+                                name="numero_empleado"
+                                value="{{ valores.numero_empleado or '' }}"
+                                required
+                            >
+
+                        </div>
+
+
+                        <!-- TIPO DE PERSONAL -->
+
+                        <div class="form-group">
+
+                            <label for="tipo_personal">
+                                Tipo de personal
+                            </label>
+
+                            <select
+                                id="tipo_personal"
+                                name="tipo_personal"
+                                required
+                            >
+
+                                <option value="">
+                                    Selecciona una opción
+                                </option>
+
+                                <option value="Docente" {% if valores.tipo_personal == 'Docente' %}selected{% endif %}>
+                                    Docente
+                                </option>
+
+                                <option value="Administrativo" {% if valores.tipo_personal == 'Administrativo' %}selected{% endif %}>
+                                    Administrativo
+                                </option>
+
+                                <option value="Directivo" {% if valores.tipo_personal == 'Directivo' %}selected{% endif %}>
+                                    Directivo
+                                </option>
+
+                                <option value="Otro" {% if valores.tipo_personal == 'Otro' %}selected{% endif %}>
+                                    Otro
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <!-- NOMBRE -->
+
+                        <div class="form-group">
+
+                            <label for="nombre">
+                                Nombre
+                            </label>
+
+                            <input
+                                type="text"
+                                id="nombre"
+                                name="nombre"
+                                value="{{ valores.nombre or '' }}"
+                                required
+                            >
+
+                        </div>
+
+
+                        <!-- APELLIDO PATERNO -->
+
+                        <div class="form-group">
+
+                            <label for="apellido_paterno">
+                                Apellido paterno
+                            </label>
+
+                            <input
+                                type="text"
+                                id="apellido_paterno"
+                                name="apellido_paterno"
+                                value="{{ valores.apellido_paterno or '' }}"
+                                required
+                            >
+
+                        </div>
+
+
+                        <!-- APELLIDO MATERNO -->
+
+                        <div class="form-group">
+
+                            <label for="apellido_materno">
+                                Apellido materno
+                            </label>
+
+                            <input
+                                type="text"
+                                id="apellido_materno"
+                                name="apellido_materno"
+                                value="{{ valores.apellido_materno or '' }}"
+                            >
+
+                        </div>
+
+
+                        <!-- CARGO -->
+
+                        <div class="form-group">
+
+                            <label for="cargo">
+                                Cargo
+                            </label>
+
+                            <input
+                                type="text"
+                                id="cargo"
+                                name="cargo"
+                                value="{{ valores.cargo or '' }}"
+                            >
+
+                        </div>
+
+
+                        <!-- ÁREA -->
+
+                        <div class="form-group">
+
+                            <label for="area">
+                                Área
+                            </label>
+
+                            <input
+                                type="text"
+                                id="area"
+                                name="area"
+                                value="{{ valores.area or '' }}"
+                            >
+
+                        </div>
+
+
+                        <!-- CORREO -->
+
+                        <div class="form-group">
+
+                            <label for="correo">
+                                Correo electrónico
+                            </label>
+
+                            <input
+                                type="email"
+                                id="correo"
+                                name="correo"
+                                value="{{ valores.correo or '' }}"
+                            >
+
+                        </div>
+
+
+                        <!-- TELÉFONO -->
+
+                        <div class="form-group">
+
+                            <label for="telefono">
+                                Teléfono
+                            </label>
+
+                            <input
+                                type="tel"
+                                id="telefono"
+                                name="telefono"
+                                value="{{ valores.telefono or '' }}"
+                            >
+
+                        </div>
+			<!-- FOTO -->
+
+			<div class="form-group">
+
+    			    <label for="foto">
+        			Foto del personal
+    			    </label>
+
+    			    <input
+        			type="file"
+        			id="foto"
+        			name="foto"
+        			accept="image/*"
+    			    >
+
+		        </div>
+
+                    </div>
+
+
+                    <!-- ====================================================
+                         BOTONES
+                    ===================================================== -->
+
+                    <div class="form-actions">
+
+                        <button
+                            type="submit"
+                            class="btn-guardar"
+                        >
+                            💾 Guardar personal
+                        </button>
+
+                        <a
+                            href="/administracion/personal"
+                            class="btn-cancelar"
+                        >
+                            Cancelar
+                        </a>
+
+                    </div>
+
+
+                </form>
+
+
+            </div>
+
+        </div>
+
+    </main>
+
+
+    <script src="/static/js/navigation.js"></script>
+</body>
+
+</html>
+
+
+
+
+
+

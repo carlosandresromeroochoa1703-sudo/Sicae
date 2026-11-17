@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>SICAE WEB</title>
+
+    <link
+        rel="stylesheet"
+        href="/static/css/style.css"
+    >
+
+    <style>
+
+        /* ==================================================
+           TARJETAS DEL DASHBOARD
+           ================================================== */
+
+        .dashboard-cards {
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(
+                    auto-fit,
+                    minmax(180px, 1fr)
+                );
+
+            gap: 20px;
+
+            margin-top: 25px;
+            margin-bottom: 30px;
+
+        }
+
+
+        .dashboard-card {
+
+            background: white;
+
+            border-radius: 16px;
+
+            padding: 22px;
+
+            box-shadow:
+                0 4px 15px
+                rgba(0, 0, 0, .08);
+
+        }
+
+
+        .dashboard-card h3 {
+
+            margin: 0 0 10px 0;
+
+            font-size: 16px;
+
+            color: #6b7280;
+
+        }
+
+
+        .dashboard-number {
+
+            font-size: 34px;
+
+            font-weight: bold;
+
+            color: #111827;
+
+        }
+
+
+        .dashboard-description {
+
+            margin-top: 6px;
+
+            font-size: 13px;
+
+            color: #6b7280;
+
+        }
+
+
+        /* ==================================================
+           SECCIÓN INFERIOR
+           ================================================== */
+
+        .dashboard-section {
+
+            background: white;
+
+            border-radius: 16px;
+
+            padding: 25px;
+
+            box-shadow:
+                0 4px 15px
+                rgba(0, 0, 0, .08);
+
+        }
+
+
+        .dashboard-section h3 {
+
+            margin-top: 0;
+
+            margin-bottom: 20px;
+
+        }
+
+
+        /* ==================================================
+           TABLA
+           ================================================== */
+
+        .dashboard-table-container {
+
+            overflow-x: auto;
+
+        }
+
+
+        .dashboard-table {
+
+            width: 100%;
+
+            min-width: 950px;
+
+            border-collapse: collapse;
+
+            table-layout: auto;
+
+        }
+
+
+        .dashboard-table th,
+        .dashboard-table td {
+
+            white-space: nowrap;
+
+        }
+
+
+        .dashboard-table th {
+
+            text-align: left;
+
+            padding: 12px 18px;
+
+            background: #f3f4f6;
+
+            color: #374151;
+
+            font-size: 14px;
+
+        }
+
+
+        .dashboard-table td {
+
+            padding: 12px 18px;
+
+            border-bottom: 1px solid #e5e7eb;
+
+            font-size: 14px;
+
+        }
+
+
+        .dashboard-table th:nth-child(1),
+        .dashboard-table td:nth-child(1) {
+
+            min-width: 105px;
+
+        }
+
+
+        .dashboard-table th:nth-child(2),
+        .dashboard-table td:nth-child(2) {
+
+            min-width: 85px;
+
+        }
+
+
+        .dashboard-table th:nth-child(3),
+        .dashboard-table td:nth-child(3) {
+
+            min-width: 180px;
+
+        }
+
+
+        .dashboard-table th:nth-child(4),
+        .dashboard-table td:nth-child(4) {
+
+            min-width: 240px;
+
+        }
+
+
+        .dashboard-table th:nth-child(5),
+        .dashboard-table td:nth-child(5) {
+
+            min-width: 160px;
+
+        }
+
+
+        .dashboard-table th:nth-child(6),
+        .dashboard-table td:nth-child(6) {
+
+            min-width: 120px;
+
+        }
+
+
+        .dashboard-table th {
+
+            text-align: left;
+
+            padding: 12px;
+
+            background: #f3f4f6;
+
+            color: #374151;
+
+            font-size: 14px;
+
+        }
+
+
+        .dashboard-table td {
+
+            padding: 12px;
+
+            border-bottom: 1px solid #e5e7eb;
+
+            font-size: 14px;
+
+        }
+
+
+        .dashboard-table tr:last-child td {
+
+            border-bottom: none;
+
+        }
+
+
+        /* ==================================================
+           MOVIMIENTOS
+           ================================================== */
+
+        .movimiento-entrada {
+
+            color: #16a34a;
+
+            font-weight: bold;
+
+        }
+
+
+        .movimiento-salida {
+
+            color: #dc2626;
+
+            font-weight: bold;
+
+        }
+
+
+        .sin-accesos {
+
+            text-align: center;
+
+            padding: 30px;
+
+            color: #6b7280;
+
+        }
+
+
+        /* ==================================================
+           RESPONSIVE
+           ================================================== */
+
+        @media (max-width: 700px) {
+
+            .dashboard-cards {
+
+                grid-template-columns: 1fr;
+
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <!-- ==========================================
+         BARRA LATERAL
+         ========================================== -->
+
+    {% include "_sidebar.html" %}
+
+
+    <!-- ==========================================
+         CONTENIDO
+         ========================================== -->
+
+    <main class="content">
+
+
+        <!-- ======================================
+             ENCABEZADO
+             ====================================== -->
+
+        <header class="header">
+
+            <h2>
+
+                Panel principal
+
+            </h2>
+
+
+            <p>
+
+                Sistema de Registro BGM José María Chávez
+
+            </p>
+
+        </header>
+
+
+        <!-- ======================================
+             TARJETAS PRINCIPALES
+             ====================================== -->
+
+        <section class="dashboard-cards">
+
+
+            <!-- ALUMNOS -->
+
+            <div class="dashboard-card">
+
+                <h3>
+
+                    Alumnos
+
+                </h3>
+
+
+                <div class="dashboard-number" id="dash-alumnos">
+
+                    {{ estadisticas.alumnos }}
+
+                </div>
+
+
+                <div class="dashboard-description">
+
+                    Alumnos activos
+
+                </div>
+
+            </div>
+
+
+            <!-- GRUPOS -->
+
+            <div class="dashboard-card">
+
+                <h3>
+
+                    Grupos
+
+                </h3>
+
+
+                <div class="dashboard-number" id="dash-grupos">
+
+                    {{ estadisticas.grupos }}
+
+                </div>
+
+
+                <div class="dashboard-description">
+
+                    Grupos activos
+
+                </div>
+
+            </div>
+
+
+            <!-- ENTRADAS -->
+
+            <div class="dashboard-card">
+
+                <h3>
+
+                    Entradas de hoy
+
+                </h3>
+
+
+                <div class="dashboard-number" id="dash-entradas">
+
+                    {{ estadisticas.entradas }}
+
+                </div>
+
+
+                <div class="dashboard-description">
+
+                    Registros de entrada
+
+                </div>
+
+            </div>
+
+
+            <!-- SALIDAS -->
+
+            <div class="dashboard-card">
+
+                <h3>
+
+                    Salidas de hoy
+
+                </h3>
+
+
+                <div class="dashboard-number" id="dash-salidas">
+
+                    {{ estadisticas.salidas }}
+
+                </div>
+
+
+                <div class="dashboard-description">
+
+                    Registros de salida
+
+                </div>
+
+            </div>
+
+
+            <!-- AUSENTES -->
+
+            <div class="dashboard-card">
+
+                <h3>
+
+                    Ausentes de hoy
+
+                </h3>
+
+
+                <div class="dashboard-number" id="dash-ausentes">
+
+                    {{ estadisticas.ausentes }}
+
+                </div>
+
+
+                <div class="dashboard-description">
+
+                    Alumnos sin entrada
+
+                </div>
+
+            </div>
+
+
+            <!-- PORCENTAJE -->
+
+            <div class="dashboard-card">
+
+                <h3>
+
+                    Asistencia
+
+                </h3>
+
+
+                <div class="dashboard-number" id="dash-porcentaje">
+
+                    {{ estadisticas.porcentaje_asistencia }}%
+
+                </div>
+
+
+                <div class="dashboard-description">
+
+                    Porcentaje de asistencia
+
+                </div>
+
+            </div>
+
+
+        </section>
+
+
+        <!-- ======================================
+             ÚLTIMOS ACCESOS
+             ====================================== -->
+
+        <section class="dashboard-section">
+
+
+            <h3>
+
+                Últimos accesos
+
+            </h3>
+
+
+            <div class="dashboard-table-container">
+
+
+                {% if estadisticas.ultimos_accesos %}
+
+
+                <table class="dashboard-table">
+
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Fecha
+                            </th>
+
+                            <th>
+                                Hora
+                            </th>
+
+                            <th>
+                                Matrícula / Empleado
+                            </th>
+
+                            <th>
+                                Persona
+                            </th>
+
+                            <th>
+                                Grupo / Área
+                            </th>
+
+                            <th>
+                                Movimiento
+                            </th>
+
+                            <th>Registrado por</th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody id="recentAccessRows">
+
+
+                        {% for acceso in estadisticas.ultimos_accesos %}
+
+
+                        <tr>
+
+
+                            <td>
+                                {{ acceso.fecha }}
+                            </td>
+
+                            <td>
+                                {{ acceso.hora }}
+                            </td>
+
+
+                            <td>
+                                {{ acceso.matricula }}
+                            </td>
+
+
+                            <td>
+
+                                {{ acceso.nombre }}
+
+                                {{ acceso.apellido_paterno }}
+
+                                {{ acceso.apellido_materno }}
+
+                                {% if acceso.tipo == 'personal' %}
+
+                                    <br>
+
+                                    <small>
+                                        PERSONAL
+                                    </small>
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <td>
+
+                                {% if acceso.tipo == 'personal' %}
+
+                                    {{ acceso.nombre_grupo or 'Personal' }}
+
+                                {% else %}
+
+                                    {{ acceso.nombre_grupo or 'Sin grupo' }}
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <td>
+
+                                {% if acceso.movimiento == 'ENTRADA' %}
+
+                                    <span class="movimiento-entrada">
+                                        ENTRADA
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="movimiento-salida">
+                                        SALIDA
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+                            <td>{{ acceso.registrado_por or 'No disponible' }}</td>
+
+
+                        </tr>
+
+
+                        {% endfor %}
+
+
+                    </tbody>
+
+
+                </table>
+
+
+                {% else %}
+
+
+                <div class="sin-accesos">
+
+                    No hay accesos registrados.
+
+                </div>
+
+
+                {% endif %}
+
+
+            </div>
+
+
+        </section>
+
+
+    </main>
+
+
+    <script>
+    (function () {
+        const ids = {alumnos: "dash-alumnos", grupos: "dash-grupos", entradas: "dash-entradas", salidas: "dash-salidas", ausentes: "dash-ausentes", porcentaje_asistencia: "dash-porcentaje"};
+        let tbody = document.getElementById("recentAccessRows");
+        const esc = value => String(value ?? "");
+        function cell(row, value) { const td = document.createElement("td"); td.textContent = esc(value); row.appendChild(td); }
+        async function actualizarInicio() {
+            try {
+                const response = await fetch("/api/inicio-plantel", {credentials: "same-origin", cache: "no-store"});
+                if (!response.ok) return;
+                const data = await response.json();
+                Object.entries(ids).forEach(([key, id]) => { const element = document.getElementById(id); if (element) element.textContent = key === "porcentaje_asistencia" ? `${data[key]}%` : data[key]; });
+                if (!tbody) {
+                    const container = document.querySelector(".dashboard-table-container");
+                    const table = document.createElement("table"); table.className = "dashboard-table";
+                    const head = document.createElement("thead"); const headRow = document.createElement("tr");
+                    ["Fecha", "Hora", "Matrícula / Empleado", "Persona", "Grupo / Área", "Movimiento", "Registrado por"].forEach(label => { const th = document.createElement("th"); th.textContent = label; headRow.appendChild(th); });
+                    head.appendChild(headRow); table.appendChild(head); tbody = document.createElement("tbody"); tbody.id = "recentAccessRows"; table.appendChild(tbody); container.replaceChildren(table);
+                }
+                tbody.replaceChildren();
+                (data.ultimos_accesos || []).forEach(access => {
+                    const row = document.createElement("tr");
+                    cell(row, access.fecha); cell(row, access.hora); cell(row, access.matricula);
+                    cell(row, `${access.nombre || ""} ${access.apellido_paterno || ""} ${access.apellido_materno || ""}${access.tipo === "personal" ? " · PERSONAL" : ""}`.trim());
+                    cell(row, access.tipo === "personal" ? (access.nombre_grupo || "Personal") : (access.nombre_grupo || "Sin grupo"));
+                    const movementCell = document.createElement("td"); const badge = document.createElement("span");
+                    badge.className = access.movimiento === "ENTRADA" ? "movimiento-entrada" : "movimiento-salida"; badge.textContent = access.movimiento || ""; movementCell.appendChild(badge); row.appendChild(movementCell);
+                    cell(row, access.registrado_por || "No disponible"); tbody.appendChild(row);
+                });
+            } catch (error) { console.debug("No se pudo actualizar el inicio automáticamente.", error); }
+        }
+        window.setInterval(actualizarInicio, 5000);
+    })();
+    </script>
+    <script src="/static/js/navigation.js"></script>
+</body>
+
+</html>
+
+

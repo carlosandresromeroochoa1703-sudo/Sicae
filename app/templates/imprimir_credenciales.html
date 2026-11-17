@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Imprimir credenciales - SICAE WEB</title>
+
+    <link
+        rel="stylesheet"
+        href="/static/css/style.css?v=20261018-3"
+    >
+
+    <style>
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .page-header h2 {
+            margin: 0;
+            font-size: 28px;
+        }
+
+        .page-header p {
+            margin-top: 8px;
+            color: #6b7280;
+        }
+
+        .print-container {
+            background: white;
+            border-radius: 14px;
+            padding: 30px;
+            box-shadow:
+                0 4px 14px
+                rgba(0, 0, 0, 0.08);
+            max-width: 1000px;
+        }
+
+        .section-title {
+            margin-top: 0;
+            margin-bottom: 8px;
+            font-size: 20px;
+            color: #111827;
+        }
+
+        .section-description {
+            margin-top: 0;
+            margin-bottom: 25px;
+            color: #6b7280;
+        }
+
+        .groups-grid {
+            display: grid;
+            grid-template-columns:
+                repeat(
+                    auto-fit,
+                    minmax(250px, 1fr)
+                );
+            gap: 18px;
+        }
+
+        .group-card {
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 20px;
+            background: #f9fafb;
+            transition:
+                border-color .2s ease,
+                box-shadow .2s ease,
+                transform .2s ease;
+        }
+
+        .group-card:hover {
+            border-color: #2563eb;
+            box-shadow:
+                0 5px 15px
+                rgba(0, 0, 0, .08);
+            transform: translateY(-2px);
+        }
+
+        .group-icon {
+            font-size: 38px;
+            margin-bottom: 10px;
+        }
+
+        .group-name {
+            margin: 0;
+            font-size: 21px;
+            color: #111827;
+        }
+
+        .group-details {
+            margin-top: 12px;
+            color: #4b5563;
+            line-height: 1.7;
+        }
+
+        .student-count {
+            margin-top: 15px;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            color: #374151;
+        }
+
+        .student-count strong {
+            font-size: 19px;
+        }
+
+        .print-button {
+            display: block;
+            width: 100%;
+            margin-top: 18px;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background: #2563eb;
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .print-button:hover {
+            background: #1d4ed8;
+        }
+
+        .back-button {
+            display: inline-block;
+            padding: 11px 18px;
+            border-radius: 8px;
+            background: #64748b;
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .back-button:hover {
+            background: #475569;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6b7280;
+        }
+
+        .empty-icon {
+            font-size: 60px;
+            margin-bottom: 15px;
+        }
+
+        @media(max-width: 700px) {
+
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <!-- ==========================================
+         BARRA LATERAL
+         ========================================== -->
+
+    {% include "_sidebar.html" %}
+
+
+    <!-- ==========================================
+         CONTENIDO
+         ========================================== -->
+
+    <main class="content">
+
+
+        <div class="page-header">
+
+            <div>
+
+                <h2>
+                    🖨️ Imprimir credenciales
+                </h2>
+
+                <p>
+                    Selecciona un grupo para elegir
+                    las credenciales que deseas imprimir.
+                </p>
+
+            </div>
+
+
+            <a
+                href="/credencial/configuracion"
+                class="back-button"
+            >
+
+                ⚙️ Configurar credencial
+
+            </a>
+
+        </div>
+
+
+        <section class="print-container">
+
+
+            <h3 class="section-title">
+
+                🏫 Seleccionar grupo
+
+            </h3>
+
+
+            <p class="section-description">
+
+                Selecciona un grupo para continuar.
+
+            </p>
+
+
+            {% if grupos %}
+
+
+                <div class="groups-grid">
+
+
+                    {% for grupo in grupos %}
+
+
+                        <article class="group-card">
+
+
+                            <div class="group-icon">
+                                🏫
+                            </div>
+
+
+                            <h3 class="group-name">
+
+                                {{ grupo.nombre_grupo }}
+
+                            </h3>
+
+
+                            <div class="group-details">
+
+                                <div>
+
+                                    <strong>
+                                        Grado:
+                                    </strong>
+
+                                    {{ grupo.grado }}°
+
+                                </div>
+
+
+                                <div>
+
+                                    <strong>
+                                        Grupo:
+                                    </strong>
+
+                                    {{ grupo.nombre }}
+
+                                </div>
+
+
+                                <div>
+
+                                    <strong>
+                                        Turno:
+                                    </strong>
+
+                                    {{ grupo.turno }}
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="student-count">
+
+                                👨‍🎓
+
+                                <strong>
+                                    {{ grupo.cantidad_alumnos }}
+                                </strong>
+
+                                {% if grupo.cantidad_alumnos == 1 %}
+
+                                    alumno registrado
+
+                                {% else %}
+
+                                    alumnos registrados
+
+                                {% endif %}
+
+                            </div>
+
+
+                            {% if grupo.cantidad_alumnos > 0 %}
+
+                                <a
+                                    href="/credencial/imprimir/grupo/{{ grupo.id }}"
+                                    class="print-button"
+                                >
+
+                                    👨‍🎓 Seleccionar alumnos
+
+                                </a>
+
+                            {% else %}
+
+                                <div
+                                    style="
+                                        margin-top:18px;
+                                        padding:12px;
+                                        border-radius:8px;
+                                        background:#e5e7eb;
+                                        color:#6b7280;
+                                        text-align:center;
+                                        font-weight:bold;
+                                    "
+                                >
+
+                                    Sin alumnos
+
+                                </div>
+
+                            {% endif %}
+
+
+                        </article>
+
+
+                    {% endfor %}
+
+
+                </div>
+
+
+            {% else %}
+
+
+                <div class="empty-state">
+
+
+                    <div class="empty-icon">
+                        🏫
+                    </div>
+
+
+                    <h3>
+                        No hay grupos registrados
+                    </h3>
+
+
+                    <p>
+                        Primero debes crear un grupo
+                        para poder imprimir credenciales.
+                    </p>
+
+
+                    <a
+                        href="/grupos/nuevo"
+                        class="print-button"
+                        style="
+                            max-width:260px;
+                            margin:20px auto 0;
+                        "
+                    >
+
+                        ➕ Crear grupo
+
+                    </a>
+
+
+                </div>
+
+
+            {% endif %}
+
+
+        </section>
+
+
+    </main>
+
+
+    <script src="/static/js/navigation.js"></script>
+</body>
+
+</html>
+
+
+
+
+
+
+
+
+
+

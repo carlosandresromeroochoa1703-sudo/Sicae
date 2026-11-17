@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Correo y notificaciones - SICAE WEB</title>
+    <link rel="stylesheet" href="/static/css/style.css?v=20261018-3">
+    <style>
+        .mail-settings { max-width: 1050px; margin: 0 auto; }
+        .mail-card { margin-bottom: 20px; padding: 24px; border: 1px solid #e2e8f0; border-radius: 16px; background:#fff; box-shadow:0 4px 18px rgba(15,23,42,.045); }
+        .mail-card h3 { margin:0 0 7px; color:#17324d; font-size:17px; }
+        .mail-card-intro { margin:0 0 20px; color:#64748b; font-size:13px; line-height:1.55; }
+        .mail-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
+        .mail-field label { display:block; margin-bottom:7px; color:#334155; font-size:13px; font-weight:650; }
+        .mail-field input, .mail-field select, .mail-field textarea { width:100%; padding:11px 12px; border:1px solid #cbd5e1; border-radius:10px; color:#1e293b; font:inherit; }
+        .mail-field textarea { min-height:210px; resize:vertical; font-size:14px; line-height:1.55; }
+        .mail-field-wide { grid-column:1/-1; }
+        .mail-help { display:block; margin-top:6px; color:#64748b; font-size:12px; line-height:1.45; }
+        .mail-password-state { margin:0 0 15px; padding:11px 13px; border-radius:10px; background:#f0fdfa; color:#0f766e; font-size:13px; }
+        .mail-toggle-list { display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:10px; margin-top:18px; }
+        .mail-toggle { display:flex; align-items:center; gap:9px; padding:13px; border:1px solid #e2e8f0; border-radius:10px; background:#f8fafc; color:#334155; font-size:13px; }
+        .mail-toggle input { width:17px; height:17px; accent-color:#0f766e; }
+        .mail-info, .mail-success, .mail-error { margin-bottom:18px; padding:13px 15px; border-radius:10px; line-height:1.5; font-size:13px; }
+        .mail-info { background:#eff6ff; border:1px solid #bfdbfe; color:#1e40af; }
+        .mail-success { background:#ecfdf5; border:1px solid #bbf7d0; color:#166534; }
+        .mail-error { background:#fef2f2; border:1px solid #fecaca; color:#991b1b; }
+        .mail-actions { display:flex; flex-wrap:wrap; align-items:end; gap:12px; margin-top:18px; }
+        .mail-actions button { min-height:43px; padding:0 17px; border:0; border-radius:10px; background:#0f766e; color:#fff; font-weight:650; cursor:pointer; }
+        .mail-actions button:hover { background:#115e59; }
+        .mail-actions .secondary { background:#e2e8f0; color:#334155; }
+        .mail-actions .secondary:hover { background:#cbd5e1; }
+        .mail-actions .test-address { flex:1; min-width:230px; }
+        .mail-actions .test-address input { width:100%; padding:11px 12px; border:1px solid #cbd5e1; border-radius:10px; }
+        .mail-variables { display:flex; flex-wrap:wrap; gap:7px; margin-top:13px; }
+        .mail-variables code { padding:4px 7px; border-radius:6px; background:#f1f5f9; color:#0f766e; }
+        @media(max-width:650px) { .mail-card { padding:17px; } .mail-grid { grid-template-columns:1fr; } .mail-field-wide { grid-column:auto; } .mail-actions { align-items:stretch; flex-direction:column; } .mail-actions .test-address { min-width:0; } }
+    </style>
+</head>
+<body>
+    {% include "_sidebar.html" %}
+    <main class="content">
+        <div class="mail-settings">
+            <header class="header">
+                <div>
+                    <h2>Correo y notificaciones</h2>
+                    <p>Configura desde SICAE la cuenta que enviará los avisos de entrada y salida.</p>
+                </div>
+            </header>
+
+            {% if mensaje_guardado %}<div class="mail-success" role="status">{{ mensaje_guardado }}</div>{% endif %}
+            {% if error_configuracion %}<div class="mail-error" role="alert">No se pudo completar la operación: {{ error_configuracion }}</div>{% endif %}
+            <div class="mail-info"><strong>Antes de guardar:</strong> solicita a tu proveedor de correo los datos SMTP. La contraseña se guarda localmente en la configuración de SICAE y nunca se muestra después de guardarla. Si cambias de cuenta, escribe la nueva contraseña; si la dejas vacía, se conserva la actual.</div>
+
+            <form method="post" action="/notificaciones/configuracion" autocomplete="off">
+                <section class="mail-card">
+                    <h3>Cuenta remitente</h3>
+                    <p class="mail-card-intro">Estos datos permiten que SICAE se conecte al servicio de correo y envíe los mensajes.</p>
+                    {% if configuracion_smtp.smtp_password_configurada %}
+                    <p class="mail-password-state">✓ Hay una contraseña SMTP guardada. Déjala vacía para conservarla.</p>
+                    {% endif %}
+                    <div class="mail-grid">
+                        <div class="mail-field">
+                            <label for="correo_remitente">Correo que aparecerá como remitente</label>
+                            <input type="email" id="correo_remitente" name="correo_remitente" value="{{ configuracion_notificaciones.correo_remitente if configuracion_notificaciones and configuracion_notificaciones.correo_remitente else configuracion_smtp.smtp_user }}" placeholder="asistencia@escuela.edu" required>
+                        </div>
+                        <div class="mail-field">
+                            <label for="smtp_user">Usuario SMTP</label>
+                            <input type="text" id="smtp_user" name="smtp_user" value="{{ configuracion_smtp.smtp_user }}" placeholder="normalmente el correo remitente" required>
+                        </div>
+                        <div class="mail-field">
+                            <label for="smtp_host">Servidor SMTP</label>
+                            <input type="text" id="smtp_host" name="smtp_host" value="{{ configuracion_smtp.smtp_host }}" placeholder="smtp.proveedor.com" required>
+                        </div>
+                        <div class="mail-field">
+                            <label for="smtp_port">Puerto</label>
+                            <input type="number" id="smtp_port" name="smtp_port" min="1" max="65535" value="{{ configuracion_smtp.smtp_port }}" required>
+                        </div>
+                        <div class="mail-field">
+                            <label for="smtp_security">Seguridad de conexión</label>
+                            <select id="smtp_security" name="smtp_security">
+                                <option value="starttls" {% if configuracion_smtp.smtp_security == 'starttls' %}selected{% endif %}>STARTTLS (común: puerto 587)</option>
+                                <option value="ssl" {% if configuracion_smtp.smtp_security == 'ssl' %}selected{% endif %}>SSL/TLS (común: puerto 465)</option>
+                            </select>
+                        </div>
+                        <div class="mail-field">
+                            <label for="smtp_password">Contraseña o clave de aplicación</label>
+                            <input type="password" id="smtp_password" name="smtp_password" value="" placeholder="{% if configuracion_smtp.smtp_password_configurada %}Guardada; no es necesario volver a escribirla{% else %}Escribe la contraseña SMTP{% endif %}" autocomplete="new-password">
+                            <span class="mail-help">Si tu proveedor utiliza verificación en dos pasos, usa una contraseña de aplicación.</span>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="mail-card">
+                    <h3>Mensajes de asistencia</h3>
+                    <p class="mail-card-intro">Personaliza el asunto y el contenido que se enviará cuando se registre una entrada o una salida.</p>
+                    <div class="mail-field">
+                        <label for="asunto">Asunto del correo</label>
+                        <input type="text" id="asunto" name="asunto" value="{{ configuracion_notificaciones.asunto if configuracion_notificaciones else 'SICAE WEB - Notificación de asistencia' }}" required>
+                    </div>
+                    <div class="mail-field" style="margin-top:16px">
+                        <label for="mensaje">Texto del mensaje</label>
+                        <textarea id="mensaje" name="mensaje" required>{{ configuracion_notificaciones.mensaje if configuracion_notificaciones else 'Estimado padre, madre o tutor:\n\nSe registró un movimiento de asistencia en SICAE WEB.\n\nAlumno: {nombre}\nMatrícula: {matricula}\nMovimiento: {movimiento}\nFecha: {fecha}\nHora: {hora}\nGrado: {grado}\nGrupo: {grupo}\nTurno: {turno}\n\nSaludos.' }}</textarea>
+                        <div class="mail-variables">
+                            <code>{nombre}</code><code>{matricula}</code><code>{movimiento}</code><code>{fecha}</code><code>{hora}</code><code>{grado}</code><code>{grupo}</code><code>{turno}</code>
+                        </div>
+                        <span class="mail-help">Puedes usar estas variables en el mensaje y el asunto.</span>
+                    </div>
+                    <div class="mail-toggle-list">
+                        <label class="mail-toggle"><input type="checkbox" name="notificaciones_activas" value="true" {% if configuracion_notificaciones and configuracion_notificaciones.notificaciones_activas %}checked{% elif not configuracion_notificaciones %}checked{% endif %}>Activar notificaciones</label>
+                        <label class="mail-toggle"><input type="checkbox" name="enviar_entrada" value="true" {% if configuracion_notificaciones and configuracion_notificaciones.enviar_entrada %}checked{% elif not configuracion_notificaciones %}checked{% endif %}>Avisar entradas</label>
+                        <label class="mail-toggle"><input type="checkbox" name="enviar_salida" value="true" {% if configuracion_notificaciones and configuracion_notificaciones.enviar_salida %}checked{% elif not configuracion_notificaciones %}checked{% endif %}>Avisar salidas</label>
+                    </div>
+                </section>
+
+                <section class="mail-card">
+                    <h3>Probar el envío</h3>
+                    <p class="mail-card-intro">Guarda los datos y envía un mensaje de prueba al correo que indiques.</p>
+                    <div class="mail-actions">
+                        <button type="submit" name="accion" value="guardar">Guardar configuración</button>
+                        <label class="test-address">
+                            <span class="mail-help" style="margin:0 0 6px">Enviar prueba a</span>
+                            <input type="email" name="correo_prueba" placeholder="tu-correo@ejemplo.com">
+                        </label>
+                        <button class="secondary" type="submit" name="accion" value="probar">Guardar y enviar prueba</button>
+                        <button class="secondary" type="button" onclick="window.location.href='/administracion'">Regresar</button>
+                    </div>
+                </section>
+            </form>
+        </div>
+    </main>
+    <script src="/static/js/navigation.js"></script>
+</body>
+</html>

@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Editar usuario - SICAE WEB
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="/static/css/style.css?v=20261018-3"
+    >
+
+    <style>
+
+        .user-page {
+
+            max-width: 700px;
+
+            margin: 0 auto;
+
+        }
+
+
+        .user-card {
+
+            background: white;
+
+            border-radius: 16px;
+
+            padding: 28px;
+
+            box-shadow:
+                0 4px 15px
+                rgba(0,0,0,.08);
+
+        }
+
+
+        .form-group {
+
+            margin-bottom: 18px;
+
+        }
+
+
+        .form-group label {
+
+            display: block;
+
+            margin-bottom: 7px;
+
+            font-weight: bold;
+
+            color: #374151;
+
+        }
+
+
+        .form-group input,
+
+        .form-group select {
+
+            width: 100%;
+
+            box-sizing: border-box;
+
+            padding: 12px;
+
+            border: 1px solid #d1d5db;
+
+            border-radius: 8px;
+
+            font-size: 15px;
+
+            color: #172033;
+            background-color: #fff;
+
+        }
+
+
+        .form-group input:focus,
+
+        .form-group select:focus {
+
+            outline: none;
+
+            border-color: #2563eb;
+
+        }
+
+
+        .form-actions {
+
+            display: flex;
+
+            gap: 10px;
+
+            margin-top: 25px;
+
+        }
+
+
+        .button {
+
+            flex: 1;
+
+            border: none;
+
+            border-radius: 9px;
+
+            padding: 12px;
+
+            font-weight: bold;
+
+            cursor: pointer;
+
+            text-align: center;
+
+            text-decoration: none;
+
+        }
+
+
+        .save-button {
+
+            background: #2563eb;
+
+            color: white;
+
+        }
+
+
+        .cancel-button {
+
+            background: #374151;
+
+            color: white;
+
+        }
+
+
+        .info {
+
+            padding: 12px;
+
+            background: #eff6ff;
+
+            color: #1e40af;
+
+            border-radius: 8px;
+
+            margin-bottom: 20px;
+
+        }
+
+
+        @media (max-width: 600px) {
+
+            .form-actions {
+
+                flex-direction: column;
+
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <!-- ====================================================
+         MENÚ LATERAL
+    ===================================================== -->
+
+    {% include "_sidebar.html" %}
+
+
+    <!-- ====================================================
+         CONTENIDO
+    ===================================================== -->
+
+    <main class="content">
+
+
+        <div class="user-page">
+
+
+            <div class="page-title">
+
+                <h2>
+                    Editar usuario
+                </h2>
+
+                <p>
+                    Modifica los datos de la cuenta
+                    de acceso al sistema.
+                </p>
+
+            </div>
+
+
+            {% if error == 'docente' %}
+            <div role="alert" style="margin:0 0 16px;padding:12px 15px;border-radius:9px;background:#fee2e2;color:#991b1b">Selecciona un docente activo que no esté vinculado a otra cuenta docente.</div>
+            {% elif error == 'usuario' %}
+            <div role="alert" style="margin:0 0 16px;padding:12px 15px;border-radius:9px;background:#fee2e2;color:#991b1b">Ese nombre de usuario ya existe. Elige otro.</div>
+            {% endif %}
+
+
+            <div class="user-card">
+
+
+                <div class="info">
+
+                    Editando usuario:
+                    <strong>
+                        {{ usuario.usuario }}
+                    </strong>
+
+                </div>
+
+
+                <form
+                    method="POST"
+                    action="/administracion/usuarios/{{ usuario.id }}/editar"
+                >
+
+
+                    <div class="form-group">
+
+                        <label for="usuario">
+                            Usuario
+                        </label>
+
+                        <input
+                            id="usuario"
+                            name="usuario"
+                            type="text"
+                            value="{{ usuario.usuario }}"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="nombre">
+                            Nombre
+                        </label>
+
+                        <input
+                            id="nombre"
+                            name="nombre"
+                            type="text"
+                            value="{{ usuario.nombre }}"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="rol">
+                            Rol
+                        </label>
+
+                        <select
+                            id="rol"
+                            name="rol"
+                            required
+                        >
+
+                            <option
+                                value="operador"
+                                {% if usuario.rol == "operador" %}
+                                    selected
+                                {% endif %}
+                            >
+                                Operador
+                            </option>
+
+
+                            <option
+                                value="administrador"
+                                {% if usuario.rol == "administrador" %}
+                                    selected
+                                {% endif %}
+                            >
+                                Administrador
+                            </option>
+
+                            <option value="docente" {% if usuario.rol == "docente" %}selected{% endif %}>Docente</option>
+
+                        </select>
+
+                        <span class="form-help">Administrador: acceso completo. Operador: accesos y asistencias del día. Docente: solo sus propias clases.</span>
+
+                    </div>
+
+                    <div class="form-group full" id="docentePersonalGroup" style="display:none">
+                        <label for="personal_id">Registro del maestro ({{ maestros|length }} disponible(s))</label>
+                        <select id="personal_id" name="personal_id">
+                            <option value="">Selecciona el docente vinculado</option>
+                            {% for maestro in maestros %}
+                            <option value="{{ maestro.id }}" {% if usuario.personal_id == maestro.id %}selected{% endif %}>{{ maestro.nombre }} {{ maestro.apellido_paterno }} {{ maestro.apellido_materno or '' }}{% if maestro.numero_empleado %} · {{ maestro.numero_empleado }}{% endif %}</option>
+                            {% else %}
+                            <option value="" disabled>No hay docentes activos registrados</option>
+                            {% endfor %}
+                        </select>
+                        <span class="form-help">Esta asociación determina qué clases podrá ver y tomar asistencia esta cuenta.</span>
+                        {% if not maestros %}<span class="form-help">Primero registra o activa al maestro desde <a href="/administracion/personal/nuevo">Personal → Nuevo personal</a>, seleccionando el tipo “Docente”.</span>{% endif %}
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="password">
+                            Nueva contraseña
+                        </label>
+
+                        <input
+                            id="password"
+                            name="password"
+                            type="password"
+                            placeholder="Dejar vacío para conservar la actual"
+                        >
+
+                    </div>
+
+
+                    <div class="form-actions">
+
+
+                        <button
+                            type="submit"
+                            class="button save-button"
+                        >
+
+                            💾 Guardar cambios
+
+                        </button>
+
+
+                        <a
+                            href="/administracion/usuarios"
+                            class="button cancel-button"
+                        >
+
+                            Cancelar
+
+                        </a>
+
+
+                    </div>
+
+
+                </form>
+
+
+            </div>
+
+
+        </div>
+
+
+    </main>
+
+
+    <script>
+        const roleSelect = document.getElementById("rol");
+        const teacherSelect = document.getElementById("personal_id");
+        const teacherGroup = document.getElementById("docentePersonalGroup");
+        function toggleTeacherAccount() {
+            const isTeacher = roleSelect.value === "docente";
+            teacherGroup.style.display = isTeacher ? "flex" : "none";
+            teacherSelect.required = isTeacher;
+        }
+        roleSelect.addEventListener("change", toggleTeacherAccount);
+        toggleTeacherAccount();
+    </script>
+    <script src="/static/js/navigation.js"></script>
+</body>
+
+</html>
+
+
+
+
+
+
+
+

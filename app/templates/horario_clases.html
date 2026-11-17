@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de clases · SICAE WEB</title>
+    <link rel="stylesheet" href="/static/css/style.css?v=20261020-1">
+    <style>
+        .classes-page{max-width:1200px;margin:0 auto;padding:26px;color:#172033}
+        .classes-heading{margin-bottom:22px}.classes-heading h2{margin:0 0 6px;font-size:26px}.classes-heading p{margin:0;color:#64748b}
+        .classes-layout{display:grid;grid-template-columns:minmax(290px,.8fr) minmax(0,1.5fr);gap:20px;align-items:start}
+        .class-panel{background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:22px;box-shadow:0 8px 24px #0f172a0a}
+        .class-panel h3{margin:0 0 15px}.class-form label{display:block;margin:13px 0 6px;font-weight:650}
+        .class-form input,.class-form select{width:100%;box-sizing:border-box;padding:11px 12px;border:1px solid #cbd5e1;border-radius:9px;background:#fff;font:inherit}
+        .class-form input:focus,.class-form select:focus{outline:2px solid #93c5fd;border-color:#3b82f6}
+        .time-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.class-submit{width:100%;margin-top:18px;padding:12px;border:0;border-radius:9px;background:#4f46e5;color:#fff;font:inherit;font-weight:750;cursor:pointer}
+        .class-list{display:grid;gap:10px}.class-item{display:grid;grid-template-columns:110px minmax(0,1fr) auto;gap:14px;align-items:center;padding:15px;border:1px solid #e2e8f0;border-radius:12px;background:#fff}
+        .timetable-controls{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin:0 0 14px}.timetable-controls label{display:block;margin-bottom:6px;font-weight:700}.timetable-controls select{min-width:230px;padding:10px 12px;border:1px solid #cbd5e1;border-radius:9px;background:#fff;font:inherit}
+        .grid-config-form{display:flex;align-items:flex-end;flex-wrap:wrap;gap:10px;margin:0 0 16px;padding:12px;border:1px solid #e0e7ff;border-radius:11px;background:#f8faff}.grid-config-field label{display:block;margin-bottom:5px;color:#475569;font-size:12px;font-weight:700}.grid-config-field input,.grid-config-field select{height:39px;padding:8px 10px;border:1px solid #cbd5e1;border-radius:8px;background:#fff;font:inherit}.grid-config-field input[type=number]{width:90px}.grid-config-field input[type=time]{width:125px}.grid-save{height:39px;padding:0 13px;border:0;border-radius:8px;background:#4f46e5;color:#fff;font-weight:700;cursor:pointer}.grid-end{height:39px;display:flex;align-items:center;padding:0 8px;color:#334155;font-weight:750}
+        .timetable-scroll{overflow:auto;border:1px solid #e2e8f0;border-radius:12px}.timetable{width:100%;min-width:980px;border-collapse:separate;border-spacing:0;table-layout:fixed}.timetable th{position:sticky;top:0;z-index:1;padding:11px 8px;background:#f1f5f9;color:#334155;font-size:13px;text-align:center;border-bottom:1px solid #e2e8f0}.timetable th:first-child{left:0;z-index:2;width:90px}.timetable td{height:44px;padding:4px;border-right:1px solid #e2e8f0;border-bottom:1px solid #e2e8f0;background:#fff}.timetable td.time-cell{position:sticky;left:0;z-index:1;width:90px;padding:5px 8px;background:#f8fafc;color:#64748b;font-size:11px;text-align:center;white-space:nowrap}.timetable td.slot-cell{height:auto;min-height:44px}.slot-add{width:100%;height:100%;min-height:36px;border:1px dashed transparent;border-radius:7px;background:transparent;color:#94a3b8;cursor:pointer}.slot-add:hover,.slot-add:focus-visible{border-color:#a5b4fc;background:#eef2ff;color:#4338ca}.slot-class{display:flex;height:100%;min-height:52px;flex-direction:column;justify-content:center;gap:4px;padding:8px;border-left:3px solid #6366f1;border-radius:7px;background:#eef2ff;color:#312e81;font-size:12px}.slot-class strong{font-size:13px}.slot-class span{color:#4f46e5}.slot-class form{margin-top:3px}.slot-delete{padding:2px 0;border:0;background:transparent;color:#b91c1c;font-size:11px;text-align:left;cursor:pointer}.timetable-empty{padding:20px;text-align:center;color:#64748b}
+        .class-time{color:#4338ca;font-weight:750;font-size:14px;line-height:1.5}.class-info strong{display:block;font-size:15px}.class-info span{display:block;color:#64748b;font-size:13px;line-height:1.5;margin-top:3px}
+        .delete-class{padding:8px 10px;border:1px solid #fecaca;border-radius:8px;background:#fff7f7;color:#b91c1c;font-weight:700;cursor:pointer}
+        .class-empty{padding:28px;text-align:center;color:#64748b;border:1px dashed #cbd5e1;border-radius:12px}
+        .class-note,.class-success,.class-error{margin:0 0 15px;padding:11px 13px;border-radius:9px;font-size:14px;line-height:1.5}
+        .class-note{background:#eef2ff;color:#3730a3}.class-success{background:#dcfce7;color:#166534}.class-error{background:#fef2f2;color:#991b1b}
+        .day-selection-note{margin:10px 0 12px;color:#4338ca;font-size:14px;font-weight:700}.slot-add.is-selected{border:2px solid #4f46e5;background:#e0e7ff;color:#312e81;font-weight:800}
+        @media(max-width:900px){.classes-layout{grid-template-columns:1fr}.classes-page{padding:18px}}
+        @media(max-width:520px){.class-item{grid-template-columns:1fr auto;gap:8px}.class-time{grid-column:1/-1}.classes-heading h2{font-size:22px}.time-row{gap:8px}}
+    </style>
+</head>
+<body>
+    {% include "_sidebar.html" %}
+    <main class="content">
+        <div class="classes-page">
+            <header class="classes-heading">
+                <h2>Registro de clases</h2>
+                <p>Elige directamente los espacios de la tabla; al guardar, cada clase conservará el día y las horas de sus celdas.</p>
+            </header>
+            {% if guardado %}<div class="class-success" role="status">Se agregaron {{ guardado }} {% if guardado == 1 %}clase{% else %}clases{% endif %} al horario.</div>{% endif %}
+            {% if error %}<div class="class-error" role="alert">{{ detalle_error or 'No se pudo guardar la clase. Revisa la duración y los cruces de horario.' }}</div>{% endif %}
+            <div class="classes-layout">
+                <section class="class-panel">
+                    <h3>Datos de la clase</h3>
+                    <p class="class-note">Primero selecciona una o más celdas vacías de la tabla y luego guarda aquí la materia.</p>
+                    <form class="class-form" method="post" action="/clases/crear">
+                        <input id="selectedCells" type="hidden" name="celdas_json" value="[]">
+                        <input id="classGroup" type="hidden" name="grupo_id" value="{{ grupo_seleccionado or (grupos[0].id if grupos else '') }}">
+                        <p class="class-note">Grupo de la tabla: <strong id="selectedGroupName">Selecciona un grupo en el horario.</strong></p>
+                        <label for="classSubject">Materia o clase</label>
+                        <input id="classSubject" type="text" name="materia" maxlength="150" required placeholder="Ej. Matemáticas">
+                        <label for="classTeacher">Maestro (opcional)</label>
+                        <select id="classTeacher" name="personal_id">
+                            <option value="">Sin maestro asignado</option>
+                            {% for maestro in maestros %}<option value="{{ maestro.id }}">{{ maestro.nombre }} {{ maestro.apellido_paterno }} {{ maestro.apellido_materno or '' }}{% if maestro.numero_empleado %} · {{ maestro.numero_empleado }}{% endif %}</option>{% endfor %}
+                        </select>
+                        <p class="day-selection-note" id="daySelectionNote" role="status">Celdas seleccionadas: 0</p>
+                        <label for="classRoom">Salón (opcional)</label>
+                        <input id="classRoom" type="text" name="aula" maxlength="100" placeholder="Ej. Aula 12">
+                        <button id="classSubmit" class="class-submit" type="submit" {% if not grupos %}disabled{% endif %}>Selecciona celdas</button>
+                        {% if not grupos %}<p class="class-note">Primero registra al menos un grupo activo.</p>{% endif %}
+                        {% if not maestros %}<p class="class-note">No hay docentes activos. Puedes registrar clases sin asignar un maestro.</p>{% endif %}
+                    </form>
+                </section>
+                <section class="class-panel">
+                    <h3>Horario semanal interactivo</h3>
+                    {% if grupos %}
+                    <div class="timetable-controls">
+                        <div><label for="timetableGroup">Grupo</label>
+                            <select id="timetableGroup" aria-label="Selecciona el grupo para ver su horario">
+                                {% for grupo in grupos %}<option value="{{ grupo.id }}" {% if grupo.id == grupo_seleccionado %}selected{% endif %}>{{ grupo.grado }}° {{ grupo.nombre }} · {{ grupo.nombre_grupo }}</option>{% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    {% if config_guardada %}<div class="class-success" role="status">Se guardó la cantidad y duración de las celdas para este grupo.</div>{% endif %}
+                    {% if config_error %}<div class="class-error" role="alert">No se pudo guardar la tabla. Reduce el número de celdas o ajusta el horario para que termine antes de medianoche.</div>{% endif %}
+                    <form id="gridConfigForm" class="grid-config-form" method="post" action="/clases/configuracion-tabla">
+                        <input id="gridGroupId" type="hidden" name="grupo_id">
+                        <div class="grid-config-field"><label for="gridStart">La tabla inicia a las</label><input id="gridStart" type="time" name="hora_inicio" value="07:00" required></div>
+                        <div class="grid-config-field"><label for="gridCellMinutes">Minutos exactos por celda</label><input id="gridCellMinutes" type="number" name="minutos_por_celda" min="5" max="180" step="1" value="30" required></div>
+                        <div class="grid-config-field"><label for="gridCellCount">Celdas por día</label><input id="gridCellCount" type="number" name="cantidad_celdas" min="2" max="48" value="20" required></div>
+                        <div class="grid-config-field"><label>La tabla termina a las</label><output id="gridEnd" class="grid-end">17:00</output></div>
+                        <button class="grid-save" type="submit">Guardar tabla</button>
+                    </form>
+                    <div class="timetable-scroll">
+                        <table class="timetable" aria-label="Horario semanal del grupo seleccionado">
+                            <thead><tr><th>Hora</th>{% for dia_id, dia_nombre in dias %}<th>{{ dia_nombre }}</th>{% endfor %}</tr></thead>
+                            <tbody id="timetableBody"></tbody>
+                        </table>
+                    </div>
+                    <p id="gridRangeNote" class="class-note" style="margin-top:12px">Elige cuántas celdas tendrá la tabla y cuánto dura cada una. Haz clic en cualquier celda vacía para seleccionarla.</p>
+                    {% else %}<div class="class-empty">Registra primero un grupo para crear su horario.</div>{% endif %}
+                    <h3 style="margin-top:24px">Todas las clases <span style="color:#64748b;font-size:14px;font-weight:500">({{ clases|length }})</span></h3>
+                    {% if clases %}
+                    <div class="class-list">
+                        {% for clase in clases %}
+                        <article class="class-item">
+                            <div class="class-time">{{ clase.dia }}<br>{{ clase.hora_inicio }}–{{ clase.hora_fin }}</div>
+                            <div class="class-info"><strong>{{ clase.materia }} · {{ clase.grupo }}</strong><span>Maestro: {{ clase.maestro }}{% if clase.aula %} · Salón: {{ clase.aula }}{% endif %}</span></div>
+                            <form method="post" action="/clases/{{ clase.id }}/eliminar" onsubmit="return confirm('¿Eliminar esta clase del horario?')"><input type="hidden" name="grupo_id" value="{{ clase.grupo_id }}"><button class="delete-class" type="submit" aria-label="Eliminar {{ clase.materia }}">Eliminar</button></form>
+                        </article>
+                        {% endfor %}
+                    </div>
+                    {% else %}<div class="class-empty">Todavía no hay clases registradas. Usa el formulario para crear el horario.</div>{% endif %}
+                </section>
+            </div>
+        </div>
+    </main>
+    {% if grupos %}
+    <script>
+        (() => {
+            const classes = {{ clases|tojson }};
+            const tableConfigs = {{ configuracion_tablas|tojson }};
+            const groupSelect = document.getElementById("timetableGroup");
+            const tbody = document.getElementById("timetableBody");
+            const groupField = document.getElementById("classGroup");
+            const daySelectionNote = document.getElementById("daySelectionNote");
+            const classSubmit = document.getElementById("classSubmit");
+            const selectedCellsField = document.getElementById("selectedCells");
+            const selectedCells = new Map();
+            const form = document.querySelector(".class-form");
+            const gridForm = document.getElementById("gridConfigForm");
+            const gridGroupId = document.getElementById("gridGroupId");
+            const gridStart = document.getElementById("gridStart");
+            const cellMinutes = document.getElementById("gridCellMinutes");
+            const cellCount = document.getElementById("gridCellCount");
+            const gridEnd = document.getElementById("gridEnd");
+            const rangeNote = document.getElementById("gridRangeNote");
+            const saveGrid = gridForm.querySelector("button[type=submit]");
+            const dayNames = {{ dias|tojson }};
+            const toMinutes = value => { const [h, m] = value.split(":").map(Number); return h * 60 + m; };
+            const toClock = value => String(Math.floor(value / 60)).padStart(2, "0") + ":" + String(value % 60).padStart(2, "0");
+            const esc = value => String(value ?? "");
+
+            function updateSelection() {
+                const cells = Array.from(selectedCells.values());
+                selectedCellsField.value = JSON.stringify(cells);
+                classSubmit.textContent = cells.length ? `Guardar ${cells.length} ${cells.length === 1 ? "clase" : "clases"}` : "Selecciona celdas";
+                daySelectionNote.textContent = `Celdas seleccionadas: ${cells.length}`;
+                renderTable();
+            }
+
+            form.addEventListener("submit", event => {
+                if (!selectedCells.size) {
+                    event.preventDefault();
+                    daySelectionNote.textContent = "Haz clic en una o más celdas vacías del horario.";
+                    groupSelect.focus();
+                }
+            });
+
+            function loadGroupConfig() {
+                const config = tableConfigs[groupSelect.value] || {hora_inicio: "07:00", minutos_por_celda: 30, cantidad_celdas: 20};
+                gridGroupId.value = groupSelect.value;
+                groupField.value = groupSelect.value;
+                document.getElementById("selectedGroupName").textContent = groupSelect.selectedOptions[0]?.textContent || "Selecciona un grupo en el horario.";
+                gridStart.value = config.hora_inicio;
+                cellMinutes.value = String(config.minutos_por_celda);
+                cellCount.value = String(config.cantidad_celdas);
+                renderTable();
+            }
+
+            function renderTable() {
+                const groupId = Number(groupSelect.value);
+                const visible = classes.filter(item => Number(item.grupo_id) === groupId);
+                gridGroupId.value = groupSelect.value;
+                const start = toMinutes(gridStart.value || "07:00");
+                const length = Number(cellMinutes.value) || 30;
+                const maxRows = Math.floor((24 * 60 - start) / length);
+                cellCount.max = String(Math.max(2, Math.min(48, maxRows)));
+                if (maxRows >= 2 && Number(cellCount.value) > maxRows) cellCount.value = String(maxRows);
+                const rowsCount = Math.max(1, Math.min(Number(cellCount.value) || 20, 48, maxRows || 1));
+                const finish = start + rowsCount * length;
+                gridEnd.textContent = toClock(finish);
+                saveGrid.disabled = maxRows < 2;
+                rangeNote.textContent = maxRows < 2
+                    ? "Con esa hora y duración no caben al menos dos celdas antes de medianoche."
+                    : "La tabla tiene " + rowsCount + " celdas de " + length + " minutos y termina a las " + toClock(finish) + ". Haz clic en las celdas vacías donde debe quedar la clase.";
+                const outside = visible.filter(item => {
+                    const classStart = toMinutes(item.hora_inicio), classEnd = toMinutes(item.hora_fin);
+                    return classEnd <= start || classStart >= finish;
+                });
+                tbody.replaceChildren();
+                for (let index = 0; index < rowsCount; index++) {
+                    const cellStart = start + index * length, cellEnd = cellStart + length;
+                    const row = document.createElement("tr");
+                    const timeCell = document.createElement("td"); timeCell.className = "time-cell"; timeCell.textContent = toClock(cellStart) + "–" + toClock(cellEnd); row.appendChild(timeCell);
+                    for (let day = 0; day < 7; day++) {
+                        const cell = document.createElement("td"); cell.className = "slot-cell";
+                        const cellClasses = visible.filter(item => Number(item.dia_semana) === day
+                            && toMinutes(item.hora_inicio) < cellEnd && toMinutes(item.hora_fin) > cellStart);
+                        if (cellClasses.length) {
+                            cellClasses.forEach(classItem => {
+                            const card = document.createElement("div"); card.className = "slot-class";
+                            const subject = document.createElement("strong"); subject.textContent = esc(classItem.materia); card.appendChild(subject);
+                            const time = document.createElement("span"); time.textContent = classItem.hora_inicio + "–" + classItem.hora_fin; card.appendChild(time);
+                            const teacher = document.createElement("span"); teacher.textContent = esc(classItem.maestro); card.appendChild(teacher);
+                            if (classItem.aula) { const room = document.createElement("span"); room.textContent = "Salón " + esc(classItem.aula); card.appendChild(room); }
+                            const deleteForm = document.createElement("form"); deleteForm.method = "post"; deleteForm.action = "/clases/" + classItem.id + "/eliminar";
+                            const deleteGroup = document.createElement("input"); deleteGroup.type = "hidden"; deleteGroup.name = "grupo_id"; deleteGroup.value = String(groupId); deleteForm.appendChild(deleteGroup);
+                            const deleteButton = document.createElement("button"); deleteButton.type = "submit"; deleteButton.className = "slot-delete"; deleteButton.textContent = "Quitar del horario"; deleteButton.onclick = event => { if (!confirm("¿Eliminar esta clase del horario?")) event.preventDefault(); };
+                            deleteForm.appendChild(deleteButton); card.appendChild(deleteForm); cell.appendChild(card);
+                            });
+                        } else {
+                            const selectionKey = `${groupId}:${day}:${cellStart}:${cellEnd}`;
+                            const isSelected = selectedCells.has(selectionKey);
+                            const add = document.createElement("button"); add.type = "button"; add.className = "slot-add" + (isSelected ? " is-selected" : ""); add.textContent = isSelected ? "✓ Seleccionada" : "+"; add.title = (isSelected ? "Quitar selección: " : "Seleccionar: ") + dayNames[day][1] + " " + toClock(cellStart) + "–" + toClock(cellEnd);
+                            add.addEventListener("click", () => {
+                                if (selectedCells.has(selectionKey)) selectedCells.delete(selectionKey);
+                                else selectedCells.set(selectionKey, {dia: day, inicio: cellStart, fin: cellEnd});
+                                updateSelection();
+                            });
+                            cell.appendChild(add);
+                        }
+                        row.appendChild(cell);
+                    }
+                    tbody.appendChild(row);
+                }
+                if (outside.length) {
+                    rangeNote.textContent += " " + outside.length + " clase(s) quedan fuera del rango visible; amplía la tabla para verlas.";
+                }
+            }
+            groupSelect.addEventListener("change", () => { selectedCells.clear(); groupField.value = groupSelect.value; updateSelection(); loadGroupConfig(); });
+            [gridStart, cellMinutes, cellCount].forEach(control => control.addEventListener("input", () => { selectedCells.clear(); updateSelection(); }));
+            updateSelection();
+            loadGroupConfig();
+        })();
+    </script>
+    {% endif %}
+    <script src="/static/js/navigation.js"></script>
+</body>
+</html>

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horarios · SICAE WEB</title>
+    <link rel="stylesheet" href="/static/css/style.css?v=20261020-1">
+    <style>
+        .horarios-page{max-width:1200px;margin:0 auto;padding:28px;color:#172033}
+        .horarios-heading{margin:0 0 22px}.horarios-heading h2{margin:0 0 7px;font-size:27px}.horarios-heading p{margin:0;color:#64748b;line-height:1.5}
+        .materias-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:16px;align-items:start}
+        .materia-card{overflow:hidden;border:1px solid #dbe5f1;border-radius:15px;background:#fff;box-shadow:0 8px 24px rgba(15,23,42,.06)}
+        .materia-card>summary{display:flex;min-height:76px;align-items:center;justify-content:space-between;gap:12px;padding:18px 20px;color:#172033;font-size:18px;font-weight:800;cursor:pointer;list-style:none}
+        .materia-card>summary::-webkit-details-marker,.grupo-card>summary::-webkit-details-marker{display:none}
+        .materia-card>summary::after{content:'＋';color:#4f46e5;font-size:20px}.materia-card[open]>summary::after{content:'−'}
+        .materia-card[open]>summary{border-bottom:1px solid #e2e8f0;background:#f8faff}
+        .materia-contenido{padding:14px}.grupo-card{margin:0 0 10px;border:1px solid #e2e8f0;border-radius:11px;background:#fff}.grupo-card:last-child{margin-bottom:0}
+        .grupo-card>summary{padding:13px 14px;color:#334155;font-weight:750;cursor:pointer;list-style:none}.grupo-card>summary::after{content:'Ver horarios  ＋';float:right;color:#4f46e5;font-size:12px}
+        .grupo-card[open]>summary{border-bottom:1px solid #e2e8f0;background:#f8fafc}.horarios-grupo{display:grid;gap:10px;padding:12px}
+        .horario-materia{padding:13px;border:1px solid #e2e8f0;border-radius:9px;background:#f8fafc}.horario-materia strong{display:block;margin-bottom:4px;color:#172033}.hora-linea{color:#475569;font-size:13px}.maestro-linea{margin-top:5px;color:#64748b;font-size:13px}
+        .clase-stats{display:flex;flex-wrap:wrap;gap:7px;margin:10px 0}.clase-stat{padding:5px 8px;border-radius:7px;background:#fff;color:#475569;font-size:12px}.clase-stat.presentes{color:#15803d}.clase-stat.retardos{color:#b45309}.clase-stat.faltas{color:#b91c1c}
+        .clase-historial{margin-top:8px;border-top:1px solid #e2e8f0;padding-top:8px}.clase-historial summary{color:#4f46e5;font-size:12px;font-weight:750;cursor:pointer}
+        .sesion-historial{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #e2e8f0;color:#475569;font-size:12px}.sesion-historial a{color:#4f46e5;font-weight:750;text-decoration:none;white-space:nowrap}.clase-sin-historial{margin:8px 0 0;color:#94a3b8;font-size:12px}
+        .horarios-empty{padding:32px;border:1px dashed #cbd5e1;border-radius:14px;background:#fff;color:#64748b;text-align:center}
+        @media(max-width:700px){.horarios-page{padding:18px}.horarios-heading h2{font-size:23px}.materias-grid{grid-template-columns:1fr}}
+    </style>
+</head>
+<body>
+    {% include "_sidebar.html" %}
+    <main class="content">
+        <div class="horarios-page">
+            <header class="horarios-heading">
+                <h2>Horarios</h2>
+                <p>Selecciona una materia para consultar los grupos donde se imparte. Abre un grupo para ver sus días, horas y el historial de asistencia.</p>
+            </header>
+            {% if materias_asistencia %}
+            <div class="materias-grid">
+                {% for materia in materias_asistencia %}
+                <details class="materia-card">
+                    <summary>{{ materia.nombre }}</summary>
+                    <div class="materia-contenido">
+                        {% for grupo in materia.grupos %}
+                        <details class="grupo-card">
+                            <summary>{{ grupo.nombre }}</summary>
+                            <div class="horarios-grupo">
+                                {% for clase in grupo.clases %}
+                                <article class="horario-materia">
+                                    <strong>{{ dias[clase.dia_semana][1] }} · {{ clase.hora_inicio }}–{{ clase.hora_fin }}{% if clase.aula %} · Salón {{ clase.aula }}{% endif %}</strong>
+                                    <div class="maestro-linea">Maestro: {{ clase.maestro }}</div>
+                                    <div class="clase-stats">
+                                        <span class="clase-stat presentes">{{ clase.presentes }} asistencias</span>
+                                        <span class="clase-stat retardos">{{ clase.retardos }} retardos</span>
+                                        <span class="clase-stat faltas">{{ clase.faltas }} faltas</span>
+                                    </div>
+                                    <details class="clase-historial">
+                                        <summary>Historial · {{ clase.sesiones|length }} sesiones</summary>
+                                        {% if clase.sesiones %}
+                                            {% for sesion in clase.sesiones %}
+                                            <div class="sesion-historial">
+                                                <span>{{ sesion.fecha.strftime('%d/%m/%Y') }} · {{ sesion.presentes }} presentes, {{ sesion.retardos }} retardos, {{ sesion.faltas }} faltas</span>
+                                                <a href="/clases/asistencia/{{ sesion.id }}">Ver lista</a>
+                                            </div>
+                                            {% endfor %}
+                                        {% else %}
+                                            <p class="clase-sin-historial">Todavía no hay asistencias registradas.</p>
+                                        {% endif %}
+                                    </details>
+                                </article>
+                                {% endfor %}
+                            </div>
+                        </details>
+                        {% endfor %}
+                    </div>
+                </details>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="horarios-empty">Aún no hay materias registradas en los horarios. Primero agrega clases en <a href="/clases">Registro de clases</a>.</div>
+            {% endif %}
+        </div>
+    </main>
+    <script src="/static/js/navigation.js"></script>
+</body>
+</html>

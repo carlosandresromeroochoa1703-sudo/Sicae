@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Actividad de alumnos - SICAE WEB</title>
+    <link rel="stylesheet" href="/static/css/style.css?v=20261018-3">
+    <style>
+        .activity-search,
+        .activity-results,
+        .activity-history {
+            margin-bottom: 22px;
+            padding: 22px;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            background: #fff;
+            box-shadow: 0 4px 18px rgba(15,23,42,.045);
+        }
+        .activity-search label { display:block; margin-bottom:8px; font-weight:700; color:#334155; }
+        .activity-search-row { display:flex; gap:10px; max-width:760px; }
+        .activity-search-row input { flex:1; min-width:0; padding:12px 14px; }
+        .activity-search-row button,
+        .student-result-link,
+        .activity-pagination a {
+            display:inline-flex; align-items:center; justify-content:center;
+            min-height:42px; padding:0 16px; border:0; border-radius:10px;
+            background:#0f766e; color:#fff; font-weight:650; text-decoration:none; cursor:pointer;
+        }
+        .activity-search-hint, .activity-muted { margin:9px 0 0; color:#64748b; font-size:13px; }
+        .activity-results h3, .activity-history h3 { margin:0 0 14px; color:#17324d; font-size:17px; }
+        .activity-results-list { display:grid; gap:10px; }
+        .student-result {
+            display:flex; align-items:center; justify-content:space-between; gap:18px;
+            padding:14px 16px; border:1px solid #e2e8f0; border-radius:12px;
+            background:#fbfdff;
+        }
+        .student-result strong { display:block; color:#1e293b; }
+        .student-result small { display:block; margin-top:4px; color:#64748b; }
+        .student-result-link { min-height:36px; padding:0 13px; font-size:13px; white-space:nowrap; }
+        .student-result-link:hover, .activity-search-row button:hover, .activity-pagination a:hover { background:#115e59; }
+        .activity-empty { padding:24px; border:1px dashed #cbd5e1; border-radius:12px; color:#64748b; text-align:center; }
+        .selected-student {
+            display:flex; align-items:center; justify-content:space-between; gap:16px;
+            margin-bottom:16px; padding:16px; border-radius:12px; background:#f0fdfa;
+        }
+        .selected-student h3 { margin:0; color:#134e4a; }
+        .selected-student p { margin:5px 0 0; color:#64748b; font-size:13px; }
+        .activity-table-wrap { overflow-x:auto; }
+        .activity-table { width:100%; min-width:460px; border-collapse:collapse; }
+        .activity-table th, .activity-table td { padding:13px 14px; border-bottom:1px solid #e2e8f0; text-align:left; }
+        .activity-table th { background:#f8fafc; color:#64748b; font-size:11px; letter-spacing:.06em; text-transform:uppercase; }
+        .movement-badge { display:inline-flex; padding:5px 10px; border-radius:999px; font-size:11px; font-weight:750; letter-spacing:.04em; }
+        .movement-entrada { background:#dcfce7; color:#166534; }
+        .movement-salida { background:#dbeafe; color:#1d4ed8; }
+        .activity-pagination { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:16px; }
+        .activity-pagination span { color:#64748b; font-size:13px; }
+        .activity-pagination a { min-height:36px; padding:0 13px; font-size:13px; }
+        .activity-pagination a[aria-disabled="true"] { opacity:.45; pointer-events:none; }
+        @media (max-width:600px) {
+            .activity-search, .activity-results, .activity-history { padding:16px; }
+            .activity-search-row, .student-result, .selected-student { align-items:stretch; flex-direction:column; }
+            .activity-search-row button, .student-result-link { width:100%; }
+            .activity-pagination { flex-wrap:wrap; }
+        }
+    </style>
+</head>
+<body>
+    {% include "_sidebar.html" %}
+    <main class="content">
+        <header class="header">
+            <div>
+                <h2>Actividad de alumnos</h2>
+                <p>Busca por nombre o matrícula para consultar sus entradas y salidas.</p>
+            </div>
+        </header>
+
+        <section class="activity-search">
+            <form method="get" action="/actividad-alumnos">
+                <label for="q">Nombre del alumno o matrícula</label>
+                <div class="activity-search-row">
+                    <input id="q" name="q" type="search" value="{{ q }}" minlength="2" placeholder="Ej. Ana López o 24001234" autocomplete="off">
+                    <button type="submit">Buscar alumno</button>
+                </div>
+                <p class="activity-search-hint">Escribe al menos 2 caracteres para ver coincidencias.</p>
+            </form>
+        </section>
+
+        {% if q %}
+        <section class="activity-results">
+            <h3>Resultados de búsqueda</h3>
+            {% if resultados %}
+            <div class="activity-results-list">
+                {% for resultado in resultados %}
+                <article class="student-result">
+                    <div>
+                        <strong>{{ resultado.nombre }} {{ resultado.apellido_paterno }} {{ resultado.apellido_materno or '' }}</strong>
+                        <small>Matrícula: {{ resultado.matricula }}{% if resultado.nombre_grupo %} · {{ resultado.nombre_grupo }}{% endif %}{% if resultado.grado %} · {{ resultado.grado }}° {{ resultado.grupo_nombre or '' }}{% endif %}</small>
+                    </div>
+                    <a class="student-result-link" href="/actividad-alumnos?alumno_id={{ resultado.id }}&amp;q={{ q|urlencode }}">Ver actividad</a>
+                </article>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="activity-empty">No encontramos alumnos activos con ese nombre o matrícula.</div>
+            {% endif %}
+        </section>
+        {% endif %}
+
+        {% if alumno %}
+        <section class="activity-history">
+            <div class="selected-student">
+                <div>
+                    <h3>{{ alumno.nombre }} {{ alumno.apellido_paterno }} {{ alumno.apellido_materno or '' }}</h3>
+                    <p>Matrícula: {{ alumno.matricula }}{% if alumno.nombre_grupo %} · {{ alumno.nombre_grupo }}{% endif %}</p>
+                </div>
+                <a class="student-result-link" href="/alumnos/detalle/{{ alumno.id }}">Ficha del alumno</a>
+            </div>
+
+            <h3>Historial de entradas y salidas</h3>
+            <p class="activity-muted">{{ total_actividad }} registro{% if total_actividad != 1 %}s{% endif %} en total.</p>
+            {% if actividad %}
+            <div class="activity-table-wrap">
+                <table class="activity-table">
+                    <thead><tr><th>Fecha</th><th>Hora</th><th>Movimiento</th><th>Registrado por</th></tr></thead>
+                    <tbody>
+                        {% for acceso in actividad %}
+                        <tr>
+                            <td>{{ acceso.fecha.strftime('%d/%m/%Y') if acceso.fecha.strftime is defined else acceso.fecha }}</td>
+                            <td>{{ acceso.hora.strftime('%H:%M:%S') if acceso.hora.strftime is defined else acceso.hora }}</td>
+                            <td><span class="movement-badge movement-{{ acceso.movimiento|lower }}">{{ acceso.movimiento }}</span></td>
+                            <td>{{ acceso.registrado_por or 'No disponible' }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="activity-empty">Este alumno todavía no tiene entradas o salidas registradas.</div>
+            {% endif %}
+
+            {% if total_paginas > 1 %}
+            <nav class="activity-pagination" aria-label="Paginación del historial">
+                <a href="/actividad-alumnos?alumno_id={{ alumno.id }}&amp;q={{ q|urlencode }}&amp;page={{ pagina_actual - 1 }}" {% if pagina_actual <= 1 %}aria-disabled="true"{% endif %}>← Anterior</a>
+                <span>Página {{ pagina_actual }} de {{ total_paginas }}</span>
+                <a href="/actividad-alumnos?alumno_id={{ alumno.id }}&amp;q={{ q|urlencode }}&amp;page={{ pagina_actual + 1 }}" {% if pagina_actual >= total_paginas %}aria-disabled="true"{% endif %}>Siguiente →</a>
+            </nav>
+            {% endif %}
+        </section>
+        {% elif alumno_id %}
+        <section class="activity-history"><div class="activity-empty">No se encontró al alumno solicitado.</div></section>
+        {% endif %}
+    </main>
+    <script src="/static/js/navigation.js"></script>
+</body>
+</html>

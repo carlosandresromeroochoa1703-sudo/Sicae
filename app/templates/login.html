@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        {{ configuracion.nombre_sistema or "SICAE WEB" }}
+    </title>
+
+    <style>
+
+        :root {
+
+            --color-principal:
+                {{ configuracion.color_principal or '#2563EB' }};
+
+            --color-secundario:
+                {{ configuracion.color_secundario or '#1E40AF' }};
+
+            --color-fondo:
+                {{ configuracion.color_fondo_login or '#F3F4F6' }};
+
+            --color-texto:
+                {{ configuracion.color_texto_login or '#111827' }};
+
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+
+            margin: 0;
+
+            min-height: 100vh;
+
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    var(--color-secundario),
+                    var(--color-principal)
+                );
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            padding: 20px;
+
+        }
+
+        .login-container {
+
+            width: 100%;
+
+            max-width: 430px;
+
+        }
+
+        .login-card {
+
+            background:
+                var(--color-fondo);
+
+            border-radius: 20px;
+
+            padding: 35px;
+
+            box-shadow:
+                0 20px 50px
+                rgba(0, 0, 0, 0.25);
+
+        }
+
+.logo-container {
+
+    width: {{ configuracion.logo_tamano or 120 }}px;
+
+    height: {{ configuracion.logo_tamano or 120 }}px;
+
+    margin: 0 auto 20px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+}
+
+.logo-container img {
+
+    width: {{ configuracion.logo_tamano or 120 }}px;
+
+    height: {{ configuracion.logo_tamano or 120 }}px;
+
+    object-fit: contain;
+
+}
+        .logo-default {
+
+            font-size: 70px;
+
+        }
+
+        h1 {
+
+            margin: 0;
+
+            text-align: center;
+
+            color: var(--color-texto);
+
+            font-size: 28px;
+
+        }
+
+        .subtitle {
+
+            margin-top: 10px;
+
+            margin-bottom: 30px;
+
+            text-align: center;
+
+            color: var(--color-texto);
+
+            opacity: 0.75;
+
+            font-size: 15px;
+
+            line-height: 1.5;
+
+        }
+
+        .error {
+
+            background: #fee2e2;
+
+            color: #991b1b;
+
+            border: 1px solid #fecaca;
+
+            padding: 12px;
+
+            border-radius: 10px;
+
+            margin-bottom: 20px;
+
+            text-align: center;
+
+            font-size: 14px;
+
+        }
+
+        label {
+
+            display: block;
+
+            margin-bottom: 7px;
+
+            color: var(--color-texto);
+
+            font-weight: bold;
+
+            font-size: 14px;
+
+        }
+
+        input {
+
+            width: 100%;
+
+            padding: 13px 14px;
+
+            border: 1px solid #d1d5db;
+
+            border-radius: 10px;
+
+            font-size: 16px;
+
+            outline: none;
+
+            margin-bottom: 18px;
+
+            background: white;
+
+        }
+
+        input:focus {
+
+            border-color:
+                var(--color-principal);
+
+            box-shadow:
+                0 0 0 3px
+                color-mix(
+                    in srgb,
+                    var(--color-principal) 20%,
+                    transparent
+                );
+
+        }
+
+        button {
+
+            width: 100%;
+
+            padding: 14px;
+
+            border: none;
+
+            border-radius: 10px;
+
+            background:
+                var(--color-principal);
+
+            color: white;
+
+            font-size: 16px;
+
+            font-weight: bold;
+
+            cursor: pointer;
+
+            transition: 0.2s;
+
+        }
+
+        button:hover {
+
+            background:
+                var(--color-secundario);
+
+            transform: translateY(-1px);
+
+        }
+
+        .footer {
+
+            text-align: center;
+
+            margin-top: 25px;
+
+            color: var(--color-texto);
+
+            opacity: 0.65;
+
+            font-size: 12px;
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <div class="login-container">
+
+        <div class="login-card">
+
+            <div class="logo-container">
+
+                {% if configuracion.logo_login %}
+
+                    <img
+                        src="/static/uploads/{{ configuracion.logo_login }}?v={{ configuracion.fecha_actualizacion }}"
+                        alt="Escudo o logotipo"
+                    >
+
+                {% else %}
+
+                    <div class="logo-default">
+                        🛡️
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+            <h1>
+
+                {{ configuracion.nombre_sistema or "SICAE WEB" }}
+
+            </h1>
+
+            <div class="subtitle">
+
+                {{ configuracion.subtitulo or "Sistema de Registro BGM José María Chávez" }}
+
+            </div>
+
+            {% if error %}
+
+                <div class="error">
+
+                    {{ error }}
+
+                </div>
+
+            {% endif %}
+
+            <form
+                method="post"
+                action="/login"
+            >
+
+                <label for="usuario">
+                    Usuario
+                </label>
+
+                <input
+                    type="text"
+                    id="usuario"
+                    name="usuario"
+                    placeholder="Ingrese su usuario"
+                    required
+                    autocomplete="username"
+                >
+
+                <label for="password">
+                    Contraseña
+                </label>
+
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    placeholder="Ingrese su contraseña"
+                    required
+                    autocomplete="current-password"
+                >
+
+                <button type="submit">
+
+                    Iniciar sesión
+
+                </button>
+
+            </form>
+
+            <div class="footer">
+
+                {{ configuracion.nombre_sistema or "SICAE WEB" }}
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <script src="/static/js/navigation.js"></script>
+</body>
+
+</html>
+

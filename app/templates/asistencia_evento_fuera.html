@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asistencia del evento · SICAE WEB</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        .event-attendance{max-width:1150px;margin:0 auto;padding:24px;color:#172033}
+        .event-top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:20px}
+        .event-top h2{margin:0 0 6px}.event-top p{margin:0;color:#64748b;line-height:1.5}
+        .back-link{display:inline-block;color:#2563eb;text-decoration:none;font-weight:700;margin-bottom:14px}
+        .attendance-layout{display:grid;grid-template-columns:minmax(300px,.9fr) minmax(0,1.3fr);gap:18px;align-items:start}
+        .attendance-card{background:#fff;border:1px solid #e2e8f0;border-radius:15px;padding:20px;box-shadow:0 8px 24px #0f172a0a}
+        .attendance-card h3{margin:0 0 15px}.event-info{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+        .info-chip{padding:6px 10px;border-radius:999px;background:#eff6ff;color:#1e40af;font-size:13px;font-weight:650}
+        .scanner-controls label{display:block;font-weight:700;margin:12px 0 6px}.scanner-controls select,.manual-scan input{width:100%;box-sizing:border-box;min-height:46px;border:1px solid #cbd5e1;border-radius:9px;padding:10px;font:inherit;background:#fff}
+        .scan-buttons{display:flex;gap:9px;margin-top:12px}.scan-button{border:0;border-radius:9px;padding:12px 14px;background:#2563eb;color:white;font-weight:750;cursor:pointer;flex:1}.scan-button.stop{background:#475569}.scan-button:disabled{opacity:.5;cursor:not-allowed}
+        #eventReader{width:100%;overflow:hidden;border-radius:12px;margin-top:13px}.scan-message{display:none;margin-top:12px;padding:12px;border-radius:10px;font-weight:650}.scan-message.ok{display:block;background:#dcfce7;color:#166534}.scan-message.duplicate{display:block;background:#fef3c7;color:#92400e}.scan-message.error{display:block;background:#fee2e2;color:#991b1b}
+        .secure-note{margin:12px 0;color:#64748b;font-size:13px;line-height:1.5}.manual-scan{display:flex;gap:8px;margin-top:14px}.manual-scan input{flex:1}.manual-scan button{border:0;border-radius:9px;background:#0f766e;color:white;font-weight:700;padding:0 14px;cursor:pointer}
+        .event-closed{margin-bottom:14px;padding:12px;border-radius:9px;background:#f1f5f9;color:#475569;font-weight:650}
+        .attendees-top{display:flex;justify-content:space-between;gap:12px;align-items:center}.total-badge{padding:7px 11px;border-radius:999px;background:#dcfce7;color:#166534;font-weight:800}
+        .attendees-wrap{max-height:540px;overflow:auto;border:1px solid #e2e8f0;border-radius:10px}.attendees-table{width:100%;border-collapse:collapse;font-size:14px}.attendees-table th,.attendees-table td{text-align:left;padding:11px 10px;border-bottom:1px solid #e2e8f0}.attendees-table th{position:sticky;top:0;background:#f8fafc;color:#475569}.attendees-table tbody tr:last-child td{border-bottom:0}.attendee-empty{text-align:center;padding:28px;color:#64748b}
+        @media(max-width:900px){.attendance-layout{grid-template-columns:1fr}.event-attendance{padding:16px}.event-top{flex-direction:column}}
+        @media(max-width:520px){.manual-scan{flex-direction:column}.manual-scan button{min-height:44px}.scan-buttons{flex-direction:column}.attendees-table{font-size:12px}.attendees-table th,.attendees-table td{padding:9px 7px}}
+    </style>
+</head>
+<body>
+    {% include "_sidebar.html" %}
+    <main class="content">
+        <div class="event-attendance">
+            <a class="back-link" href="/eventos-fuera">← Eventos fuera del plantel</a>
+            <header class="event-top">
+                <div>
+                    <h2>{{ evento.nombre }}</h2>
+                    <p>{{ evento.fecha_evento.strftime('%d/%m/%Y') }}{% if evento.lugar %} · {{ evento.lugar }}{% endif %}</p>
+                    <div class="event-info">{% for grupo in evento.grupos %}<span class="info-chip">{{ grupo.nombre_grupo }} · {{ grupo.grado }}° {{ grupo.nombre }}</span>{% endfor %}</div>
+                </div>
+                <span class="total-badge"><span id="attendanceCount">{{ asistencias|length }}</span> presentes</span>
+            </header>
+            <div class="attendance-layout">
+                <section class="attendance-card">
+                    <h3>Registrar con QR</h3>
+                    {% if not evento.activo %}<div class="event-closed">Este evento está cerrado. Puedes consultar la lista, pero no registrar nuevas asistencias.</div>{% endif %}
+                    <div class="scanner-controls">
+                        <label for="eventGroup">Grupo que está pasando lista</label>
+                        <select id="eventGroup" {% if not evento.activo %}disabled{% endif %}>
+                            <option value="">Selecciona un grupo</option>
+                            <option value="todos">Todos los grupos del evento</option>
+                            {% for grupo in evento.grupos %}<option value="{{ grupo.id }}">{{ grupo.nombre_grupo }} · {{ grupo.grado }}° {{ grupo.nombre }}</option>{% endfor %}
+                        </select>
+                    </div>
+                    <div class="scan-buttons">
+                        <button id="startEventScan" class="scan-button" type="button" {% if not evento.activo %}disabled{% endif %}>📷 Activar cámara</button>
+                        <button id="stopEventScan" class="scan-button stop" type="button" disabled>Detener</button>
+                    </div>
+                    <div id="eventReader"></div>
+                    <form class="manual-scan" id="manualScanForm">
+                        <input id="eventMatricula" type="text" autocomplete="off" placeholder="Escanea o escribe la matrícula" {% if not evento.activo %}disabled{% endif %}>
+                        <button type="submit" {% if not evento.activo %}disabled{% endif %}>Registrar</button>
+                    </form>
+                    <div id="scanMessage" class="scan-message" role="status" aria-live="polite"></div>
+                </section>
+                <section class="attendance-card">
+                    <div class="attendees-top"><h3>Alumnos presentes</h3><span class="total-badge"><span id="attendanceCountSecondary">{{ asistencias|length }}</span></span></div>
+                    <div class="attendees-wrap">
+                        <table class="attendees-table">
+                            <thead><tr><th>Alumno</th><th>Matrícula</th><th>Grupo</th><th>Hora</th></tr></thead>
+                            <tbody id="attendeesBody">
+                                {% for asistencia in asistencias %}
+                                <tr data-student-id="{{ asistencia.alumno_id }}"><td>{{ asistencia.nombre }}</td><td>{{ asistencia.matricula }}</td><td>{{ asistencia.grupo }}</td><td>{{ asistencia.registrada_en }}</td></tr>
+                                {% else %}<tr id="emptyAttendees"><td class="attendee-empty" colspan="4">Todavía no hay asistencias registradas.</td></tr>{% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <script>
+        (function () {
+            const eventId = {{ evento.id|tojson }};
+            const active = {{ evento.activo|tojson }};
+            const groupSelect = document.getElementById("eventGroup");
+            const message = document.getElementById("scanMessage");
+            const input = document.getElementById("eventMatricula");
+            const body = document.getElementById("attendeesBody");
+            const startButton = document.getElementById("startEventScan");
+            const stopButton = document.getElementById("stopEventScan");
+            let scanner = null, processing = false, lastCode = "", lastTime = 0;
+
+            function showMessage(text, kind) { message.textContent = text; message.className = "scan-message " + kind; }
+            function addCell(row, value) { const cell = document.createElement("td"); cell.textContent = value || ""; row.appendChild(cell); }
+            async function registerCode(raw) {
+                const matricula = String(raw || "").trim();
+                const groupId = groupSelect.value;
+                if (!matricula) return;
+                if (!groupId) { showMessage("Selecciona un grupo o todos los grupos del evento.", "error"); return; }
+                if (processing) return;
+                const now = Date.now();
+                if (matricula === lastCode && now - lastTime < 2500) return;
+                processing = true; lastCode = matricula; lastTime = now;
+                try {
+                    const response = await fetch("/api/eventos-fuera/" + eventId + "/asistencia", {
+                        method: "POST", credentials: "same-origin",
+                        headers: {"Content-Type": "application/json"},
+                        body: JSON.stringify({matricula: matricula, grupo_id: groupId === "todos" ? null : groupId})
+                    });
+                    const result = await response.json();
+                    if (!response.ok || !result.ok) { showMessage(result.mensaje || "No se pudo registrar.", "error"); return; }
+                    if (result.estado === "duplicado") { showMessage(result.nombre + " ya estaba registrado a las " + result.hora + ".", "duplicate"); return; }
+                    let confirmation = "Asistencia registrada: " + result.nombre + " · " + result.matricula + " · " + result.hora;
+                    if (result.correo_enviado) confirmation += " · aviso enviado al correo familiar";
+                    else if (result.mensaje_correo) confirmation += " · " + result.mensaje_correo;
+                    showMessage(confirmation, "ok");
+                    const empty = document.getElementById("emptyAttendees"); if (empty) empty.remove();
+                    const row = document.createElement("tr"); row.dataset.studentId = result.alumno_id || "";
+                    addCell(row, result.nombre); addCell(row, result.matricula); addCell(row, result.grupo); addCell(row, result.hora);
+                    body.prepend(row);
+                    const total = Number(document.getElementById("attendanceCount").textContent || 0) + 1;
+                    document.getElementById("attendanceCount").textContent = total;
+                    document.getElementById("attendanceCountSecondary").textContent = total;
+                    input.value = "";
+                } catch (error) { showMessage("No se pudo conectar con SICAE. Verifica la conexión e intenta de nuevo.", "error"); }
+                finally { processing = false; }
+            }
+            document.getElementById("manualScanForm").addEventListener("submit", function (event) { event.preventDefault(); registerCode(input.value); });
+            async function startScan() {
+                if (!active) return;
+                if (!groupSelect.value) { showMessage("Selecciona un grupo o todos los grupos antes de activar la cámara.", "error"); return; }
+                if (!window.isSecureContext || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    showMessage("La cámara requiere HTTPS en este dispositivo. Usa el campo de matrícula o abre SICAE con HTTPS.", "error"); return;
+                }
+                try {
+                    scanner = new Html5Qrcode("eventReader");
+                    await scanner.start({facingMode: "environment"}, {fps: 12, qrbox: {width: 230, height: 230}}, function (decoded) { registerCode(decoded); });
+                    startButton.disabled = true; stopButton.disabled = false;
+                } catch (error) { showMessage("No se pudo activar la cámara. Revisa el permiso del navegador.", "error"); scanner = null; }
+            }
+            async function stopScan() {
+                if (scanner) {
+                    try { if (scanner.isScanning) await scanner.stop(); await scanner.clear(); } catch (error) {}
+                    scanner = null;
+                }
+                startButton.disabled = !active; stopButton.disabled = true;
+            }
+            startButton.addEventListener("click", startScan);
+            stopButton.addEventListener("click", stopScan);
+            window.addEventListener("pagehide", stopScan);
+        })();
+    </script>
+    <script src="/static/js/navigation.js"></script>
+</body>
+</html>

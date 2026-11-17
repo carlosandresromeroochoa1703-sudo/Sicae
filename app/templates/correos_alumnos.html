@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Correos de alumnos - SICAE WEB</title>
+    <link rel="stylesheet" href="/static/css/style.css?v=20261018-3">
+    <style>
+        .correos-contenido { margin-left:260px; padding:30px; }
+        .correos-panel { max-width:1150px; margin:auto; background:white; padding:25px; border-radius:14px; box-shadow:0 4px 14px rgba(0,0,0,.08); }
+        .correos-descripcion { color:#64748b; margin-bottom:22px; }
+        .busqueda { display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap; align-items:center; }
+        .busqueda input, .busqueda select { flex:1; min-width:190px; padding:12px; border:1px solid #cbd5e1; border-radius:7px; background:white; }
+        .boton { display:inline-block; border:0; border-radius:7px; padding:11px 17px; cursor:pointer; text-decoration:none; font-size:14px; }
+        .boton-buscar { background:#e2e8f0; color:#1e293b; }
+        .boton-guardar { background:#2563eb; color:white; }
+        .tabla-contenedor { overflow-x:auto; }
+        table { width:100%; border-collapse:collapse; }
+        th, td { padding:12px; border-bottom:1px solid #e2e8f0; text-align:left; }
+        th { background:#f8fafc; }
+        td input { width:100%; min-width:220px; box-sizing:border-box; padding:10px; border:1px solid #cbd5e1; border-radius:6px; }
+        .mensaje { padding:13px; border-radius:7px; margin:15px 0; }
+        .correcto { background:#dcfce7; color:#166534; }
+        .error { background:#fee2e2; color:#991b1b; }
+        .acciones { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:15px; }
+        @media (max-width:800px) { .correos-contenido { margin-left:0; padding:15px; } .correos-panel { padding:15px; } }
+    </style>
+</head>
+<body>
+    {% include "_sidebar.html" %}
+    <main class="correos-contenido">
+        <section class="correos-panel">
+            <h1>&#128231; Correos de alumnos</h1>
+            <p class="correos-descripcion">
+                Selecciona un grupo y, si lo deseas, busca por nombre o apellidos.
+                Puedes editar varios correos y guardarlos juntos.
+            </p>
+
+            {% if request.query_params.get("guardado") is not none %}
+            <div class="mensaje correcto">
+                Se guardaron correctamente {{ request.query_params.get("guardado") }} correo(s).
+            </div>
+            {% endif %}
+
+            {% if request.query_params.get("error") == "correo_invalido" %}
+            <div class="mensaje error">
+                Hay un correo con formato incorrecto. Revisa los datos.
+                No se guardaron cambios en esta operacion.
+            </div>
+            {% endif %}
+
+            <form method="get" action="/correos-alumnos" class="busqueda">
+                <select name="grupo_id" aria-label="Seleccionar grupo">
+                    <option value="">Todos los grupos</option>
+                    {% for grupo in grupos %}
+                    <option value="{{ grupo[0] }}"
+                        {% if grupo[0] == grupo_seleccionado %}selected{% endif %}>
+                        {{ grupo[1] }} - {{ grupo[3] }} - {{ grupo[4] }}
+                    </option>
+                    {% endfor %}
+                </select>
+                <input type="search" name="buscar" value="{{ busqueda }}"
+                       placeholder="Buscar alumno por nombre o apellidos">
+                <button class="boton boton-buscar" type="submit">Filtrar</button>
+                <a class="boton boton-buscar" href="/correos-alumnos">Limpiar filtros</a>
+            </form>
+
+            <form method="post" action="/correos-alumnos">
+                <input type="hidden" name="grupo_id" value="{{ grupo_seleccionado or '' }}">
+                <input type="hidden" name="buscar" value="{{ busqueda }}">
+
+                <div class="acciones">
+                    <span>Alumnos encontrados: <strong>{{ alumnos|length }}</strong></span>
+                    <button class="boton boton-guardar" type="submit">&#128190; Guardar correos</button>
+                </div>
+
+                <div class="tabla-contenedor">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nombre del alumno</th>
+                                <th>Correo electronico</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for alumno in alumnos %}
+                            <tr>
+                                <td>
+                                    {{ alumno.apellido_paterno or "" }}
+                                    {{ alumno.apellido_materno or "" }}
+                                    {{ alumno.nombre or "" }}
+                                </td>
+                                <td>
+                                    <input type="email"
+                                           name="correo_{{ alumno.id }}"
+                                           value="{{ alumno.correo or '' }}"
+                                           placeholder="correo@ejemplo.com"
+                                           aria-label="Correo de {{ alumno.nombre }}">
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr><td colspan="2">No se encontraron alumnos en este filtro.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                {% if alumnos %}
+                <div class="acciones" style="margin-top:20px">
+                    <span>Los campos vacios borraran el correo correspondiente.</span>
+                    <button class="boton boton-guardar" type="submit">Guardar cambios</button>
+                </div>
+                {% endif %}
+            </form>
+        </section>
+    </main>
+    <script src="/static/js/navigation.js"></script>
+</body>
+</html>

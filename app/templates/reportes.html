@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Reportes - SICAE WEB
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="/static/css/style.css?v=20261018-3"
+    >
+
+    <style>
+
+        .reportes-container {
+            width: 100%;
+        }
+
+        .filtros {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: end;
+            margin-bottom: 25px;
+        }
+
+        .filtro {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .filtro label {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .filtro input,
+        .filtro select {
+            padding: 10px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
+            min-width: 180px;
+            background: white;
+        }
+
+        .btn-filtrar {
+            padding: 10px 18px;
+            border: none;
+            border-radius: 8px;
+            background: #111827;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-filtrar:hover {
+            background: #1f2937;
+        }
+
+        .btn-limpiar {
+            padding: 10px 18px;
+            border-radius: 8px;
+            background: #e5e7eb;
+            color: #374151;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .tabla-container {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        th {
+            background: #111827;
+            color: white;
+            padding: 13px 12px;
+            text-align: left;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+
+        tr:hover td {
+            background: #f8fafc;
+        }
+
+        .entrada {
+            color: #15803d;
+            font-weight: 700;
+        }
+
+        .salida {
+            color: #dc2626;
+            font-weight: 700;
+        }
+
+        .sin-resultados {
+            text-align: center;
+            padding: 40px;
+            color: #64748b;
+        }
+
+        .resumen {
+            margin-bottom: 18px;
+            color: #64748b;
+            font-size: 14px;
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <!-- ============================================= -->
+    <!-- BARRA LATERAL -->
+    <!-- ============================================= -->
+
+    {% include "_sidebar.html" %}
+
+
+    <!-- ============================================= -->
+    <!-- CONTENIDO -->
+    <!-- ============================================= -->
+
+    <main class="content">
+
+
+        <header class="header">
+
+            <h2>
+                📊 Reportes
+            </h2>
+
+
+            <p>
+                Consulta los registros de asistencia.
+            </p>
+
+        </header>
+
+
+        <div class="card reportes-container">
+
+
+            <!-- ========================================= -->
+            <!-- FILTROS -->
+            <!-- ========================================= -->
+
+            <form
+                method="get"
+                action="/reportes"
+                class="filtros"
+                id="formReportes"
+            >
+
+
+                <div class="filtro">
+
+                    <label for="fecha_inicio">
+                        Fecha inicial
+                    </label>
+
+
+                    <input
+                        id="fecha_inicio"
+                        type="date"
+                        name="fecha_inicio"
+                        value="{{ fecha_inicio or '' }}"
+                    >
+
+                </div>
+
+
+                <div class="filtro">
+
+                    <label for="fecha_fin">
+                        Fecha final
+                    </label>
+
+
+                    <input
+                        id="fecha_fin"
+                        type="date"
+                        name="fecha_fin"
+                        value="{{ fecha_fin or '' }}"
+                    >
+
+                </div>
+
+
+                <div class="filtro">
+
+                    <label for="grupo_id">
+                        Grupo
+                    </label>
+
+
+                    <select
+                        id="grupo_id"
+                        name="grupo_id"
+                    >
+
+                        <option value="">
+                            Todos los grupos
+                        </option>
+
+
+                        {% for grupo in grupos %}
+
+                            <option
+                                value="{{ grupo.id }}"
+
+                                {% if grupo_id is not none
+                                    and grupo.id|string == grupo_id|string
+                                %}
+
+                                    selected
+
+                                {% endif %}
+                            >
+
+                                {{ grupo.grado }}°
+                                {{ grupo.nombre_grupo }}
+                                -
+                                {{ grupo.nombre }}
+                                -
+                                {{ grupo.turno }}
+
+                            </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+
+                <button
+                    type="submit"
+                    class="btn-filtrar"
+                >
+
+                    🔎 Filtrar
+
+                </button>
+
+
+                <!-- ========================================= -->
+                <!-- EXPORTAR EXCEL -->
+                <!-- ========================================= -->
+
+                <a
+                    href="/reportes/exportar/excel{% if fecha_inicio or fecha_fin or grupo_id %}?{% endif %}{% if fecha_inicio %}fecha_inicio={{ fecha_inicio }}{% endif %}{% if fecha_inicio and fecha_fin %}&{% endif %}{% if fecha_fin %}fecha_fin={{ fecha_fin }}{% endif %}{% if (fecha_inicio or fecha_fin) and grupo_id %}&{% endif %}{% if grupo_id %}grupo_id={{ grupo_id }}{% endif %}"
+                    class="btn-limpiar"
+                >
+
+                    📥 Exportar Excel
+
+                </a>
+
+
+                <!-- ========================================= -->
+                <!-- LIMPIAR -->
+                <!-- ========================================= -->
+
+                <a
+                    href="/reportes"
+                    class="btn-limpiar"
+                >
+
+                    Limpiar
+
+                </a>
+
+
+            </form>
+
+
+            <!-- ========================================= -->
+            <!-- RESUMEN -->
+            <!-- ========================================= -->
+
+            <div class="resumen">
+
+                Registros encontrados:
+
+                <strong>
+                    {{ accesos|length }}
+                </strong>
+
+            </div>
+
+
+            <!-- ========================================= -->
+            <!-- TABLA -->
+            <!-- ========================================= -->
+
+            <div class="tabla-container">
+
+
+                {% if accesos %}
+
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    Fecha
+                                </th>
+
+                                <th>
+                                    Hora
+                                </th>
+
+                                <th>
+                                    Matrícula
+                                </th>
+
+                                <th>
+                                    Alumno
+                                </th>
+
+                                <th>
+                                    Grupo
+                                </th>
+
+                                <th>
+                                    Grado
+                                </th>
+
+                                <th>
+                                    Turno
+                                </th>
+
+                                <th>
+                                    Movimiento
+                                </th>
+
+                                <th>Registrado por</th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+
+                            {% for acceso in accesos %}
+
+                                <tr>
+
+
+                                    <td>
+                                        {{ acceso.fecha }}
+                                    </td>
+
+                                    <td>
+                                        {{ acceso.hora }}
+                                    </td>
+
+
+                                    <td>
+                                        {{ acceso.matricula }}
+                                    </td>
+
+
+                                    <td>
+
+                                        {{ acceso.nombre }}
+
+                                        {{ acceso.apellido_paterno }}
+
+                                        {{ acceso.apellido_materno or '' }}
+
+                                    </td>
+
+
+                                    <td>
+                                        {{ acceso.nombre_grupo or '' }}
+                                    </td>
+
+
+                                    <td>
+
+                                        {% if acceso.grado %}
+
+                                            {{ acceso.grado }}°
+
+                                        {% endif %}
+
+                                        {{ acceso.grupo_nombre or '' }}
+
+                                    </td>
+
+
+                                    <td>
+                                        {{ acceso.turno or '' }}
+                                    </td>
+
+
+                                    <td>
+
+                                        {% if acceso.movimiento == "ENTRADA" %}
+
+                                            <span class="entrada">
+                                                🟢 ENTRADA
+                                            </span>
+
+                                        {% else %}
+
+                                            <span class="salida">
+                                                🔴 SALIDA
+                                            </span>
+
+                                        {% endif %}
+
+                                    </td>
+
+                                    <td>{{ acceso.registrado_por or 'No disponible' }}</td>
+
+
+                                </tr>
+
+                            {% endfor %}
+
+
+                        </tbody>
+
+                    </table>
+
+
+                {% else %}
+
+
+                    <div class="sin-resultados">
+
+                        <h3>
+                            📋 No hay registros
+                        </h3>
+
+
+                        <p>
+                            No se encontraron registros
+                            de asistencia con los filtros
+                            seleccionados.
+                        </p>
+
+                    </div>
+
+
+                {% endif %}
+
+
+            </div>
+
+            <section class="tabla-container" style="margin-top: 28px;">
+                <h2>Credenciales especiales</h2>
+                <p>Dirección, Prefectura, Conferencias y Proveedores. El filtro por grupo solo aplica al reporte de alumnos.</p>
+                <div class="resumen">Registros encontrados: <strong>{{ accesos_especiales|length }}</strong></div>
+                {% if accesos_especiales %}
+                    <table>
+                        <thead><tr><th>Fecha</th><th>Hora</th><th>Tipo</th><th>Código</th><th>Persona</th><th>Cargo</th><th>Organización</th><th>Movimiento</th><th>Registrado por</th></tr></thead>
+                        <tbody>
+                        {% for acceso in accesos_especiales %}
+                            <tr>
+                                <td>{{ acceso.fecha }}</td><td>{{ acceso.hora }}</td><td>{{ acceso.tipo_label }}</td><td>{{ acceso.codigo }}</td><td>{{ acceso.nombre_completo }}</td><td>{{ acceso.cargo or '' }}</td><td>{{ acceso.organizacion or '' }}</td>
+                                <td>{% if acceso.movimiento == 'ENTRADA' %}<span class="entrada">🟢 ENTRADA</span>{% else %}<span class="salida">🔴 SALIDA</span>{% endif %}</td><td>{{ acceso.registrado_por or 'No disponible' }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <div class="sin-resultados"><p>No hay registros de credenciales especiales para las fechas seleccionadas.</p></div>
+                {% endif %}
+            </section>
+
+
+        </div>
+
+
+    </main>
+
+
+    <!-- ============================================= -->
+    <!-- CORRECCIÓN "TODOS LOS GRUPOS" -->
+    <!-- ============================================= -->
+
+    <script>
+
+        const formularioReportes =
+            document.getElementById(
+                "formReportes"
+            );
+
+
+        const selectorGrupo =
+            document.getElementById(
+                "grupo_id"
+            );
+
+
+        formularioReportes.addEventListener(
+            "submit",
+            function() {
+
+                /*
+                 * Si está seleccionado
+                 * "Todos los grupos",
+                 * quitamos el atributo name.
+                 *
+                 * Así el navegador NO enviará:
+                 *
+                 * grupo_id=
+                 *
+                 * FastAPI recibirá:
+                 *
+                 * grupo_id=None
+                 *
+                 */
+
+                if (
+                    selectorGrupo.value === ""
+                ) {
+
+                    selectorGrupo.removeAttribute(
+                        "name"
+                    );
+
+                } else {
+
+                    selectorGrupo.setAttribute(
+                        "name",
+                        "grupo_id"
+                    );
+
+                }
+
+            }
+        );
+
+    </script>
+
+
+    <script src="/static/js/navigation.js"></script>
+</body>
+
+</html>
+
+
+
+
+
+
+
+

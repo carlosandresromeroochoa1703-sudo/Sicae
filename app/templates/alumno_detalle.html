@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Ficha del alumno - SICAE WEB</title>
+
+    <link
+        rel="stylesheet"
+        href="/static/css/style.css?v=20261018-3"
+    >
+
+    <style>
+
+        .detalle-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            gap: 20px;
+        }
+
+        .detalle-header h2 {
+            margin: 0;
+            font-size: 28px;
+        }
+
+        .detalle-header p {
+            margin-top: 7px;
+            color: #777;
+        }
+
+        .detalle-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 16px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #d1d5db;
+        }
+
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+
+        .btn-danger {
+            background: #dc2626;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #b91c1c;
+        }
+
+        .btn-success {
+            background: #16a34a;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #15803d;
+        }
+
+        .student-card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .student-top {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .student-photo-container {
+            width: 170px;
+            height: 170px;
+            flex-shrink: 0;
+        }
+
+        .student-photo {
+            width: 170px;
+            height: 170px;
+            object-fit: cover;
+            border-radius: 14px;
+            border: 3px solid #e5e7eb;
+        }
+
+        .no-photo {
+            width: 170px;
+            height: 170px;
+            border-radius: 14px;
+            background: #e5e7eb;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 65px;
+        }
+
+        .student-main-info h1 {
+            margin: 0;
+            font-size: 32px;
+        }
+
+        .matricula {
+            margin-top: 10px;
+            font-size: 18px;
+            color: #666;
+        }
+
+        .grupo {
+            margin-top: 8px;
+            font-size: 17px;
+            font-weight: bold;
+        }
+
+        .section-title {
+            margin-top: 30px;
+            margin-bottom: 18px;
+            font-size: 20px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 18px;
+        }
+
+        .info-box {
+            background: #f8fafc;
+            border-radius: 10px;
+            padding: 16px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .info-label {
+            display: block;
+            color: #777;
+            font-size: 13px;
+            margin-bottom: 6px;
+        }
+
+        .info-value {
+            font-size: 16px;
+            font-weight: 600;
+            word-break: break-word;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .status-active {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status-inactive {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        @media (max-width: 800px) {
+
+            .detalle-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .student-top {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <!-- ================================================= -->
+    <!-- BARRA LATERAL -->
+    <!-- ================================================= -->
+
+        {% include "_sidebar.html" %}
+
+
+    <!-- ================================================= -->
+    <!-- CONTENIDO -->
+    <!-- ================================================= -->
+
+    <main class="content">
+
+
+        <div class="detalle-header">
+
+            <div>
+
+                <h2>
+                    Ficha del alumno
+                </h2>
+
+                <p>
+                    Información general del estudiante
+                </p>
+
+            </div>
+
+
+            <div class="detalle-actions">
+
+                <a
+                    href="/alumnos"
+                    class="btn btn-secondary"
+                >
+                    ← Alumnos
+                </a>
+
+
+                {% if alumno.grupo_id %}
+
+                <a
+                    href="/alumnos/grupo/{{ alumno.grupo_id }}"
+                    class="btn btn-secondary"
+                >
+                    ← Regresar al grupo
+                </a>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+
+        <!-- ================================================= -->
+        <!-- TARJETA DEL ALUMNO -->
+        <!-- ================================================= -->
+
+        <section class="student-card">
+
+
+            <div class="student-top">
+
+
+                <!-- FOTO -->
+
+                <div class="student-photo-container">
+
+                    {% if alumno.foto %}
+
+                    <img
+                        src="/static/uploads/{{ alumno.foto }}"
+                        alt="Foto del alumno"
+                        class="student-photo"
+                    >
+
+                    {% else %}
+
+                    <div class="no-photo">
+                        Usuario
+                    </div>
+
+                    {% endif %}
+
+                </div>
+
+
+                <!-- INFORMACIÓN PRINCIPAL -->
+
+                <div class="student-main-info">
+
+                    <h1>
+
+                        {{ alumno.nombre }}
+
+                        {{ alumno.apellido_paterno }}
+
+                        {% if alumno.apellido_materno %}
+
+                            {{ alumno.apellido_materno }}
+
+                        {% endif %}
+
+                    </h1>
+
+
+                    <div class="matricula">
+
+                        Matrícula:
+
+                        <strong>
+                            {{ alumno.matricula }}
+                        </strong>
+
+                    </div>
+
+
+                    <div class="grupo">
+
+                        Nombre del grupo:
+
+                        {% if alumno.nombre_grupo %}
+
+                            {{ alumno.nombre_grupo }}
+
+                        {% else %}
+
+                            Sin grupo
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- ================================================= -->
+            <!-- DATOS PERSONALES -->
+            <!-- ================================================= -->
+
+            <h3 class="section-title">
+                Datos personales
+            </h3>
+
+
+            <div class="info-grid">
+
+
+                <div class="info-box">
+
+                    <span class="info-label">
+                        Nombre completo
+                    </span>
+
+                    <span class="info-value">
+
+                        {{ alumno.nombre }}
+
+                        {{ alumno.apellido_paterno }}
+
+                        {% if alumno.apellido_materno %}
+
+                            {{ alumno.apellido_materno }}
+
+                        {% endif %}
+
+                    </span>
+
+                </div>
+
+
+                <div class="info-box">
+
+                    <span class="info-label">
+                        Matrícula
+                    </span>
+
+                    <span class="info-value">
+
+                        {{ alumno.matricula }}
+
+                    </span>
+
+                </div>
+
+
+                <div class="info-box">
+
+                    <span class="info-label">
+                        Fecha de nacimiento
+                    </span>
+
+                    <span class="info-value">
+
+                        {% if alumno.fecha_nacimiento %}
+
+                            {{ alumno.fecha_nacimiento }}
+
+                        {% else %}
+
+                            No registrada
+
+                        {% endif %}
+
+                    </span>
+
+                </div>
+
+
+                <div class="info-box">
+
+                    <span class="info-label">
+                        Correo electrónico
+                    </span>
+
+                    <span class="info-value">
+
+                        {% if alumno.correo %}
+
+                            {{ alumno.correo }}
+
+                        {% else %}
+
+                            No registrado
+
+                        {% endif %}
+
+                    </span>
+
+                </div>
+
+
+                <div class="info-box">
+
+                    <span class="info-label">
+                        Teléfono
+                    </span>
+
+                    <span class="info-value">
+
+                        {% if alumno.telefono %}
+
+                            {{ alumno.telefono }}
+
+                        {% else %}
+
+                            No registrado
+
+                        {% endif %}
+
+                    </span>
+
+                </div>
+
+
+                <div class="info-box">
+
+                    <span class="info-label">
+                        Estado
+                    </span>
+
+                    <span class="info-value">
+
+                        {% if alumno.activo %}
+
+                            <span class="status status-active">
+                                Activo
+                            </span>
+
+                        {% else %}
+
+                            <span class="status status-inactive">
+                                Inactivo
+                            </span>
+
+                        {% endif %}
+
+                    </span>
+
+                </div>
+
+
+            </div>
+
+
+            <!-- ================================================= -->
+            <!-- INFORMACIÓN ACADÉMICA -->
+            <!-- ================================================= -->
+
+            <h3 class="section-title">
+                Información académica
+            </h3>
+
+
+            <div class="info-grid">
+
+
+                <!-- NOMBRE DEL GRUPO -->
+
+                <div class="info-box">
+
+                    <span class="info-label">
+                        Nombre del grupo
+                    </span>
+
+                    <span class="info-value">
+
+                        {% if alumno.nombre_grupo %}
+
+                            {{ alumno.nombre_grupo }}
+
+                        {% else %}
+
+                            —
+
+                        {% endif %}
+
+                    </span>
+
+                </div>
+
+
+                <!-- GRADO -->
+
+                <div class="info-box">
+
+                    <span class="info-label">
+                        Grado
+                    </span>
+
+                    <span class="info-value">
+
+                        {% if alumno.grado %}
+
+                            {{ alumno.grado }}°
+
+                        {% else %}
+
+                            —
+
+                        {% endif %}
+
+                    </span>
+
+                </div>
+
+
+                <!-- GRUPO / LETRA -->
+
+                <div class="info-box">
+
+                    <span class="info-label">
+                        Grupo
+                    </span>
+
+                    <span class="info-value">
+
+                        {% if alumno.grupo_nombre %}
+
+                            {{ alumno.grupo_nombre }}
+
+                        {% else %}
+
+                            —
+
+                        {% endif %}
+
+                    </span>
+
+                </div>
+
+
+                <!-- TURNO -->
+
+                <div class="info-box">
+
+                    <span class="info-label">
+                        Turno
+                    </span>
+
+                    <span class="info-value">
+
+                        {% if alumno.turno %}
+
+                            {{ alumno.turno }}
+
+                        {% else %}
+
+                            —
+
+                        {% endif %}
+
+                    </span>
+
+                </div>
+
+
+            </div>
+
+
+            <!-- ================================================= -->
+            <!-- ACCIONES -->
+            <!-- ================================================= -->
+
+            {% if request.session.get("rol") == "administrador" %}
+            <h3 class="section-title">
+                Acciones
+            </h3>
+
+
+            <div class="detalle-actions">
+
+
+                <a
+                    href="/alumnos/{{ alumno.id }}/editar"
+                    class="btn btn-primary"
+                >
+                    Editar Editar alumno
+                </a>
+
+
+                <a
+    		    href="/alumnos/{{ alumno.id }}/credencial"
+    		    class="btn btn-success"
+		>
+ 		    Credencial Generar credencial
+		</a>
+
+
+                <a
+                    href="/alumnos/{{ alumno.id }}/eliminar"
+                    class="btn btn-danger"
+                    onclick="return confirm('¿Seguro que deseas desactivar este alumno?');"
+                >
+                    Eliminar Desactivar alumno
+                </a>
+
+
+            </div>
+            {% endif %}
+
+
+        </section>
+
+
+    </main>
+
+
+    <script src="/static/js/navigation.js"></script>
+</body>
+
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

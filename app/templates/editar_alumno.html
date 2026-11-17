@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Editar Alumno - SICAE WEB</title>
+
+    <link
+        rel="stylesheet"
+        href="/static/css/style.css?v=20261018-3"
+    >
+
+    <style>
+
+        .page-header {
+            margin-bottom: 25px;
+        }
+
+        .page-header h2 {
+            margin: 0;
+            font-size: 28px;
+        }
+
+        .page-header p {
+            margin-top: 8px;
+            color: #777;
+        }
+
+        .card {
+            background: white;
+            border-radius: 14px;
+            padding: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            max-width: 850px;
+        }
+
+        .section-title {
+            margin-top: 30px;
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+
+        .section-title:first-child {
+            margin-top: 0;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #374151;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 15px;
+            background: white;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+        }
+
+        .form-help {
+            margin-top: 6px;
+            color: #6b7280;
+            font-size: 13px;
+        }
+
+        .current-photo-container {
+            margin-bottom: 20px;
+        }
+
+        .current-photo {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 12px;
+            border: 3px solid #e5e7eb;
+        }
+
+        .no-photo {
+            width: 150px;
+            height: 150px;
+            border-radius: 12px;
+            background: #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 55px;
+        }
+
+        .button-container {
+            margin-top: 30px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 20px;
+            border-radius: 8px;
+            border: none;
+            text-decoration: none;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #d1d5db;
+        }
+
+        .student-info {
+            background: #f8fafc;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 25px;
+        }
+
+        .student-info strong {
+            color: #111827;
+        }
+
+        @media (max-width: 700px) {
+
+            .card {
+                padding: 20px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <!-- =====================================================
+         BARRA LATERAL
+         ===================================================== -->
+
+        {% include "_sidebar.html" %}
+
+
+    <!-- =====================================================
+         CONTENIDO
+         ===================================================== -->
+
+    <main class="content">
+
+
+        <header class="page-header">
+
+            <h2>
+                Editar Editar alumno
+            </h2>
+
+            <p>
+                Modificar la información del estudiante
+            </p>
+
+        </header>
+
+
+        <div class="card">
+
+
+            <!-- =================================================
+                 INFORMACIÓN ACTUAL
+                 ================================================= -->
+
+            <div class="student-info">
+
+                <strong>
+                    Alumno:
+                </strong>
+
+                {{ alumno.nombre }}
+
+                {{ alumno.apellido_paterno }}
+
+                {% if alumno.apellido_materno %}
+
+                    {{ alumno.apellido_materno }}
+
+                {% endif %}
+
+                <br>
+
+                <strong>
+                    Matrícula actual:
+                </strong>
+
+                {{ alumno.matricula }}
+
+            </div>
+
+
+            <!-- =================================================
+                 FORMULARIO
+                 ================================================= -->
+
+            <form
+                method="post"
+                action="/alumnos/{{ alumno.id }}/editar"
+                enctype="multipart/form-data"
+            >
+
+
+                <!-- =================================================
+                     DATOS PERSONALES
+                     ================================================= -->
+
+                <h3 class="section-title">
+                    Datos personales
+                </h3>
+
+
+                <!-- MATRÍCULA -->
+
+                <div class="form-group">
+
+                    <label for="matricula">
+                        Matrícula
+                    </label>
+
+                    <input
+                        id="matricula"
+                        type="text"
+                        name="matricula"
+                        class="form-control"
+                        maxlength="50"
+                        value="{{ alumno.matricula }}"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- NOMBRE -->
+
+                <div class="form-group">
+
+                    <label for="nombre">
+                        Nombre
+                    </label>
+
+                    <input
+                        id="nombre"
+                        type="text"
+                        name="nombre"
+                        class="form-control"
+                        maxlength="100"
+                        value="{{ alumno.nombre }}"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- APELLIDO PATERNO -->
+
+                <div class="form-group">
+
+                    <label for="apellido_paterno">
+                        Apellido paterno
+                    </label>
+
+                    <input
+                        id="apellido_paterno"
+                        type="text"
+                        name="apellido_paterno"
+                        class="form-control"
+                        maxlength="100"
+                        value="{{ alumno.apellido_paterno }}"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- APELLIDO MATERNO -->
+
+                <div class="form-group">
+
+                    <label for="apellido_materno">
+                        Apellido materno
+                    </label>
+
+                    <input
+                        id="apellido_materno"
+                        type="text"
+                        name="apellido_materno"
+                        class="form-control"
+                        maxlength="100"
+                        value="{{ alumno.apellido_materno or '' }}"
+                    >
+
+                </div>
+
+
+                <!-- FECHA DE NACIMIENTO -->
+
+                <div class="form-group">
+
+                    <label for="fecha_nacimiento">
+                        Fecha de nacimiento
+                    </label>
+
+                    <input
+                        id="fecha_nacimiento"
+                        type="date"
+                        name="fecha_nacimiento"
+                        class="form-control"
+                        value="{{ alumno.fecha_nacimiento or '' }}"
+                    >
+
+                </div>
+
+
+                <!-- =================================================
+                     INFORMACIÓN ESCOLAR
+                     ================================================= -->
+
+                <h3 class="section-title">
+                    Información escolar
+                </h3>
+
+
+                <div class="form-group">
+
+                    <label for="grupo_id">
+                        Grupo
+                    </label>
+
+
+                    <select
+                        id="grupo_id"
+                        name="grupo_id"
+                        class="form-control"
+                        required
+                    >
+
+
+                        <option value="">
+                            Seleccionar grupo
+                        </option>
+
+
+                        {% for grupo in grupos %}
+
+
+                            <option
+                                value="{{ grupo.id }}"
+                                {% if alumno.grupo_id == grupo.id %}
+                                    selected
+                                {% endif %}
+                            >
+
+                                {{ grupo.nombre_grupo }}
+
+                                -
+
+                                {{ grupo.grado }}°
+
+                                {{ grupo.nombre }}
+
+                                -
+
+                                {{ grupo.turno }}
+
+                            </option>
+
+
+                        {% endfor %}
+
+
+                    </select>
+
+
+                    <div class="form-help">
+
+                        Selecciona el grupo al que pertenece actualmente el alumno.
+
+                    </div>
+
+                </div>
+
+
+                <!-- =================================================
+                     INFORMACIÓN DE CONTACTO
+                     ================================================= -->
+
+                <h3 class="section-title">
+                    Información de contacto
+                </h3>
+
+
+                <!-- CORREO -->
+
+                <div class="form-group">
+
+                    <label for="correo">
+                        Correo electrónico
+                    </label>
+
+                    <input
+                        id="correo"
+                        type="email"
+                        name="correo"
+                        class="form-control"
+                        maxlength="150"
+                        value="{{ alumno.correo or '' }}"
+                    >
+
+                </div>
+
+
+                <!-- TELÉFONO -->
+
+                <div class="form-group">
+
+                    <label for="telefono">
+                        Teléfono
+                    </label>
+
+                    <input
+                        id="telefono"
+                        type="tel"
+                        name="telefono"
+                        class="form-control"
+                        maxlength="30"
+                        value="{{ alumno.telefono or '' }}"
+                    >
+
+                </div>
+
+
+                <!-- =================================================
+                     FOTOGRAFÍA
+                     ================================================= -->
+
+                <h3 class="section-title">
+                    Fotografía
+                </h3>
+
+
+                <div class="current-photo-container">
+
+
+                    {% if alumno.foto %}
+
+                        <img
+                            src="/static/uploads/{{ alumno.foto }}"
+                            alt="Foto actual del alumno"
+                            class="current-photo"
+                        >
+
+                    {% else %}
+
+                        <div class="no-photo">
+                            Usuario
+                        </div>
+
+                    {% endif %}
+
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="foto">
+                        Cambiar fotografía
+                    </label>
+
+
+                    <input
+                        id="foto"
+                        type="file"
+                        name="foto"
+                        accept="image/*"
+                        class="form-control"
+                    >
+
+
+                    <div class="form-help">
+
+                        Si no seleccionas una nueva fotografía,
+                        se conservará la actual.
+
+                    </div>
+
+                </div>
+
+
+                <!-- =================================================
+                     BOTONES
+                     ================================================= -->
+
+                <div class="button-container">
+
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary"
+                    >
+                        Guardar Guardar cambios
+                    </button>
+
+
+                    <a
+                        href="/alumnos/detalle/{{ alumno.id }}"
+                        class="btn btn-secondary"
+                    >
+                        Cancelar
+                    </a>
+
+
+                </div>
+
+
+            </form>
+
+
+        </div>
+
+
+    </main>
+
+
+    <script src="/static/js/navigation.js"></script>
+</body>
+
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

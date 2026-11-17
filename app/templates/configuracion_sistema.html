@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Configuración del sistema</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f3f4f6;
+            color: #111827;
+        }
+
+        .contenedor {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        .titulo {
+            font-size: 30px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .descripcion {
+            color: #6b7280;
+            margin-bottom: 30px;
+        }
+
+        .tarjeta {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            margin-bottom: 25px;
+        }
+
+        .seccion {
+            font-size: 20px;
+            font-weight: bold;
+            margin-top: 10px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .campo {
+            margin-bottom: 22px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 15px;
+        }
+
+        textarea {
+            min-height: 130px;
+            resize: vertical;
+        }
+
+        input[type="color"] {
+            width: 70px;
+            height: 45px;
+            padding: 3px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            cursor: pointer;
+        }
+
+        .color-contenedor {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .codigo-color {
+            font-family: monospace;
+            font-size: 15px;
+            color: #4b5563;
+        }
+
+        .logo-info {
+            margin-top: 8px;
+            font-size: 13px;
+            color: #6b7280;
+        }
+
+        .logo-actual {
+            display: block;
+            margin-top: 15px;
+            max-width: 180px;
+            max-height: 150px;
+            object-fit: contain;
+        }
+
+        .valor-tamano {
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .boton {
+            border: none;
+            background: {{ configuracion.color_principal or '#2563EB' }};
+            color: white;
+            padding: 13px 25px;
+            border-radius: 8px;
+            font-size: 15px;
+            cursor: pointer;
+        }
+
+        .boton:hover {
+            opacity: 0.9;
+        }
+
+        .respaldo-aviso { color: #4b5563; line-height: 1.55; }
+        .respaldo-resultado { margin: 12px 0; padding: 12px 14px; border-radius: 9px; background: #dcfce7; color: #166534; }
+        .respaldo-error { margin: 12px 0; padding: 12px 14px; border-radius: 9px; background: #fee2e2; color: #991b1b; }
+        .respaldo-archivo { display: block; margin: 14px 0; padding: 12px; border: 1px solid #d1d5db; border-radius: 8px; width: 100%; background: #fff; }
+
+        /* ====================================================
+           VISTA PREVIA
+        ==================================================== */
+
+        .vista-previa {
+            border-radius: 15px;
+            overflow: hidden;
+            border: 1px solid #d1d5db;
+            margin-top: 10px;
+            background: #f3f4f6;
+        }
+
+        .preview-cabecera {
+            padding: 18px;
+            color: white;
+            background: {{ configuracion.color_principal or '#2563EB' }};
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .preview-cuerpo {
+            min-height: 330px;
+            padding: 35px 20px;
+            background: {{ configuracion.color_fondo_login or '#F3F4F6' }};
+            color: {{ configuracion.color_texto_login or '#111827' }};
+            text-align: center;
+        }
+
+        .preview-logo-contenedor {
+            height: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+
+        .preview-logo {
+            width: {{ configuracion.logo_tamano or 120 }}px;
+            height: {{ configuracion.logo_tamano or 120 }}px;
+            object-fit: contain;
+            display: none;
+        }
+
+        .preview-logo-placeholder {
+            width: {{ configuracion.logo_tamano or 120 }}px;
+            height: {{ configuracion.logo_tamano or 120 }}px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 55px;
+        }
+
+        .preview-titulo {
+            font-size: 25px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .preview-subtitulo {
+            font-size: 15px;
+            margin-bottom: 15px;
+        }
+
+        .preview-boton {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 10px 25px;
+            border-radius: 8px;
+            color: white;
+            background: {{ configuracion.color_secundario or '#1E40AF' }};
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+<div class="contenedor">
+
+    <div class="titulo">
+        Configuración del sistema
+    </div>
+
+    <div class="descripcion">
+        Personaliza el nombre, textos, colores y logotipos del sistema.
+    </div>
+
+
+    <form
+        method="POST"
+        action="/configuracion/sistema"
+        enctype="multipart/form-data"
+    >
+
+
+        <!-- ==================================================
+             INFORMACIÓN
+        =================================================== -->
+
+        <div class="tarjeta">
+
+            <div class="seccion">
+                Información del sistema
+            </div>
+
+
+            <div class="campo">
+
+                <label>
+                    Nombre del sistema
+                </label>
+
+                <input
+                    type="text"
+                    id="nombre_sistema"
+                    name="nombre_sistema"
+                    value="{{ configuracion.nombre_sistema }}"
+                    required
+                >
+
+            </div>
+
+
+            <div class="campo">
+
+                <label>
+                    Subtítulo
+                </label>
+
+                <input
+                    type="text"
+                    id="subtitulo"
+                    name="subtitulo"
+                    value="{{ configuracion.subtitulo or '' }}"
+                >
+
+            </div>
+
+
+            <div class="campo">
+
+                <label>
+                    Texto de bienvenida
+                </label>
+
+                <textarea
+                    id="texto_bienvenida"
+                    name="texto_bienvenida"
+                >{{ configuracion.texto_bienvenida or '' }}</textarea>
+
+            </div>
+
+        </div>
+
+
+        <!-- ==================================================
+             CONFIGURACIÓN DEL EXCEL
+        =================================================== -->
+
+        <div class="tarjeta">
+
+            <div class="seccion">
+                Configuración del Excel
+            </div>
+
+            <div class="campo">
+
+                <label>
+                    Título del Excel
+                </label>
+
+                <input
+                    type="text"
+                    name="titulo_excel"
+                    value="{{ configuracion.titulo_excel or 'Reporte de Asistencias' }}"
+                >
+
+                <small class="logo-info">
+                    Este título se utilizará únicamente en los reportes Excel.
+                </small>
+
+            </div>
+
+            <div class="campo">
+
+                <label>
+                    Subtítulo del Excel
+                </label>
+
+                <input
+                    type="text"
+                    name="subtitulo_excel"
+                    value="{{ configuracion.subtitulo_excel or 'Sistema de Registro de Asistencias' }}"
+                >
+
+                <small class="logo-info">
+                    Este subtítulo se utilizará únicamente en los reportes Excel.
+                </small>
+
+            </div>
+
+            <div class="campo">
+
+                <label>
+                    Logo del Excel
+                </label>
+
+                {% if configuracion.logo_excel %}
+
+                    <div class="logo-info">
+                        Logo actual: {{ configuracion.logo_excel }}
+                    </div>
+
+                {% else %}
+
+                    <small class="logo-info">
+                        No hay un logo configurado.
+                    </small>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+
+        <!-- ==================================================
+             COLORES
+        =================================================== -->
+
+        <div class="tarjeta">
+
+            <div class="seccion">
+                Colores del sistema
+            </div>
+
+
+            <div class="campo">
+
+                <label>
+                    Color principal
+                </label>
+
+                <div class="color-contenedor">
+
+                    <input
+                        type="color"
+                        id="color_principal"
+                        name="color_principal"
+                        value="{{ configuracion.color_principal or '#2563EB' }}"
+                    >
+
+                    <span
+                        class="codigo-color"
+                        id="valor-principal"
+                    >
+                        {{ configuracion.color_principal or '#2563EB' }}
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div class="campo">
+
+                <label>
+                    Color secundario
+                </label>
+
+                <div class="color-contenedor">
+
+                    <input
+                        type="color"
+                        id="color_secundario"
+                        name="color_secundario"
+                        value="{{ configuracion.color_secundario or '#1E40AF' }}"
+                    >
+
+                    <span
+                        class="codigo-color"
+                        id="valor-secundario"
+                    >
+                        {{ configuracion.color_secundario or '#1E40AF' }}
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div class="campo">
+
+                <label>
+                    Color de fondo del login
+                </label>
+
+                <div class="color-contenedor">
+
+                    <input
+                        type="color"
+                        id="color_fondo_login"
+                        name="color_fondo_login"
+                        value="{{ configuracion.color_fondo_login or '#F3F4F6' }}"
+                    >
+
+                    <span
+                        class="codigo-color"
+                        id="valor-fondo"
+                    >
+                        {{ configuracion.color_fondo_login or '#F3F4F6' }}
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div class="campo">
+
+                <label>
+                    Color del texto del login
+                </label>
+
+                <div class="color-contenedor">
+
+                    <input
+                        type="color"
+                        id="color_texto_login"
+                        name="color_texto_login"
+                        value="{{ configuracion.color_texto_login or '#111827' }}"
+                    >
+
+                    <span
+                        class="codigo-color"
+                        id="valor-texto"
+                    >
+                        {{ configuracion.color_texto_login or '#111827' }}
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ==================================================
+             LOGOS
+        =================================================== -->
+
+        <div class="tarjeta">
+
+            <div class="seccion">
+                Logotipo del inicio de sesión
+            </div>
+
+
+            <div class="campo">
+
+                <label>
+                    Escudo o logo
+                </label>
+
+                <input
+                    type="file"
+                    id="logo_login"
+                    name="logo_login"
+                    accept="image/png,image/jpeg,image/jpg"
+                >
+
+                <div class="logo-info">
+                    Selecciona una imagen para verla inmediatamente en la vista previa.
+                </div>
+
+            </div>
+
+
+            <div class="campo">
+
+                <label>
+                    Tamaño del logo
+                </label>
+
+                <span
+                    class="valor-tamano"
+                    id="valor-tamano"
+                >
+                    {{ configuracion.logo_tamano or 120 }} px
+                </span>
+
+                <input
+                    type="range"
+                    id="logo_tamano"
+                    name="logo_tamano"
+                    min="50"
+                    max="300"
+                    step="5"
+                    value="{{ configuracion.logo_tamano or 120 }}"
+                >
+
+                <div class="logo-info">
+                    Puedes ajustar el tamaño desde 50 px hasta 300 px.
+                </div>
+
+            </div>
+
+
+            {% if configuracion.logo_login %}
+
+                <img
+                    class="logo-actual"
+                    src="/static/uploads/{{ configuracion.logo_login }}?v={{ configuracion.fecha_actualizacion }}"
+                    alt="Escudo actual"
+                >
+
+            {% endif %}
+
+        </div>
+
+
+        <!-- ==================================================
+             VISTA PREVIA
+        =================================================== -->
+
+        <div class="tarjeta">
+
+            <div class="seccion">
+                Vista previa en tiempo real
+            </div>
+
+
+            <div class="vista-previa">
+
+                <div
+                    class="preview-cabecera"
+                    id="preview-cabecera"
+                >
+                    <span id="preview-nombre">
+                        {{ configuracion.nombre_sistema }}
+                    </span>
+                </div>
+
+
+                <div
+                    class="preview-cuerpo"
+                    id="preview-cuerpo"
+                >
+
+                    <div class="preview-logo-contenedor">
+
+                        {% if configuracion.logo_login %}
+
+                            <img
+                                id="preview-logo"
+                                class="preview-logo"
+                                src="/static/uploads/{{ configuracion.logo_login }}?v={{ configuracion.fecha_actualizacion }}"
+                                alt="Logo"
+                                style="display:block;"
+                            >
+
+                            <div
+                                id="preview-logo-placeholder"
+                                class="preview-logo-placeholder"
+                                style="display:none;"
+                            >
+                                🛡️
+                            </div>
+
+                        {% else %}
+
+                            <img
+                                id="preview-logo"
+                                class="preview-logo"
+                                alt="Logo"
+                            >
+
+                            <div
+                                id="preview-logo-placeholder"
+                                class="preview-logo-placeholder"
+                            >
+                                🛡️
+                            </div>
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <div
+                        class="preview-titulo"
+                        id="preview-titulo"
+                    >
+                        {{ configuracion.nombre_sistema }}
+                    </div>
+
+
+                    <div
+                        class="preview-subtitulo"
+                        id="preview-subtitulo"
+                    >
+                        {{ configuracion.subtitulo or '' }}
+                    </div>
+
+
+                    <div
+                        id="preview-texto"
+                    >
+                        {{ configuracion.texto_bienvenida or 'Sistema de control y registro de asistencias.' }}
+                    </div>
+
+
+                    <div
+                        class="preview-boton"
+                        id="preview-boton"
+                    >
+                        Iniciar sesión
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ==================================================
+             LOGO EXCEL
+        =================================================== -->
+
+        <div class="tarjeta">
+
+            <div class="seccion">
+                Logo para Excel
+            </div>
+
+
+            <div class="campo">
+
+                <input
+                    type="file"
+                    name="logo_excel"
+                    accept="image/png,image/jpeg,image/jpg"
+                >
+
+                <div class="logo-info">
+                    Este logo será utilizado en los reportes de Excel.
+                </div>
+
+
+                {% if configuracion.logo_excel %}
+
+                    <img
+                        class="logo-actual"
+                        src="/static/uploads/{{ configuracion.logo_excel }}?v={{ configuracion.fecha_actualizacion }}"
+                        alt="Logo de Excel"
+                    >
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+
+        <div class="tarjeta">
+
+            <button
+                class="boton"
+                type="submit"
+            >
+                Guardar configuración
+            </button>
+
+        </div>
+
+
+    </form>
+
+    <section class="tarjeta">
+        <div class="seccion">Cargar respaldo de estudiantes de la versión anterior</div>
+        <p class="respaldo-aviso">
+            Carga un respaldo PostgreSQL en formato <strong>.sql</strong>, <strong>.backup</strong> o <strong>.dump</strong> (máximo 1 GB).
+            Se importarán los grupos y alumnos. Los registros con una matrícula que ya exista se omitirán y no se modificarán los datos actuales ni el resto de la base.
+        </p>
+        {% if alumnos_importados or alumnos_omitidos or grupos_importados %}
+        <div class="respaldo-resultado" role="status">
+            Importación terminada: {{ alumnos_importados }} alumnos nuevos, {{ alumnos_omitidos }} omitidos y {{ grupos_importados }} grupos relacionados.
+        </div>
+        {% endif %}
+        {% if respaldo_error %}
+        <div class="respaldo-error" role="alert">
+            No se pudo importar el archivo. Verifica que sea un respaldo PostgreSQL válido con datos de alumnos y que no exceda 1 GB.
+        </div>
+        {% endif %}
+        <form method="post" action="/configuracion/sistema/importar-respaldo-alumnos" enctype="multipart/form-data" onsubmit="return confirm('Se agregarán los alumnos nuevos del respaldo y se omitirán las matrículas existentes. ¿Deseas continuar?')">
+            <label for="respaldo_alumnos">Archivo de respaldo</label>
+            <input class="respaldo-archivo" type="file" id="respaldo_alumnos" name="archivo" accept=".sql,.backup,.dump" required>
+            <button class="boton" type="submit">Cargar alumnos del respaldo</button>
+        </form>
+    </section>
+
+</div>
+
+
+<script>
+
+    /* ======================================================
+       ELEMENTOS
+    ====================================================== */
+
+    const nombre = document.getElementById("nombre_sistema");
+    const subtitulo = document.getElementById("subtitulo");
+    const bienvenida = document.getElementById("texto_bienvenida");
+
+    const colorPrincipal =
+        document.getElementById("color_principal");
+
+    const colorSecundario =
+        document.getElementById("color_secundario");
+
+    const colorFondo =
+        document.getElementById("color_fondo_login");
+
+    const colorTexto =
+        document.getElementById("color_texto_login");
+
+    const logoInput =
+        document.getElementById("logo_login");
+
+    const logoTamano =
+        document.getElementById("logo_tamano");
+
+
+    /* ======================================================
+       VISTA PREVIA
+    ====================================================== */
+
+    const previewNombre =
+        document.getElementById("preview-nombre");
+
+    const previewTitulo =
+        document.getElementById("preview-titulo");
+
+    const previewSubtitulo =
+        document.getElementById("preview-subtitulo");
+
+    const previewTexto =
+        document.getElementById("preview-texto");
+
+    const previewCabecera =
+        document.getElementById("preview-cabecera");
+
+    const previewCuerpo =
+        document.getElementById("preview-cuerpo");
+
+    const previewBoton =
+        document.getElementById("preview-boton");
+
+    const previewLogo =
+        document.getElementById("preview-logo");
+
+    const previewLogoPlaceholder =
+        document.getElementById("preview-logo-placeholder");
+
+
+    /* ======================================================
+       NOMBRE
+    ====================================================== */
+
+    nombre.addEventListener("input", function () {
+
+        previewNombre.textContent =
+            this.value || "SICAE WEB";
+
+        previewTitulo.textContent =
+            this.value || "SICAE WEB";
+
+    });
+
+
+    /* ======================================================
+       SUBTÍTULO
+    ====================================================== */
+
+    subtitulo.addEventListener("input", function () {
+
+        previewSubtitulo.textContent =
+            this.value;
+
+    });
+
+
+    /* ======================================================
+       BIENVENIDA
+    ====================================================== */
+
+    bienvenida.addEventListener("input", function () {
+
+        previewTexto.textContent =
+            this.value ||
+            "Sistema de control y registro de asistencias.";
+
+    });
+
+
+    /* ======================================================
+       COLOR PRINCIPAL
+    ====================================================== */
+
+    colorPrincipal.addEventListener("input", function () {
+
+        previewCabecera.style.backgroundColor =
+            this.value;
+
+        document.getElementById(
+            "valor-principal"
+        ).textContent = this.value;
+
+    });
+
+
+    /* ======================================================
+       COLOR SECUNDARIO
+    ====================================================== */
+
+    colorSecundario.addEventListener("input", function () {
+
+        previewBoton.style.backgroundColor =
+            this.value;
+
+        document.getElementById(
+            "valor-secundario"
+        ).textContent = this.value;
+
+    });
+
+
+    /* ======================================================
+       COLOR FONDO
+    ====================================================== */
+
+    colorFondo.addEventListener("input", function () {
+
+        previewCuerpo.style.backgroundColor =
+            this.value;
+
+        document.getElementById(
+            "valor-fondo"
+        ).textContent = this.value;
+
+    });
+
+
+    /* ======================================================
+       COLOR TEXTO
+    ====================================================== */
+
+    colorTexto.addEventListener("input", function () {
+
+        previewCuerpo.style.color =
+            this.value;
+
+        document.getElementById(
+            "valor-texto"
+        ).textContent = this.value;
+
+    });
+
+
+    /* ======================================================
+       TAMAÑO DEL LOGO
+    ====================================================== */
+
+    logoTamano.addEventListener("input", function () {
+
+        const tamano =
+            this.value + "px";
+
+        previewLogo.style.width =
+            tamano;
+
+        previewLogo.style.height =
+            tamano;
+
+        previewLogoPlaceholder.style.width =
+            tamano;
+
+        previewLogoPlaceholder.style.height =
+            tamano;
+
+        document.getElementById(
+            "valor-tamano"
+        ).textContent =
+            this.value + " px";
+
+    });
+
+
+    /* ======================================================
+       CARGAR LOGO INMEDIATAMENTE
+    ====================================================== */
+
+    logoInput.addEventListener("change", function () {
+
+        const archivo = this.files[0];
+
+        if (!archivo) {
+            return;
+        }
+
+        const lector =
+            new FileReader();
+
+        lector.onload = function (evento) {
+
+            previewLogo.src =
+                evento.target.result;
+
+            previewLogo.style.display =
+                "block";
+
+            previewLogoPlaceholder.style.display =
+                "none";
+
+        };
+
+        lector.readAsDataURL(archivo);
+
+    });
+
+
+</script>
+
+    <script src="/static/js/navigation.js"></script>
+</body>
+
+</html>
+
+
+
+

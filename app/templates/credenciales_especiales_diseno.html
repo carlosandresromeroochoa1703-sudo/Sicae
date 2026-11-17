@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diseño de credencial {{ tipo_label }} - SICAE WEB</title>
+    <link rel="stylesheet" href="/static/css/style.css?v=20261018-3">
+    <style>
+        .design-page{max-width:1250px;margin:auto}.design-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}.design-grid{display:grid;grid-template-columns:minmax(300px,.85fr) minmax(400px,1.15fr);gap:20px;align-items:start}.design-card{background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:20px;box-shadow:0 5px 18px #0f172a0d}.design-card h3{margin-top:0}.design-fields{display:grid;grid-template-columns:1fr 1fr;gap:12px}.design-fields label{display:grid;gap:5px;color:#334155;font-size:13px;font-weight:700}.design-fields input,.design-fields select{min-width:0;width:100%;box-sizing:border-box;border:1px solid #cbd5e1;border-radius:8px;padding:9px;font:inherit}.design-fields .wide{grid-column:1/-1}.checks{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:14px 0}.checks label{display:flex;gap:8px;align-items:center;color:#334155}.design-submit,.back-link{display:inline-block;border:0;border-radius:8px;padding:10px 14px;background:#1e3a8a;color:#fff;text-decoration:none;font-weight:700;cursor:pointer}.back-link{background:#475569}.preview-wrap{display:grid;place-items:center;padding:32px 14px;background:#f1f5f9;border-radius:12px}.preview-card{position:relative;width:min(100%,560px);aspect-ratio:1.586;background:{{ configuracion.color_fondo }};border:2px solid {{ configuracion.color_principal }};border-radius:18px;overflow:hidden;box-shadow:0 12px 28px #0f172a25;color:{{ configuracion.color_texto }};font-family:{{ configuracion.fuente }},Arial,sans-serif}.designer-el{position:absolute;box-sizing:border-box;cursor:move;touch-action:none;user-select:none;padding:3px;border:1px dashed transparent;border-radius:5px;overflow:hidden}.designer-el:hover,.designer-el.selected{border-color:#2563eb;background:#2563eb12}.designer-el img{max-width:100%;max-height:100%;object-fit:contain}.el-institution{font-weight:800;font-size:clamp(12px,2.4vw,19px);color:white;background:{{ configuracion.color_principal }};white-space:nowrap}.el-subtitle{font-size:clamp(9px,1.4vw,13px);color:white;background:{{ configuracion.color_principal }}}.el-logo{background:white}.el-photo{border-radius:8px;background:#e2e8f0;display:grid;place-items:center;color:#64748b;font-size:11px}.el-name{font-size:{{ configuracion.tamano_nombre }}px;font-weight:800;line-height:1.1;overflow-wrap:anywhere}.el-type{font-size:clamp(10px,1.6vw,15px);font-weight:800;color:{{ configuracion.color_principal }}}.el-detail{font-size:clamp(9px,1.3vw,12px);line-height:1.2}.el-qr{background:white;display:grid;place-items:center}.el-qr img{width:100%;height:100%}.el-code,.el-footer{font-size:clamp(8px,1.1vw,11px);font-weight:700}.el-footer{background:{{ configuracion.color_secundario }};color:white}.editor-hint{font-size:13px;color:#475569;background:#eff6ff;border-radius:8px;padding:10px;margin:12px 0}.selected-control{display:flex;gap:10px;align-items:center;margin:12px 0;font-size:13px}.selected-control input{width:90px}.back-link{background:#475569}@media(max-width:900px){.design-grid{grid-template-columns:1fr}}@media(max-width:560px){.design-fields{grid-template-columns:1fr}.design-fields .wide{grid-column:auto}}
+    </style>
+</head>
+<body>
+    {% include "_sidebar.html" %}
+    <main class="content"><div class="design-page">
+        <header class="design-head"><div><h2>🎨 Diseño de {{ tipo_label|lower }}</h2><p>La configuración se guarda únicamente para este tipo de credencial.</p></div><a class="back-link" href="/credenciales-especiales?tipo={{ tipo }}">← Volver a {{ tipo_label|lower }}</a></header>
+        {% if guardado %}<div style="padding:12px 14px;margin-bottom:16px;border-radius:9px;background:#dcfce7;color:#166534">Se guardó el diseño personalizado.</div>{% endif %}
+        <div class="design-grid">
+            <section class="design-card"><h3>Personaliza la tarjeta</h3>
+                <form id="designForm" method="post" action="/credenciales-especiales/diseno" enctype="multipart/form-data">
+                    <input type="hidden" name="tipo" value="{{ tipo }}"><input type="hidden" id="layoutInput" name="layout" value='{{ configuracion.layout|default({}, true)|tojson }}'>
+                    <div class="design-fields">
+                        <label class="wide">Nombre institucional<input id="institution" name="nombre_institucion" maxlength="200" value="{{ configuracion.nombre_institucion }}" required></label>
+                        <label class="wide">Subtítulo<input id="subtitle" name="subtitulo" maxlength="300" value="{{ configuracion.subtitulo or '' }}"></label>
+                        <label class="wide">Texto al pie<input id="footerText" name="texto_pie" maxlength="300" value="{{ configuracion.texto_pie or '' }}"></label>
+                        <label>Color principal<input id="mainColor" name="color_principal" type="color" value="{{ configuracion.color_principal }}"></label>
+                        <label>Color secundario<input id="secondColor" name="color_secundario" type="color" value="{{ configuracion.color_secundario }}"></label>
+                        <label>Color del texto<input id="textColor" name="color_texto" type="color" value="{{ configuracion.color_texto }}"></label>
+                        <label>Fondo de la tarjeta<input id="backgroundColor" name="color_fondo" type="color" value="{{ configuracion.color_fondo }}"></label>
+                        <label>Fuente<select name="fuente"><option {% if configuracion.fuente == 'Arial' %}selected{% endif %}>Arial</option><option {% if configuracion.fuente == 'Helvetica' %}selected{% endif %}>Helvetica</option><option {% if configuracion.fuente == 'Times' %}selected{% endif %}>Times</option><option {% if configuracion.fuente == 'Courier' %}selected{% endif %}>Courier</option></select></label>
+                        <label>Tamaño del nombre<input id="nameSize" name="tamano_nombre" type="number" min="12" max="30" value="{{ configuracion.tamano_nombre }}"></label>
+                        <label class="wide">Logo de la credencial<input type="file" name="logo" accept=".png,.jpg,.jpeg,.webp,image/png,image/jpeg,image/webp"></label>
+                    </div>
+                    <div class="checks">
+                        <label><input name="mostrar_foto" type="checkbox" {% if configuracion.mostrar_foto %}checked{% endif %}> Mostrar fotografía</label>
+                        <label><input name="mostrar_qr" type="checkbox" {% if configuracion.mostrar_qr %}checked{% endif %}> Mostrar código QR</label>
+                        <label><input name="mostrar_codigo" type="checkbox" {% if configuracion.mostrar_codigo %}checked{% endif %}> Mostrar folio</label>
+                        <label><input name="mostrar_cargo" type="checkbox" {% if configuracion.mostrar_cargo %}checked{% endif %}> Mostrar cargo / motivo</label>
+                        <label><input name="mostrar_organizacion" type="checkbox" {% if configuracion.mostrar_organizacion %}checked{% endif %}> Mostrar organización</label>
+                    </div>
+                    <button class="design-submit" type="submit">Guardar diseño</button>
+                </form>
+            </section>
+            <section class="design-card"><h3>Arma la credencial</h3><p class="editor-hint">Arrastra cada elemento para acomodarlo. Selecciona uno y ajusta su ancho. La vista previa refleja el diseño que se imprimirá.</p><div class="preview-wrap"><div id="previewCard" class="preview-card">
+                {% set l = configuracion.layout|default({}, true) %}
+                {% set logo = l.get('logo', {}) %}{% set inst = l.get('institucion', {}) %}{% set sub = l.get('subtitulo', {}) %}{% set foto = l.get('foto', {}) %}{% set nom = l.get('nombre', {}) %}{% set tip = l.get('tipo', {}) %}{% set car = l.get('cargo', {}) %}{% set org = l.get('organizacion', {}) %}{% set qr = l.get('qr', {}) %}{% set cod = l.get('codigo', {}) %}{% set pie = l.get('pie', {}) %}
+                {% if configuracion.logo %}<div class="designer-el el-logo" data-el="logo" style="left:{{ logo.get('x',2) }}%;top:{{ logo.get('y',5) }}%;width:{{ logo.get('w',12) }}%;height:23%"><img id="previewLogo" src="/static/uploads/{{ configuracion.logo }}"></div>{% endif %}
+                <div class="designer-el el-institution" data-el="institucion" style="left:{{ inst.get('x',17) }}%;top:{{ inst.get('y',5) }}%;width:{{ inst.get('w',78) }}%;height:15%" id="previewInstitution">{{ configuracion.nombre_institucion }}</div>
+                <div class="designer-el el-subtitle" data-el="subtitulo" style="left:{{ sub.get('x',17) }}%;top:{{ sub.get('y',21) }}%;width:{{ sub.get('w',78) }}%;height:12%" id="previewSubtitle">{{ configuracion.subtitulo or tipo_label }}</div>
+                {% if configuracion.mostrar_foto %}<div class="designer-el el-photo" data-el="foto" style="left:{{ foto.get('x',3) }}%;top:{{ foto.get('y',42) }}%;width:{{ foto.get('w',18) }}%;height:39%">FOTO</div>{% endif %}
+                <div class="designer-el el-name" data-el="nombre" style="left:{{ nom.get('x',24) }}%;top:{{ nom.get('y',39) }}%;width:{{ nom.get('w',48) }}%;height:16%" id="previewName">Nombre Apellido</div>
+                <div class="designer-el el-type" data-el="tipo" style="left:{{ tip.get('x',24) }}%;top:{{ tip.get('y',55) }}%;width:{{ tip.get('w',48) }}%;height:10%">{{ tipo_label }}</div>
+                {% if configuracion.mostrar_cargo %}<div class="designer-el el-detail" data-el="cargo" style="left:{{ car.get('x',24) }}%;top:{{ car.get('y',66) }}%;width:{{ car.get('w',48) }}%;height:9%">Cargo / motivo</div>{% endif %}
+                {% if configuracion.mostrar_organizacion %}<div class="designer-el el-detail" data-el="organizacion" style="left:{{ org.get('x',24) }}%;top:{{ org.get('y',76) }}%;width:{{ org.get('w',48) }}%;height:9%">Organización</div>{% endif %}
+                {% if configuracion.mostrar_qr %}<div class="designer-el el-qr" data-el="qr" style="left:{{ qr.get('x',77) }}%;top:{{ qr.get('y',39) }}%;width:{{ qr.get('w',19) }}%;height:38%"><img src="/static/uploads/{{ qr_preview }}"></div>{% endif %}
+                {% if configuracion.mostrar_codigo %}<div class="designer-el el-code" data-el="codigo" style="left:{{ cod.get('x',3) }}%;top:{{ cod.get('y',87) }}%;width:{{ cod.get('w',45) }}%;height:9%">ESP-000001</div>{% endif %}
+                <div class="designer-el el-footer" data-el="pie" style="left:{{ pie.get('x',52) }}%;top:{{ pie.get('y',87) }}%;width:{{ pie.get('w',45) }}%;height:9%" id="previewFooter">{{ configuracion.texto_pie or 'Identificación oficial' }}</div>
+            </div></div><div class="selected-control">Ancho del elemento seleccionado (%) <input id="elementWidth" type="range" min="5" max="100" value="30"><span id="widthValue">30%</span></div><p style="color:#64748b;font-size:13px;line-height:1.5">Carga un logo y activa u oculta los campos desde el panel. La disposición se guarda para esta categoría y se aplica al PDF individual y al lote.</p></section>
+        </div>
+    </div></main>
+    <script>
+    const byId=id=>document.getElementById(id), card=byId('previewCard'), layout={};
+    document.querySelectorAll('.designer-el').forEach(el=>{const r=el.getBoundingClientRect(),c=card.getBoundingClientRect();layout[el.dataset.el]={x:(r.left-c.left)/c.width*100,y:(r.top-c.top)/c.height*100,w:r.width/c.width*100}});
+    try{Object.assign(layout,JSON.parse(byId('layoutInput').value||'{}'))}catch{}
+    const saveLayout=()=>{document.querySelectorAll('.designer-el').forEach(el=>{const r=el.getBoundingClientRect(),c=card.getBoundingClientRect();layout[el.dataset.el]={x:(r.left-c.left)/c.width*100,y:(r.top-c.top)/c.height*100,w:r.width/c.width*100}});byId('layoutInput').value=JSON.stringify(layout)};
+    let active=null,drag=null;
+    document.querySelectorAll('.designer-el').forEach(el=>{const k=el.dataset.el,p=layout[k];if(p){el.style.left=p.x+'%';el.style.top=p.y+'%';el.style.width=p.w+'%'}el.addEventListener('pointerdown',e=>{e.preventDefault();active=el;document.querySelectorAll('.designer-el').forEach(x=>x.classList.remove('selected'));el.classList.add('selected');const c=card.getBoundingClientRect(),r=el.getBoundingClientRect();drag={dx:e.clientX-r.left,dy:e.clientY-r.top,c};byId('elementWidth').value=Math.round(r.width/c.width*100);byId('widthValue').textContent=byId('elementWidth').value+'%';el.setPointerCapture(e.pointerId)});el.addEventListener('pointermove',e=>{if(!drag||active!==el)return;const x=Math.max(0,Math.min(98,(e.clientX-drag.c.left-drag.dx)/drag.c.width*100)),y=Math.max(0,Math.min(94,(e.clientY-drag.c.top-drag.dy)/drag.c.height*100));el.style.left=x+'%';el.style.top=y+'%';saveLayout()});el.addEventListener('pointerup',()=>drag=null)});
+    byId('elementWidth').addEventListener('input',e=>{if(active){active.style.width=e.target.value+'%';byId('widthValue').textContent=e.target.value+'%';saveLayout()}});
+    const link=(id,fn)=>byId(id).addEventListener('input',fn);
+    link('institution',e=>byId('previewInstitution').textContent=e.target.value||'SICAE WEB');
+    link('subtitle',e=>byId('previewSubtitle').textContent=e.target.value||'{{ tipo_label }}');
+    link('footerText',e=>byId('previewFooter').textContent=e.target.value||'Identificación oficial');
+    link('nameSize',e=>byId('previewName').style.fontSize=(e.target.value||20)+'px');
+    link('mainColor',e=>{document.querySelectorAll('.el-institution,.el-subtitle').forEach(x=>x.style.background=e.target.value);const t=document.querySelector('.el-type');if(t)t.style.color=e.target.value;card.style.borderColor=e.target.value});
+    link('secondColor',e=>{document.querySelectorAll('.el-footer').forEach(x=>x.style.background=e.target.value)});
+    link('textColor',e=>card.style.color=e.target.value);
+    link('backgroundColor',e=>card.style.background=e.target.value);
+    const logoInput=document.querySelector('input[name="logo"]');if(logoInput)logoInput.addEventListener('change',e=>{if(e.target.files[0]){let el=document.querySelector('[data-el="logo"]');if(!el){el=document.createElement('div');el.className='designer-el el-logo';el.dataset.el='logo';el.style.cssText='left:2%;top:5%;width:12%;height:23%';el.innerHTML='<img id="previewLogo">';card.appendChild(el);el.addEventListener('pointerdown',ev=>{ev.preventDefault();active=el;const c=card.getBoundingClientRect(),r=el.getBoundingClientRect();drag={dx:ev.clientX-r.left,dy:ev.clientY-r.top,c};el.setPointerCapture(ev.pointerId)});el.addEventListener('pointermove',ev=>{if(drag&&active===el){el.style.left=Math.max(0,(ev.clientX-drag.c.left-drag.dx)/drag.c.width*100)+'%';el.style.top=Math.max(0,(ev.clientY-drag.c.top-drag.dy)/drag.c.height*100)+'%';saveLayout()}});el.addEventListener('pointerup',()=>drag=null)}byId('previewLogo').src=URL.createObjectURL(e.target.files[0])}});
+    byId('designForm').addEventListener('submit',saveLayout);
+    </script>
+    <script src="/static/js/navigation.js"></script>
+</body>
+</html>

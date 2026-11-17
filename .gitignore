@@ -1,0 +1,39 @@
+# SICAE WEB
+.env
+.env.*
+!.env.example
+.venv/
+venv/
+__pycache__/
+**/__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Datos privados y contenido generado
+/backups/
+/app_backup_*/
+/SICAE_PORTABLE/
+/importacion 1.xlsx
+/app/static/uploads/**
+/app/static/reportes/**
+!/app/static/uploads/.gitkeep
+!/app/static/reportes/.gitkeep
+
+# Copias y artefactos de trabajo
+**/*.bak
+**/*.backup*
+**/*_backup.py
+**/*_backup.html
+/main_backup*.py
+/*.spec
+/build/
+/dist/
+/outputs/
+
+# Entornos y editores
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

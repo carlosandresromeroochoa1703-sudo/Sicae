@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Alumnos - {{ grupo.nombre_grupo }}
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="/static/css/style.css?v=20261018-3"
+    >
+
+    <style>
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            gap: 20px;
+        }
+
+        .page-title h2 {
+            margin: 0;
+            font-size: 28px;
+        }
+
+        .page-title p {
+            margin-top: 8px;
+            color: #777;
+        }
+
+        .group-info {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .group-info-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .info-label {
+            font-size: 13px;
+            color: #777;
+        }
+
+        .info-value {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 16px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #d1d5db;
+        }
+
+        .btn-info {
+            background: #0ea5e9;
+            color: white;
+        }
+
+        .btn-info:hover {
+            background: #0284c7;
+        }
+
+        .btn-danger {
+            background: #dc2626;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #b91c1c;
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+            overflow-x: auto;
+        }
+
+        .table-title {
+            margin-bottom: 15px;
+        }
+
+        .table-title h3 {
+            margin: 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            padding: 14px;
+            background: #f3f4f6;
+            font-size: 14px;
+        }
+
+        td {
+            padding: 12px 14px;
+            border-bottom: 1px solid #e5e7eb;
+            vertical-align: middle;
+        }
+
+        tr:hover {
+            background: #f9fafb;
+        }
+
+        .student-photo {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #e5e7eb;
+        }
+
+        .no-photo {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+        }
+
+        .student-name {
+            font-weight: bold;
+        }
+
+        .student-matricula {
+            color: #666;
+            font-size: 13px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: #777;
+        }
+
+        .empty-state h3 {
+            margin-bottom: 10px;
+            color: #444;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        @media (max-width: 900px) {
+
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .group-info-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+        }
+
+        @media (max-width: 600px) {
+
+            .group-info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .actions {
+                width: 100%;
+            }
+
+            .actions .btn {
+                width: 100%;
+                text-align: center;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <!-- ==========================================
+         BARRA LATERAL
+         ========================================== -->
+
+    {% include "_sidebar.html" %}
+
+
+    <!-- ==========================================
+         CONTENIDO PRINCIPAL
+         ========================================== -->
+
+    <main class="content">
+
+
+        <!-- ======================================
+             ENCABEZADO
+             ====================================== -->
+
+        <div class="page-header">
+
+            <div class="page-title">
+
+                <h2>
+                    👨‍🎓 Alumnos del grupo
+                </h2>
+
+                <p>
+                    {{ grupo.nombre_grupo }}
+                </p>
+
+            </div>
+
+
+            <div class="actions">
+
+
+                <!-- REGRESAR -->
+
+                <a
+                    href="/alumnos"
+                    class="btn btn-secondary"
+                >
+
+                    ← Regresar
+
+                </a>
+
+
+                {% if request.session.get("rol") == "administrador" %}
+                <!-- REGISTRAR ALUMNO -->
+
+                <a
+                    href="/alumnos/nuevo?grupo_id={{ grupo.id }}"
+                    class="btn btn-primary"
+                >
+
+                    ➕ Registrar alumno
+
+                </a>
+
+
+                <!-- ======================================
+                     IMPORTAR ALUMNOS DESDE EXCEL
+                     ====================================== -->
+
+                <form
+                    action="/alumnos/grupo/{{ grupo.id }}/importar-excel"
+                    method="post"
+                    enctype="multipart/form-data"
+                    style="display: inline;"
+                >
+
+                    <input
+                        type="file"
+                        name="archivo_excel"
+                        id="archivo_excel"
+                        accept=".xlsx"
+                        style="display: none;"
+                        onchange="this.form.submit();"
+                    >
+
+                    <label
+                        for="archivo_excel"
+                        class="btn btn-success"
+                        style="cursor: pointer;"
+                    >
+
+                        📥 Importar alumnos desde Excel
+
+                    </label>
+
+                </form>
+
+                <!-- ======================================
+                     GENERAR CREDENCIALES
+                     ====================================== -->
+
+                {% if alumnos %}
+
+                    <a
+                        href="/credencial/imprimir/grupo/{{ grupo.id }}"
+                        class="btn btn-info"
+                    >
+
+                        🪪 Generar credenciales
+
+                    </a>
+
+                {% endif %}
+                {% endif %}
+
+
+            </div>
+
+        </div>
+
+
+        <!-- ======================================
+             INFORMACIÓN DEL GRUPO
+             ====================================== -->
+
+        <section class="group-info">
+
+            <div class="group-info-grid">
+
+
+                <div class="info-item">
+
+                    <span class="info-label">
+                        Grupo
+                    </span>
+
+                    <span class="info-value">
+                        {{ grupo.nombre_grupo }}
+                    </span>
+
+                </div>
+
+
+                <div class="info-item">
+
+                    <span class="info-label">
+                        Grado
+                    </span>
+
+                    <span class="info-value">
+                        {{ grupo.grado }}°
+                    </span>
+
+                </div>
+
+
+                <div class="info-item">
+
+                    <span class="info-label">
+                        Nombre
+                    </span>
+
+                    <span class="info-value">
+                        {{ grupo.nombre }}
+                    </span>
+
+                </div>
+
+
+                <div class="info-item">
+
+                    <span class="info-label">
+                        Turno
+                    </span>
+
+                    <span class="info-value">
+                        {{ grupo.turno }}
+                    </span>
+
+                </div>
+
+
+            </div>
+
+        </section>
+
+
+        <!-- ======================================
+             TABLA DE ALUMNOS
+             ====================================== -->
+
+        <section class="table-container">
+
+
+            <div class="table-title">
+
+                <h3>
+
+                    Alumnos registrados
+                    ({{ alumnos|length }})
+
+                </h3>
+
+            </div>
+
+
+            {% if alumnos %}
+
+            <form
+                method="post"
+                action="/alumnos/grupo/{{ grupo.id }}/eliminar-seleccionados"
+                onsubmit="return confirmarEliminacionSeleccionados();"
+            >
+
+                {% if request.session.get("rol") == "administrador" %}<div style="margin: 15px 0;">
+
+                    <button
+                        type="submit"
+                        class="btn btn-danger"
+                    >
+                        🗑️ Eliminar seleccionados
+                    </button>
+
+                </div>{% endif %}
+
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        {% if request.session.get("rol") == "administrador" %}<th>
+                            <input
+                                type="checkbox"
+                                id="seleccionarTodos"
+                            >
+                        </th>{% endif %}
+
+                        <th>
+                            Foto
+                        </th>
+
+                        <th>
+                            Matrícula
+                        </th>
+
+                        <th>
+                            Alumno
+                        </th>
+
+                        <th>
+                            Fecha de nacimiento
+                        </th>
+
+                        <th>
+                            Correo
+                        </th>
+
+                        <th>
+                            Teléfono
+                        </th>
+
+                        <th>
+                            Acciones
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+
+                    {% for alumno in alumnos %}
+
+
+                    <tr>
+
+                        <!-- SELECCIONAR -->
+
+                        {% if request.session.get("rol") == "administrador" %}<td>
+                            <input
+                                type="checkbox"
+                                name="alumnos_ids"
+                                value="{{ alumno.id }}"
+                                class="seleccionar-alumno"
+                            >
+                        </td>{% endif %}
+
+
+                        <!-- FOTO -->
+
+                        <td>
+
+                            {% if alumno.foto %}
+
+                                <img
+                                    src="/static/uploads/{{ alumno.foto }}"
+                                    alt="Foto de {{ alumno.nombre }}"
+                                    class="student-photo"
+                                >
+
+                            {% else %}
+
+                                <div class="no-photo">
+                                    👤
+                                </div>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- MATRÍCULA -->
+
+                        <td>
+
+                            <strong>
+                                {{ alumno.matricula }}
+                            </strong>
+
+                        </td>
+
+
+                        <!-- NOMBRE -->
+
+                        <td>
+
+                            <div class="student-name">
+
+                                {{ alumno.nombre }}
+
+                                {{ alumno.apellido_paterno }}
+
+                                {% if alumno.apellido_materno %}
+
+                                    {{ alumno.apellido_materno }}
+
+                                {% endif %}
+
+                            </div>
+
+                        </td>
+
+
+                        <!-- FECHA DE NACIMIENTO -->
+
+                        <td>
+
+                            {% if alumno.fecha_nacimiento %}
+
+                                {{ alumno.fecha_nacimiento }}
+
+                            {% else %}
+
+                                —
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- CORREO -->
+
+                        <td>
+
+                            {% if alumno.correo %}
+
+                                {{ alumno.correo }}
+
+                            {% else %}
+
+                                —
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- TELÉFONO -->
+
+                        <td>
+
+                            {% if alumno.telefono %}
+
+                                {{ alumno.telefono }}
+
+                            {% else %}
+
+                                —
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- ACCIONES -->
+
+                        <td>
+
+                            <div class="action-buttons">
+
+
+                                <!-- VER DATOS -->
+
+                                <a
+                                    href="/alumnos/detalle/{{ alumno.id }}"
+                                    class="btn btn-info"
+                                >
+
+                                    👁️ Ver datos
+
+                                </a>
+
+
+                                <!-- ELIMINAR -->
+
+                                {% if request.session.get("rol") == "administrador" %}<a
+                                    href="/alumnos/{{ alumno.id }}/eliminar"
+                                    class="btn btn-danger"
+                                    onclick="return confirm('¿Seguro que deseas desactivar este alumno?');"
+                                >
+
+                                    🗑️
+
+                                </a>{% endif %}
+
+
+                            </div>
+
+                        </td>
+
+
+                    </tr>
+
+
+                    {% endfor %}
+
+
+                </tbody>
+
+            </table>
+
+            </form>
+
+
+            {% else %}
+
+
+            <!-- ==================================
+                 SIN ALUMNOS
+                 ================================== -->
+
+            <div class="empty-state">
+
+                <h3>
+                    👨‍🎓 No hay alumnos registrados
+                </h3>
+
+                <p>
+                    Este grupo todavía no tiene alumnos.
+                </p>
+
+                <br>
+
+                {% if request.session.get("rol") == "administrador" %}<a
+                    href="/alumnos/nuevo?grupo_id={{ grupo.id }}"
+                    class="btn btn-primary"
+                >
+
+                    ➕ Registrar primer alumno
+
+                </a>{% endif %}
+
+            </div>
+
+
+            {% endif %}
+
+
+        </section>
+
+
+    </main>
+
+
+<script>
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
+
+        const seleccionarTodos =
+            document.getElementById("seleccionarTodos");
+
+        const alumnos =
+            document.querySelectorAll(
+                ".seleccionar-alumno"
+            );
+
+
+        if (seleccionarTodos) {
+
+            seleccionarTodos.addEventListener(
+                "change",
+                function () {
+
+                    alumnos.forEach(
+                        function (alumno) {
+
+                            alumno.checked =
+                                seleccionarTodos.checked;
+
+                        }
+                    );
+
+                }
+            );
+
+        }
+
+    }
+);
+
+
+function confirmarEliminacionSeleccionados() {
+
+    const seleccionados =
+        document.querySelectorAll(
+            ".seleccionar-alumno:checked"
+        );
+
+
+    if (seleccionados.length === 0) {
+
+        alert(
+            "Selecciona al menos un alumno."
+        );
+
+        return false;
+
+    }
+
+
+    return confirm(
+        "¿Seguro que deseas desactivar " +
+        seleccionados.length +
+        " alumno(s) seleccionado(s)?"
+    );
+
+}
+
+</script>
+
+    <script src="/static/js/navigation.js"></script>
+</body>
+
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Alumnos - SICAE WEB</title>
+
+    <link
+        rel="stylesheet"
+        href="/static/css/style.css?v=20261018-3"
+    >
+
+    <style>
+
+        .groups-grid {
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(
+                    auto-fit,
+                    minmax(280px, 1fr)
+                );
+
+            gap: 22px;
+
+        }
+
+
+        .group-card {
+
+            background: white;
+
+            border-radius: 14px;
+
+            padding: 24px;
+
+            box-shadow:
+                0 4px 14px
+                rgba(0, 0, 0, 0.08);
+
+            transition:
+                transform 0.2s ease,
+                box-shadow 0.2s ease;
+
+        }
+
+
+        .group-card:hover {
+
+            transform: translateY(-3px);
+
+            box-shadow:
+                0 8px 20px
+                rgba(0, 0, 0, 0.12);
+
+        }
+
+
+        .group-icon {
+
+            font-size: 45px;
+
+            margin-bottom: 12px;
+
+        }
+
+
+        .group-name {
+
+            margin: 0;
+
+            font-size: 23px;
+
+            color: #111827;
+
+        }
+
+
+        .group-info {
+
+            margin-top: 18px;
+
+        }
+
+
+        .group-info p {
+
+            margin: 8px 0;
+
+            color: #374151;
+
+        }
+
+
+        .student-count {
+
+            margin-top: 20px;
+
+            padding: 13px;
+
+            background: #f3f4f6;
+
+            border-radius: 9px;
+
+            font-size: 16px;
+
+        }
+
+
+        .student-count strong {
+
+            font-size: 21px;
+
+        }
+
+
+        .group-button {
+
+            display: block;
+
+            margin-top: 20px;
+
+            padding: 12px;
+
+            text-align: center;
+
+            border-radius: 8px;
+
+            background: #111827;
+
+            color: white;
+
+            text-decoration: none;
+
+            font-weight: bold;
+
+        }
+
+
+        .group-button:hover {
+
+            background: #2563eb;
+
+        }
+
+
+        .empty-state {
+
+            background: white;
+
+            border-radius: 14px;
+
+            padding: 60px 20px;
+
+            text-align: center;
+
+            box-shadow:
+                0 4px 14px
+                rgba(0, 0, 0, 0.08);
+
+        }
+
+
+        .empty-icon {
+
+            font-size: 60px;
+
+            margin-bottom: 15px;
+
+        }
+
+
+        .new-group-button {
+
+            display: inline-block;
+
+            padding: 11px 18px;
+
+            border-radius: 8px;
+
+            background: #111827;
+
+            color: white;
+
+            text-decoration: none;
+
+            font-weight: bold;
+
+        }
+
+
+        .new-group-button:hover {
+
+            background: #2563eb;
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <!-- ==========================================
+         BARRA LATERAL
+         ========================================== -->
+
+    {% include "_sidebar.html" %}
+
+
+    <!-- ==========================================
+         CONTENIDO
+         ========================================== -->
+
+    <main class="content">
+
+
+        <!-- ======================================
+             ENCABEZADO
+             ====================================== -->
+
+        <header class="header">
+
+            <div>
+
+                <h2>
+                    Alumnos
+                </h2>
+
+
+                <p>
+                    Selecciona un grupo para administrar sus alumnos.
+                </p>
+
+            </div>
+
+        </header>
+
+
+        <!-- ======================================
+             ENCABEZADO DE GRUPOS
+             ====================================== -->
+
+        <div
+            style="
+                display:flex;
+                justify-content:space-between;
+                align-items:center;
+                margin-bottom:25px;
+                gap:15px;
+                flex-wrap:wrap;
+            "
+        >
+
+
+            <div>
+
+                <h3 style="margin:0;">
+
+                    &#128218; Grupos registrados
+
+                </h3>
+
+
+                <p
+                    style="
+                        margin-top:6px;
+                        color:#6b7280;
+                    "
+                >
+
+                    Selecciona un grupo para ver sus alumnos.
+
+                </p>
+
+            </div>
+
+
+            {% if request.session.get("rol") == "administrador" %}<a
+                href="/grupos/nuevo"
+                class="new-group-button"
+            >
+
+                + Nuevo grupo
+
+            </a>{% endif %}
+
+
+        </div>
+
+
+        <!-- ======================================
+             GRUPOS
+             ====================================== -->
+
+        {% if grupos %}
+
+
+        <section class="groups-grid">
+
+
+            {% for grupo in grupos %}
+
+
+            <article class="group-card">
+
+
+                <div class="group-icon">
+
+                    &#127979;
+
+                </div>
+
+
+                <h3 class="group-name">
+
+                    {{ grupo.nombre_grupo }}
+
+                </h3>
+
+
+                <div class="group-info">
+
+
+                    <p>
+
+                        <strong>
+                            Grado:
+                        </strong>
+
+                        {{ grupo.grado }}&deg;
+
+                    </p>
+
+
+                    <p>
+
+                        <strong>
+                            Grupo:
+                        </strong>
+
+                        {{ grupo.nombre }}
+
+                    </p>
+
+
+                    <p>
+
+                        <strong>
+                            Turno:
+                        </strong>
+
+                        {{ grupo.turno }}
+
+                    </p>
+
+
+                    <div class="student-count">
+
+                        &#128104;&#8205;&#127891;
+
+                        <strong>
+                            {{ grupo.cantidad_alumnos }}
+                        </strong>
+
+
+                        {% if grupo.cantidad_alumnos == 1 %}
+
+                            alumno registrado
+
+                        {% else %}
+
+                            alumnos registrados
+
+                        {% endif %}
+
+
+                    </div>
+
+
+                </div>
+
+
+                <a
+                    href="/alumnos/grupo/{{ grupo.id }}"
+                    class="group-button"
+                >
+
+                    &#128104;&#8205;&#127891; Ver alumnos
+
+                </a>
+
+
+            </article>
+
+
+            {% endfor %}
+
+
+        </section>
+
+
+        {% else %}
+
+
+        <!-- ======================================
+             SIN GRUPOS
+             ====================================== -->
+
+        <section class="empty-state">
+
+
+            <div class="empty-icon">
+
+                &#127979;
+
+            </div>
+
+
+            <h3>
+
+                No hay grupos registrados
+
+            </h3>
+
+
+            <p>
+
+                Primero debes crear un grupo para
+                poder registrar alumnos.
+
+            </p>
+
+
+            <br>
+
+
+            <a
+                href="/grupos/nuevo"
+                class="new-group-button"
+            >
+
+                + Crear primer grupo
+
+            </a>
+
+
+        </section>
+
+
+        {% endif %}
+
+
+    </main>
+
+
+    <script src="/static/js/navigation.js"></script>
+</body>
+
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+

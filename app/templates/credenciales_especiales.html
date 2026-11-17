@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Credenciales especiales - SICAE WEB</title>
+    <link rel="stylesheet" href="/static/css/style.css?v=20261018-3">
+    <style>
+        .special-page{max-width:1350px;margin:auto}.special-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:18px}.special-head h2{margin:0}.special-head p{color:#64748b;margin:7px 0 0}.type-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0}.type-tabs a{padding:10px 14px;border:1px solid #cbd5e1;border-radius:9px;background:#fff;color:#334155;text-decoration:none;font-weight:700}.type-tabs a.active{background:#1e3a8a;color:white;border-color:#1e3a8a}.special-grid{display:grid;grid-template-columns:minmax(300px,.78fr) minmax(0,1.5fr);gap:18px;align-items:start}.special-card{background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:20px;box-shadow:0 5px 18px #0f172a0d}.special-card h3{margin:0 0 15px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.form-grid label{display:grid;gap:5px;color:#334155;font-weight:650;font-size:13px}.form-grid input{min-width:0;width:100%;box-sizing:border-box;padding:10px;border:1px solid #cbd5e1;border-radius:8px;font:inherit}.form-grid .wide{grid-column:1/-1}.special-note{color:#64748b;font-size:13px;line-height:1.5}.special-submit,.special-link{display:inline-block;padding:10px 14px;border:0;border-radius:8px;background:#1e3a8a;color:white;text-decoration:none;font-weight:700;cursor:pointer}.special-link.secondary{background:#475569}.special-actions{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 18px}.notice{padding:12px 14px;border-radius:9px;margin:10px 0 16px;background:#dcfce7;color:#166534}.notice.error{background:#fee2e2;color:#991b1b}.records-wrap{overflow:auto}.records{width:100%;border-collapse:collapse;min-width:880px}.records th,.records td{text-align:left;padding:10px;border-bottom:1px solid #e2e8f0;vertical-align:middle}.records th{background:#f8fafc;color:#475569;font-size:13px}.qr-thumb{width:66px;height:66px;object-fit:contain;background:white}.record-actions{display:flex;gap:7px;flex-wrap:wrap}.record-actions a,.record-actions button{border:0;border-radius:7px;padding:7px 9px;background:#334155;color:white;text-decoration:none;cursor:pointer;font-weight:650}.record-actions button.off{background:#b91c1c}.record-actions button.on{background:#15803d}.status{font-size:12px;font-weight:700}.status.off{color:#b91c1c}.mail-list{color:#475569;font-size:12px;line-height:1.5;max-width:190px;overflow-wrap:anywhere}@media(max-width:900px){.special-grid{grid-template-columns:1fr}}@media(max-width:560px){.special-card{padding:15px}.form-grid{grid-template-columns:1fr}.form-grid .wide{grid-column:auto}}
+    </style>
+</head>
+<body>
+    {% include "_sidebar.html" %}
+    <main class="content"><div class="special-page">
+        <header class="special-head"><div><h2>🪪 Credenciales especiales</h2><p>Registra, personaliza e imprime credenciales con QR para accesos de entrada y salida.</p></div></header>
+        <nav class="type-tabs" aria-label="Tipo de credencial">
+            {% for clave, etiqueta in tipos.items() %}<a class="{% if clave == tipo %}active{% endif %}" href="/credenciales-especiales?tipo={{ clave }}">{{ etiqueta }}</a>{% endfor %}
+        </nav>
+        {% if guardado %}<div class="notice">La credencial se registró y su QR ya está listo.</div>{% endif %}
+        {% if actualizado %}<div class="notice">Se actualizó el estado de la credencial.</div>{% endif %}
+        {% if error %}<div class="notice error">{% if error == 'correo' %}Revisa las cuatro direcciones de correo.{% elif error == 'foto' %}La foto debe ser JPG, PNG o WEBP y pesar menos de 8 MB.{% elif error == 'nombre' %}Escribe el nombre de la persona.{% elif error == 'sin-registros' %}No hay credenciales activas para imprimir.{% else %}No se pudo completar la operación. Revisa los datos y vuelve a intentar.{% endif %}</div>{% endif %}
+        <div class="special-actions"><a class="special-link secondary" href="/credenciales-especiales/diseno?tipo={{ tipo }}">🎨 Personalizar diseño de {{ tipo_label|lower }}</a><a class="special-link" href="/credenciales-especiales/pdf?tipo={{ tipo }}">📄 Descargar todas en PDF</a></div>
+        <div class="special-grid">
+            <section class="special-card">
+                <h3>Registrar {{ tipo_label|lower }}</h3>
+                <p class="special-note">Puedes vincular hasta cuatro correos. Cada uno recibirá una notificación cuando se escanee el QR.</p>
+                <form method="post" action="/credenciales-especiales/crear" enctype="multipart/form-data">
+                    <input type="hidden" name="tipo" value="{{ tipo }}">
+                    <div class="form-grid">
+                        <label>Nombre *<input name="nombre" maxlength="100" required></label>
+                        <label>Apellido paterno<input name="apellido_paterno" maxlength="100"></label>
+                        <label>Apellido materno<input name="apellido_materno" maxlength="100"></label>
+                        <label>Cargo o motivo<input name="cargo" maxlength="120" placeholder="Ej. Dirección general"></label>
+                        <label class="wide">Organización / institución<input name="organizacion" maxlength="160"></label>
+                        <label>Teléfono<input name="telefono" maxlength="30" autocomplete="tel"></label>
+                        <label>Fotografía<input name="foto" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"></label>
+                        {% for n in range(1,5) %}<label class="wide">Correo para notificaciones {{ n }}<input name="correo_{{ n }}" type="email" maxlength="254" placeholder="persona{{ n }}@ejemplo.com"></label>{% endfor %}
+                    </div>
+                    <p class="special-note">Los campos de correo pueden quedar vacíos si no necesitas las cuatro cuentas.</p>
+                    <button class="special-submit" type="submit">Crear credencial y generar QR</button>
+                </form>
+            </section>
+            <section class="special-card">
+                <h3>{{ tipo_label }} registradas ({{ credenciales|length }})</h3>
+                {% if credenciales %}<div class="records-wrap"><table class="records"><thead><tr><th>QR</th><th>Persona</th><th>Cargo / organización</th><th>Correos vinculados</th><th>Registros</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>
+                    {% for item in credenciales %}<tr>
+                        <td>{% if item.qr %}<img class="qr-thumb" src="/static/uploads/{{ item.qr }}" alt="QR de {{ item.codigo }}">{% endif %}<br><small>{{ item.codigo }}</small></td>
+                        <td><strong>{{ item.nombre }} {{ item.apellido_paterno or '' }} {{ item.apellido_materno or '' }}</strong></td>
+                        <td>{{ item.cargo or '—' }}{% if item.organizacion %}<br><small>{{ item.organizacion }}</small>{% endif %}</td>
+                        <td class="mail-list">{% for n in range(1,5) %}{% set correo = item['correo_' ~ n] %}{% if correo %}{{ correo }}<br>{% endif %}{% endfor %}</td>
+                        <td>{{ item.total_registros }}{% if item.ultimo_registro %}<br><small>Último: {{ item.ultimo_registro.strftime('%d/%m/%Y %H:%M') }}</small>{% endif %}</td>
+                        <td><span class="status {% if not item.activo %}off{% endif %}">{{ 'Activa' if item.activo else 'Inactiva' }}</span></td>
+                        <td><div class="record-actions"><a href="/credenciales-especiales/{{ item.id }}/pdf">PDF</a><form method="post" action="/credenciales-especiales/{{ item.id }}/estado"><input type="hidden" name="tipo" value="{{ tipo }}"><input type="hidden" name="activo" value="{{ 'false' if item.activo else 'true' }}"><button class="{{ 'off' if item.activo else 'on' }}" type="submit">{{ 'Desactivar' if item.activo else 'Activar' }}</button></form></div></td>
+                    </tr>{% endfor %}
+                </tbody></table></div>{% else %}<p class="special-note">Todavía no hay credenciales de {{ tipo_label|lower }}.</p>{% endif %}
+            </section>
+        </div>
+    </div></main>
+    <script src="/static/js/navigation.js"></script>
+</body>
+</html>

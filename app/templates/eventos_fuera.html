@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eventos fuera del plantel · SICAE WEB</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        .events-page{max-width:1180px;margin:0 auto;padding:26px;color:#172033}
+        .events-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;margin-bottom:22px}
+        .events-heading h2{margin:0 0 6px;font-size:26px}.events-heading p{margin:0;color:#64748b}
+        .events-grid{display:grid;grid-template-columns:minmax(300px,.85fr) minmax(0,1.5fr);gap:20px;align-items:start}
+        .event-panel{background:white;border:1px solid #e2e8f0;border-radius:16px;padding:22px;box-shadow:0 8px 24px #0f172a0a}
+        .event-panel h3{margin:0 0 17px}.event-form label{display:block;font-weight:650;margin:13px 0 6px}
+        .event-form input[type=text],.event-form input[type=date],.event-form textarea{width:100%;box-sizing:border-box;padding:11px 12px;border:1px solid #cbd5e1;border-radius:9px;font:inherit}
+        .event-form textarea{min-height:74px;resize:vertical}.group-picker{display:grid;grid-template-columns:1fr 1fr;gap:8px;max-height:255px;overflow:auto;padding:10px;border:1px solid #e2e8f0;border-radius:9px;background:#f8fafc}
+        .group-choice{display:flex;align-items:center;gap:8px;padding:7px;border-radius:7px;background:white;font-size:13px}.group-choice input{accent-color:#2563eb}
+        .primary-action,.event-link,.state-button{display:inline-flex;justify-content:center;align-items:center;border:0;border-radius:9px;padding:11px 15px;font-weight:700;text-decoration:none;cursor:pointer}
+        .primary-action{width:100%;margin-top:16px;background:#2563eb;color:white}.event-link{background:#eff6ff;color:#1d4ed8}.state-button{background:#f1f5f9;color:#475569;padding:8px 10px}
+        .event-list{display:grid;gap:12px}.event-row{border:1px solid #e2e8f0;border-radius:12px;padding:16px;display:flex;justify-content:space-between;gap:18px;align-items:center}
+        .event-title{font-weight:750;font-size:16px}.event-meta{color:#64748b;font-size:13px;line-height:1.6;margin-top:5px}.event-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+        .badge{font-size:12px;padding:5px 9px;border-radius:999px;font-weight:700}.badge.open{background:#dcfce7;color:#166534}.badge.closed{background:#e2e8f0;color:#475569}
+        .empty{padding:30px;text-align:center;color:#64748b;border:1px dashed #cbd5e1;border-radius:12px}.error-note{margin-bottom:14px;padding:11px 13px;background:#fef2f2;color:#991b1b;border-radius:9px}
+        .mail-settings{margin-top:20px}.mail-settings summary{cursor:pointer;font-weight:750;color:#1e293b}.mail-settings p{color:#64748b;font-size:14px;line-height:1.55}.mail-settings label{display:block;font-weight:650;margin:13px 0 6px}.mail-settings input[type=text],.mail-settings textarea{width:100%;box-sizing:border-box;padding:11px 12px;border:1px solid #cbd5e1;border-radius:9px;font:inherit}.mail-settings textarea{min-height:190px;resize:vertical}.mail-toggle{display:flex!important;align-items:center;gap:9px;font-weight:600!important}.mail-help{font-size:12px;color:#64748b}.mail-saved{margin:12px 0;padding:11px 13px;background:#dcfce7;color:#166534;border-radius:9px}.mail-warning{margin:12px 0;padding:11px 13px;background:#fef2f2;color:#991b1b;border-radius:9px}
+        .finish-button,.delete-button{display:inline-flex;justify-content:center;align-items:center;border:0;border-radius:9px;padding:8px 10px;font-weight:700;cursor:pointer}.finish-button{background:#dcfce7;color:#166534}.delete-button{background:#fee2e2;color:#991b1b}
+        @media(max-width:900px){.events-grid{grid-template-columns:1fr}.events-page{padding:18px}.event-row{align-items:flex-start;flex-direction:column}.event-actions{justify-content:flex-start}}
+        @media(max-width:480px){.group-picker{grid-template-columns:1fr}.events-heading h2{font-size:22px}}
+    </style>
+</head>
+<body>
+    {% include "_sidebar.html" %}
+    <main class="content">
+        <div class="events-page">
+            <header class="events-heading">
+                <div><h2>Eventos fuera del plantel</h2><p>Organiza salidas, visitas y actividades; registra asistencia con el QR de la credencial.</p></div>
+            </header>
+            {% if evento_eliminado %}<div class="mail-saved" role="status">El evento y sus asistencias se eliminaron correctamente.</div>{% endif %}
+            {% if evento_finalizado %}<div class="mail-saved" role="status">El evento se finalizó y se enviaron avisos a las familias.{% if correos_fallidos %} No se pudieron enviar {{ correos_fallidos }} correos; revisa la configuración SMTP y los correos de las fichas.{% endif %}</div>{% endif %}
+            <div class="events-grid">
+                {% if request.session.get("rol") == "administrador" %}
+                <section class="event-panel">
+                    <h3>Crear evento</h3>
+                    {% if error %}<div class="error-note">No se pudo crear el evento. Revisa los datos y selecciona al menos un grupo.</div>{% endif %}
+                    <form class="event-form" method="post" action="/eventos-fuera/crear">
+                        <label for="eventName">Nombre del evento</label>
+                        <input id="eventName" type="text" name="nombre" maxlength="160" required placeholder="Ej. Visita al museo">
+                        <label for="eventDate">Fecha</label>
+                        <input id="eventDate" type="date" name="fecha_evento" required>
+                        <label for="eventPlace">Lugar</label>
+                        <input id="eventPlace" type="text" name="lugar" maxlength="200" placeholder="Lugar de la actividad">
+                        <label>Grupos participantes</label>
+                        {% if grupos %}
+                        <div class="group-picker">
+                            {% for grupo in grupos %}
+                            <label class="group-choice"><input type="checkbox" name="grupos_ids" value="{{ grupo.id }}"><span>{{ grupo.nombre_grupo }} · {{ grupo.grado }}° {{ grupo.nombre }}</span></label>
+                            {% endfor %}
+                        </div>
+                        {% else %}<div class="empty">No hay grupos activos registrados.</div>{% endif %}
+                        <label for="eventNotes">Notas</label>
+                        <textarea id="eventNotes" name="notas" placeholder="Indicaciones u observaciones opcionales"></textarea>
+                        <button class="primary-action" type="submit" {% if not grupos %}disabled{% endif %}>Crear evento y tomar asistencia</button>
+                    </form>
+                </section>
+                {% endif %}
+                <section class="event-panel">
+                    <h3>Eventos registrados</h3>
+                    {% if eventos %}
+                    <div class="event-list">
+                        {% for evento in eventos %}
+                        <article class="event-row">
+                            <div>
+                                <div class="event-title">{{ evento.nombre }}</div>
+                                <div class="event-meta">{{ evento.fecha_evento.strftime('%d/%m/%Y') }}{% if evento.lugar %} · {{ evento.lugar }}{% endif %}<br>Grupos: {{ evento.grupos or 'Sin grupos' }}<br>Asistencias registradas: <strong>{{ evento.presentes }}</strong></div>
+                            </div>
+                            <div class="event-actions">
+                                <span class="badge {{ 'open' if evento.activo else 'closed' }}">{{ 'Abierto' if evento.activo else ('Finalizado' if evento.finalizado_en else 'Cerrado') }}</span>
+                                {% if evento.finalizado_en %}<span class="event-meta">Finalizó: {{ evento.finalizado_en.strftime('%H:%M') }}</span>{% endif %}
+                                <a class="event-link" href="/eventos-fuera/{{ evento.id }}/asistencia">{{ 'Tomar asistencia' if evento.activo else 'Ver registro' }}</a>
+                                {% if request.session.get("rol") == "administrador" %}
+                                    {% if not evento.finalizado_en %}
+                                    <form method="post" action="/eventos-fuera/{{ evento.id }}/finalizar" onsubmit="return confirm('¿Finalizar este evento y enviar un correo a las familias de los alumnos con asistencia registrada?')"><button class="finish-button" type="submit">Finalizar evento</button></form>
+                                    <form method="post" action="/eventos-fuera/{{ evento.id }}/estado">
+                                        <input type="hidden" name="activo" value="{{ 'false' if evento.activo else 'true' }}">
+                                        <button class="state-button" type="submit">{{ 'Cerrar' if evento.activo else 'Reabrir' }}</button>
+                                    </form>
+                                    {% endif %}
+                                    <form method="post" action="/eventos-fuera/{{ evento.id }}/eliminar" onsubmit="return confirm('¿Eliminar este evento y todas sus asistencias? Esta acción no se puede deshacer.')"><button class="delete-button" type="submit">Eliminar</button></form>
+                                {% endif %}
+                            </div>
+                        </article>
+                        {% endfor %}
+                    </div>
+                    {% else %}<div class="empty">Todavía no hay eventos. Crea uno para comenzar a pasar lista.</div>{% endif %}
+                </section>
+            </div>
+            {% if request.session.get("rol") == "administrador" %}<details class="event-panel mail-settings">
+                <summary>Configurar correo para padres de familia</summary>
+                <p>Este aviso se envía cuando se registra por primera vez la asistencia del alumno al evento. Usa el correo guardado en la ficha del alumno y mantiene un mensaje independiente de los avisos de entrada y salida del plantel. Al finalizar un evento también se envía un aviso estándar con la hora de finalización a las familias de los alumnos presentes.</p>
+                {% if correo_guardado %}<div class="mail-saved" role="status">La configuración del correo para eventos se guardó correctamente.</div>{% endif %}
+                {% if correo_error %}<div class="mail-warning" role="alert">No se pudo guardar la configuración. Revisa que el asunto y el mensaje estén completos.</div>{% endif %}
+                <form method="post" action="/eventos-fuera/notificaciones">
+                    <label for="eventMailSubject">Asunto</label>
+                    <input id="eventMailSubject" type="text" name="asunto" maxlength="300" required value="{{ correo_config.asunto }}">
+                    <label for="eventMailBody">Mensaje</label>
+                    <textarea id="eventMailBody" name="mensaje" maxlength="10000" required>{{ correo_config.mensaje }}</textarea>
+                    <p class="mail-help">Variables disponibles: {nombre}, {matricula}, {evento}, {fecha}, {hora}, {grupo}, {lugar}.</p>
+                    <label class="mail-toggle"><input type="checkbox" name="activa" value="true" {% if correo_config.activa %}checked{% endif %}>Activar el envío de avisos de asistencia a eventos</label>
+                    <button class="primary-action" type="submit">Guardar configuración del correo</button>
+                </form>
+            </details>{% endif %}
+        </div>
+    </main>
+    <script src="/static/js/navigation.js"></script>
+</body>
+</html>

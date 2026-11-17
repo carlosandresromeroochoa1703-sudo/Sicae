@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <link rel="stylesheet" href="/static/css/style.css?v=20261018-3">
+
+    <title>
+        Credenciales del personal - SICAE WEB
+    </title>
+
+
+    <style>
+
+        body {
+
+            margin: 0;
+
+            padding: 0;
+
+        }
+
+
+        h1 {
+
+            margin-bottom: 10px;
+
+        }
+
+
+        .descripcion {
+
+            margin-top: 0;
+
+            margin-bottom: 30px;
+
+            color: #64748b;
+
+        }
+
+
+        .lista {
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(
+                    auto-fill,
+                    minmax(min(100%, 280px), 1fr)
+                );
+
+            gap: 20px;
+
+        }
+
+
+        .tarjeta {
+
+            background: white;
+
+            padding: 20px;
+
+            border: 1px solid #e2e8f0;
+
+            border-radius: 16px;
+
+            box-shadow:
+                0 5px 15px rgba(0,0,0,.10);
+
+        }
+
+
+        .foto {
+
+            width: 90px;
+
+            height: 90px;
+
+            object-fit: cover;
+
+            border-radius: 50%;
+
+            display: block;
+
+            margin-bottom: 15px;
+
+        }
+
+
+        .sin-foto {
+
+            width: 90px;
+
+            height: 90px;
+
+            border-radius: 50%;
+
+            background: #e2e8f0;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            color: #64748b;
+
+            font-size: 12px;
+
+            margin-bottom: 15px;
+
+        }
+
+
+        .tarjeta h3 {
+
+            margin-top: 0;
+
+            margin-bottom: 8px;
+
+        }
+
+
+        .tipo {
+
+            color: #64748b;
+
+            margin-bottom: 10px;
+
+        }
+
+
+        .botones {
+
+            display: flex;
+
+            gap: 10px;
+
+            flex-wrap: wrap;
+
+        }
+
+
+        .boton {
+
+            display: inline-block;
+
+            margin-top: 10px;
+
+            padding: 10px 15px;
+
+            background: #0f766e;
+
+            color: white;
+
+            text-decoration: none;
+
+            border-radius: 7px;
+
+        }
+
+
+        .boton-editar {
+
+            background: #334155;
+
+        }
+
+
+        .boton:hover {
+
+            opacity: .9;
+
+        }
+</style>
+
+</head>
+
+
+<body>
+
+{% include "_sidebar.html" %}
+
+<main class="content">
+    <header class="header">
+
+    <h2>
+        🪪 Credenciales del personal
+    </h2>
+
+
+    <p class="descripcion">
+        Selecciona una persona para ver o configurar su credencial.
+    </p>
+
+
+    </header>
+
+    <div class="lista">
+
+
+        {% for persona in personal %}
+
+
+            <div class="tarjeta">
+
+
+                <!-- FOTO -->
+
+                {% if persona.foto %}
+
+                    <img
+                        class="foto"
+                        src="/static/uploads/{{ persona.foto }}"
+                        alt="Foto de {{ persona.nombre }}"
+                    >
+
+                {% else %}
+
+                    <div class="sin-foto">
+                        SIN FOTO
+                    </div>
+
+                {% endif %}
+
+
+                <!-- NOMBRE -->
+
+                <h3>
+
+                    {{ persona.nombre }}
+
+                    {{ persona.apellido_paterno }}
+
+                    {{ persona.apellido_materno or '' }}
+
+                </h3>
+
+
+                <!-- TIPO -->
+
+                <p class="tipo">
+
+                    {{ persona.tipo_personal }}
+
+                </p>
+
+
+                <!-- BOTONES -->
+
+                <div class="botones">
+
+
+                    <a
+                        href="/administracion/personal/{{ persona.id | int }}/credencial"
+                        class="boton"
+                    >
+
+                        🪪 Ver credencial
+
+                    </a>
+
+
+                    <a
+                        href="/credencial/configuracion-personal"
+                        class="boton boton-editar"
+                    >
+
+                        ✏️ Editar credencial
+
+                    </a>
+
+
+                </div>
+
+
+            </div>
+
+
+        {% endfor %}
+
+
+    </div>
+
+
+    </main>
+
+    <script src="/static/js/navigation.js"></script>
+</body>
+
+</html>
+
+
+
+
+
+
+
+

@@ -1,0 +1,2892 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Diseño de credencial del personal - SICAE WEB
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="/static/css/style.css?v=20261018-3"
+    >
+
+    <style>
+
+        /* =====================================================
+           CONFIGURACIÓN GENERAL
+           ===================================================== */
+
+        .config-header {
+            margin-bottom: 25px;
+        }
+
+        .config-header h2 {
+            margin: 0;
+            font-size: 28px;
+        }
+
+        .config-header p {
+            margin-top: 7px;
+            color: #777;
+        }
+
+
+        .config-layout {
+
+            display: grid;
+
+            grid-template-columns:
+                1fr
+                760px;
+
+            gap: 25px;
+
+            align-items: start;
+
+        }
+
+
+        .config-card {
+
+            background: white;
+
+            border-radius: 16px;
+
+            padding: 25px;
+
+            box-shadow:
+                0 4px 15px rgba(0,0,0,.08);
+
+        }
+
+
+        .config-card h3 {
+
+            margin-top: 0;
+
+            margin-bottom: 20px;
+
+        }
+
+
+        /* =====================================================
+           FORMULARIO
+           ===================================================== */
+
+        .form-group {
+
+            margin-bottom: 18px;
+
+        }
+
+
+        .form-group label {
+
+            display: block;
+
+            font-weight: bold;
+
+            margin-bottom: 7px;
+
+        }
+
+
+        .form-group input,
+        .form-group select {
+
+            width: 100%;
+
+            padding: 11px 12px;
+
+            border:
+                1px solid #d1d5db;
+
+            border-radius: 8px;
+
+            box-sizing: border-box;
+
+            font-size: 15px;
+
+        }
+
+
+        /* =====================================================
+           COLORES
+           ===================================================== */
+
+        .color-row {
+
+            display: grid;
+
+            grid-template-columns:
+                1fr
+                100px;
+
+            gap: 10px;
+
+        }
+
+
+        .color-row input[type="color"] {
+
+            height: 43px;
+
+            padding: 3px;
+
+            cursor: pointer;
+
+        }
+
+
+        /* =====================================================
+           LOGO
+           ===================================================== */
+
+        .logo-preview {
+
+            margin-top: 10px;
+
+            width: 100px;
+
+            height: 100px;
+
+            object-fit: contain;
+
+            border:
+                1px solid #ddd;
+
+            border-radius: 10px;
+
+            padding: 5px;
+
+        }
+
+
+        /* =====================================================
+           CHECKBOXES
+           ===================================================== */
+
+        .checkbox-group {
+
+            display: grid;
+
+            grid-template-columns:
+                1fr
+                1fr;
+
+            gap: 12px;
+
+            margin-top: 10px;
+
+        }
+
+
+        .checkbox-item {
+
+            background:
+                #f8fafc;
+
+            padding: 12px;
+
+            border-radius: 8px;
+
+            border:
+                1px solid #e5e7eb;
+
+        }
+
+
+        .checkbox-item label {
+
+            cursor: pointer;
+
+        }
+
+
+        /* =====================================================
+           BOTÓN
+           ===================================================== */
+
+        .btn-save {
+
+            width: 100%;
+
+            padding: 13px;
+
+            border: none;
+
+            border-radius: 9px;
+
+            background:
+                #2563eb;
+
+            color: white;
+
+            font-size: 16px;
+
+            font-weight: bold;
+
+            cursor: pointer;
+
+        }
+
+
+        .btn-save:hover {
+
+            background:
+                #1d4ed8;
+
+        }
+
+
+        /* =====================================================
+           VISTA PREVIA
+           ===================================================== */
+
+        .preview-container {
+
+            display: flex;
+
+            justify-content: center;
+
+            align-items: center;
+
+            overflow-x: auto;
+
+            padding: 10px;
+
+        }
+
+
+        /* =====================================================
+           CREDENCIAL
+           ===================================================== */
+
+        .credencial {
+
+            width: 700px;
+
+            height: 400px;
+
+            min-height: 400px;
+
+            border-radius: 22px;
+
+            overflow: hidden;
+
+            background: white;
+
+            box-shadow:
+                0 10px 30px rgba(0,0,0,.18);
+
+            border:
+                1px solid #ddd;
+
+            display: flex;
+
+            flex-direction: column;
+
+            flex-shrink: 0;
+
+        }
+
+
+        /* =====================================================
+           ENCABEZADO
+           ===================================================== */
+
+        .credencial-header {
+
+            padding:
+                18px 25px;
+
+            text-align: left;
+
+            color: white;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: space-between;
+
+            min-height: 95px;
+
+            box-sizing: border-box;
+
+        }
+
+
+        .institucion {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 15px;
+
+            min-width: 0;
+
+        }
+
+
+        .credencial-logo {
+
+            width: 60px;
+
+            height: 60px;
+
+            object-fit: contain;
+
+            background: white;
+
+            border-radius: 9px;
+
+            padding: 4px;
+
+            flex-shrink: 0;
+
+        }
+
+
+        .institucion-texto {
+
+            min-width: 0;
+
+        }
+
+
+        .credencial-institucion {
+
+            font-size: 21px;
+
+            font-weight: bold;
+
+            margin: 0;
+
+            word-break: break-word;
+
+        }
+
+
+        .credencial-subtitulo {
+
+            margin:
+                5px 0 0;
+
+            font-size: 12px;
+
+            opacity: .9;
+
+            word-break: break-word;
+
+        }
+
+
+        .credencial-titulo {
+
+            font-size: 12px;
+
+            font-weight: bold;
+
+            letter-spacing: 1px;
+
+            text-transform: uppercase;
+
+            text-align: right;
+
+            flex-shrink: 0;
+
+            margin-left: 15px;
+
+        }
+
+
+        /* =====================================================
+           CUERPO
+           ===================================================== */
+
+        .credencial-body {
+
+            flex: 1;
+
+            padding:
+                22px 25px;
+
+            display: flex;
+
+            gap: 22px;
+
+            align-items: center;
+
+            box-sizing: border-box;
+
+            min-height: 0;
+
+        }
+
+
+        /* =====================================================
+           FOTO
+           ===================================================== */
+
+        .foto-container {
+
+            width: 120px;
+
+            height: 145px;
+
+            flex:
+                0 0 120px;
+
+            overflow: hidden;
+
+        }
+
+
+        .credencial-foto {
+
+            width: 120px;
+
+            height: 145px;
+
+            box-sizing: border-box;
+
+            border-radius: 10px;
+
+            border:
+                3px solid #e5e7eb;
+
+            background:
+                #f1f5f9;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            overflow: hidden;
+
+        }
+
+
+        .credencial-foto img {
+
+            width: 100%;
+
+            height: 100%;
+
+            object-fit: cover;
+
+            display: block;
+
+        }
+
+
+        .foto-placeholder {
+
+            display: flex;
+            width: 100%;
+            height: 100%;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            background: linear-gradient(155deg, #f0fdfa, #e2e8f0);
+            color: #0f766e;
+
+            font-size: 11px;
+            font-weight: 650;
+
+            text-align: center;
+
+            padding: 0;
+
+        }
+
+        .foto-placeholder svg {
+            width: 58px;
+            height: 78px;
+            fill: currentColor;
+            opacity: .72;
+        }
+
+
+        /* =====================================================
+           DATOS
+           ===================================================== */
+
+        .datos {
+
+            flex: 1;
+
+            min-width: 0;
+
+            overflow: hidden;
+
+        }
+
+
+        .credencial-nombre {
+
+            margin: 0;
+
+            font-weight: bold;
+
+            line-height: 1.1;
+
+            word-break: break-word;
+
+            overflow-wrap: anywhere;
+
+        }
+
+
+        .matricula-preview {
+
+            margin-top: 7px;
+
+            font-size: 14px;
+
+        }
+
+
+        .credencial-datos {
+
+            margin-top: 15px;
+
+            display: grid;
+
+            grid-template-columns:
+                1fr
+                1fr;
+
+            gap:
+                8px 15px;
+
+        }
+
+
+        .dato {
+
+            padding:
+                7px 0;
+
+            border-bottom:
+                1px solid #eee;
+
+            font-size: 13px;
+
+            min-width: 0;
+
+        }
+
+
+        .dato strong {
+
+            display: block;
+
+            font-size: 10px;
+
+            text-transform: uppercase;
+
+            color:
+                #777;
+
+            margin-bottom: 2px;
+
+        }
+
+
+        .dato span {
+
+            display: block;
+
+            word-break: break-word;
+
+            overflow-wrap: anywhere;
+
+        }
+
+
+        /* =====================================================
+           QR
+           ===================================================== */
+
+        .qr-container {
+
+            width: {{ configuracion.tamano_qr }}px;
+
+            flex:
+                0 0 {{ configuracion.tamano_qr }}px;
+
+            text-align: center;
+
+        }
+
+
+        .qr-imagen {
+
+            width: {{ configuracion.tamano_qr }}px;
+
+            height: {{ configuracion.tamano_qr }}px;
+
+            object-fit: contain;
+
+            display: block;
+
+            margin: auto;
+
+        }
+
+
+        .qr-text {
+
+            margin-top: 6px;
+
+            font-size: 9px;
+
+            color:
+                #777;
+
+        }
+
+
+        /* =====================================================
+           PIE
+           ===================================================== */
+
+        .credencial-footer {
+
+            padding:
+                12px 25px;
+
+            text-align: center;
+
+            font-size: 11px;
+
+            color: white;
+
+            min-height: 42px;
+
+            box-sizing: border-box;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+        }
+
+
+
+        .layout-tools { display:flex; align-items:center; justify-content:space-between; gap:12px; margin:0 0 12px; color:#475569; font-size:13px; }
+        .layout-tools button { border:1px solid #cbd5e1; border-radius:8px; background:#fff; padding:8px 11px; color:#334155; cursor:pointer; white-space:nowrap; }
+        #credencialPreview { position:relative; touch-action:none; }
+        #credencialPreview .layout-draggable { position:relative; cursor:grab; touch-action:none; user-select:none; }
+        #credencialPreview .layout-draggable.is-dragging { cursor:grabbing; outline:2px dashed #0ea5e9; outline-offset:2px; z-index:20; }
+
+
+        .free-editor-card { grid-column:1 / -1; }
+        .free-toolbar { display:flex; flex-wrap:wrap; gap:8px; margin:14px 0; }
+        .free-toolbar button,.free-mode-button { border:1px solid #cbd5e1; border-radius:8px; background:#fff; padding:9px 12px; color:#1e293b; cursor:pointer; font-weight:600; }
+        .free-toolbar button:hover,.free-mode-button:hover { border-color:#0ea5e9; color:#0369a1; }
+        .free-template-toolbar { display:flex; align-items:center; flex-wrap:wrap; gap:8px; padding:12px; margin-bottom:14px; border:1px solid #dbeafe; border-radius:10px; background:#f8fafc; }
+        .free-template-toolbar input,.free-template-toolbar select,.free-template-toolbar button { min-height:38px; padding:8px 10px; border:1px solid #cbd5e1; border-radius:7px; background:#fff; }
+        .free-template-toolbar button { cursor:pointer; font-weight:600; color:#1e293b; }
+        .cred-side-button.is-active { border-color:#0284c7; background:#e0f2fe; color:#075985; }
+        .free-editor { margin-top:16px; padding:16px; border:1px solid #dbe3ec; border-radius:14px; background:#f8fafc; }
+        .free-editor-body { display:grid; grid-template-columns:minmax(0,1fr) 250px; gap:16px; align-items:start; }
+        .free-canvas-wrap { overflow:auto; padding:10px; background:#e2e8f0; border-radius:10px; }
+        .free-canvas { position:relative; width:700px; height:400px; overflow:hidden; background:#fff; box-shadow:0 5px 18px #0f172a22; touch-action:none; }
+        .design-node { position:absolute; display:flex; align-items:flex-start; justify-content:flex-start; overflow:hidden; box-sizing:border-box; cursor:move; user-select:none; touch-action:none; }
+        .design-node.selected { outline:2px solid #0ea5e9; outline-offset:1px; z-index:900; }
+        .design-node img { display:block; width:100%; height:100%; object-fit:contain; pointer-events:none; }
+        .design-node[data-type="photo"] img { object-fit:cover; }
+        .design-node .node-text { white-space:pre-wrap; overflow:hidden; width:100%; }
+        .resize-handle { position:absolute; width:12px; height:12px; right:0; bottom:0; background:#0ea5e9; border:2px solid white; border-radius:3px; cursor:nwse-resize; }
+        .free-inspector { background:white; border:1px solid #e2e8f0; border-radius:10px; padding:12px; }
+        .free-inspector label { display:block; font-size:12px; font-weight:700; color:#475569; margin:10px 0 4px; }
+        .free-inspector input,.free-inspector textarea,.free-inspector select { width:100%; border:1px solid #cbd5e1; border-radius:7px; padding:7px; box-sizing:border-box; }
+        .free-inspector input:disabled,.free-inspector textarea:disabled,.free-inspector select:disabled { opacity:.55; cursor:not-allowed; }
+        .free-image-status { margin-top:6px; color:#64748b; font-size:12px; }
+        .free-inspector-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+        .free-hint { color:#64748b; font-size:13px; }
+        @media(max-width:900px) { .free-editor-body { grid-template-columns:1fr; } .free-inspector { max-width:none; } }
+
+        /* =====================================================
+           RESPONSIVE
+           ===================================================== */
+
+        @media (max-width: 1300px) {
+
+            .config-layout {
+
+                grid-template-columns: 1fr;
+
+            }
+
+
+            .preview-container {
+
+                justify-content: flex-start;
+
+            }
+
+        }
+
+
+        @media (max-width: 750px) {
+
+            .credencial {
+
+                transform-origin:
+                    top left;
+
+                transform:
+                    scale(.8);
+
+                margin-bottom:
+                    -80px;
+
+            }
+
+        }
+
+
+    </style>
+
+</head>
+
+
+<body>
+
+<!-- =====================================================
+         BARRA LATERAL
+         ===================================================== -->
+
+    {% include "_sidebar.html" %}
+
+
+    <!-- =====================================================
+         CONTENIDO
+         ===================================================== -->
+
+    <main class="content">
+
+
+        <div class="config-header">
+
+            <h2>
+                Diseño de credencial del personal
+            </h2>
+
+
+            <p>
+                Personaliza la apariencia de las credenciales del personal.
+            </p>
+
+        </div>
+        <nav class="credencial-switcher" aria-label="Tipo de credencial">
+            <a href="/credencial/configuracion">Alumnos</a>
+            <a class="is-active" aria-current="page" href="/credencial/configuracion-personal">Personal</a>
+        </nav>
+        <a class="credencial-lista-link" href="/administracion/credenciales-personal">
+            Ver credenciales del personal <span aria-hidden="true">→</span>
+        </a>
+
+
+        <div class="config-layout">
+
+
+            <!-- =================================================
+                 CONFIGURACIÓN
+                 ================================================= -->
+
+            <section class="config-card">
+
+                <h3>
+                    Configuración
+                </h3>
+
+
+                <form
+                    id="credentialConfigForm"
+                    method="POST"
+                    action="/credencial/configuracion-personal"
+                    enctype="multipart/form-data"
+                >
+                    <input type="hidden" name="layout_json" id="layoutJsonInput" value="{}">
+
+
+
+                    <!-- INSTITUCIÓN -->
+
+                    <div class="form-group">
+
+                        <label>
+                            Nombre de la institución
+                        </label>
+
+
+                        <input
+                            type="text"
+                            name="nombre_institucion"
+                            value="{{ configuracion.nombre_institucion }}"
+                            required
+                        >
+
+                    </div>
+
+
+                    <!-- SUBTÍTULO -->
+
+                    <div class="form-group">
+
+                        <label>
+                            Subtítulo
+                        </label>
+
+
+                        <input
+                            type="text"
+                            name="subtitulo"
+                            value="{{ configuracion.subtitulo }}"
+                        >
+
+                    </div>
+
+
+                    <!-- LOGO -->
+
+                    <div class="form-group legacy-design-control" hidden>
+
+                        <label>
+                            Logo
+                        </label>
+
+
+                        <input
+                            type="file"
+                            name="logo"
+                            accept=".jpg,.jpeg,.png,.webp"
+                        >
+
+
+                        {% if configuracion.logo %}
+
+                        <img
+                            src="/static/uploads/{{ configuracion.logo }}"
+                            class="logo-preview"
+                            id="logoFormularioPreview"
+                            alt="Logo"
+                        >
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <!-- COLOR PRINCIPAL -->
+
+                    <div class="form-group legacy-design-control" hidden>
+
+                        <label>
+                            Color principal
+                        </label>
+
+
+                        <div class="color-row">
+
+                            <input
+                                type="text"
+                                name="color_principal"
+                                value="{{ configuracion.color_principal }}"
+                            >
+
+
+                            <input
+                                type="color"
+                                value="{{ configuracion.color_principal }}"
+                            >
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- COLOR SECUNDARIO -->
+
+                    <div class="form-group legacy-design-control" hidden>
+
+                        <label>
+                            Color secundario
+                        </label>
+
+
+                        <div class="color-row">
+
+                            <input
+                                type="text"
+                                name="color_secundario"
+                                value="{{ configuracion.color_secundario }}"
+                            >
+
+
+                            <input
+                                type="color"
+                                value="{{ configuracion.color_secundario }}"
+                            >
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- COLOR TEXTO -->
+
+                    <div class="form-group legacy-design-control" hidden>
+
+                        <label>
+                            Color del texto
+                        </label>
+
+
+                        <div class="color-row">
+
+                            <input
+                                type="text"
+                                name="color_texto"
+                                value="{{ configuracion.color_texto }}"
+                            >
+
+
+                            <input
+                                type="color"
+                                value="{{ configuracion.color_texto }}"
+                            >
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- FUENTE -->
+
+                    <div class="form-group legacy-design-control" hidden>
+
+                        <label>
+                            Fuente
+                        </label>
+
+
+                        <select name="fuente">
+
+                            {% for fuente in [
+                                "Arial",
+                                "Verdana",
+                                "Tahoma",
+                                "Trebuchet MS",
+                                "Georgia",
+                                "Times New Roman"
+                            ] %}
+
+                            <option
+                                value="{{ fuente }}"
+                                {% if configuracion.fuente == fuente %}
+                                selected
+                                {% endif %}
+                            >
+
+                                {{ fuente }}
+
+                            </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- TAMAÑO DEL NOMBRE -->
+
+                    <div class="form-group legacy-design-control" hidden>
+
+                        <label>
+                            Tamaño del nombre
+                        </label>
+
+
+                        <input
+                            type="number"
+                            name="tamano_nombre"
+                            value="{{ configuracion.tamano_nombre }}"
+                            min="12"
+                            max="60"
+                        >
+
+                        <label style="margin-top: 15px; display: block;">
+                            Tamaño del código QR
+                        </label>
+
+                        <input
+                            type="number"
+                            name="tamano_qr"
+                            value="{{ configuracion.tamano_qr }}"
+                            min="100"
+                            max="500"
+                            step="10"
+                        >
+
+                    </div>
+
+
+                    <!-- =================================================
+                         ELEMENTOS VISIBLES
+                         ================================================= -->
+
+                    <div class="form-group">
+
+                        <label>
+                            Elementos visibles
+                        </label>
+
+
+                        <div class="checkbox-group">
+
+
+                            <!-- FOTO -->
+
+                            <div class="checkbox-item">
+
+                                <label>
+
+                                    <input
+                                        type="checkbox"
+                                        name="mostrar_foto"
+                                        {% if configuracion.mostrar_foto %}
+                                            checked
+                                        {% endif %}
+                                    >
+
+                                    Foto
+
+                                </label>
+
+                            </div>
+
+
+                            <!-- QR -->
+
+                            <div class="checkbox-item">
+
+                                <label>
+
+                                    <input
+                                        type="checkbox"
+                                        name="mostrar_qr"
+                                        {% if configuracion.mostrar_qr %}
+                                            checked
+                                        {% endif %}
+                                    >
+
+                                    Código QR
+
+                                </label>
+
+                            </div>
+
+
+                            <!-- MATRÍCULA -->
+
+                            <div class="checkbox-item">
+
+                                <label>
+
+                                    <input
+                                        type="checkbox"
+                                        name="mostrar_matricula"
+                                        {% if configuracion.mostrar_matricula %}
+                                            checked
+                                        {% endif %}
+                                    >
+
+                                    Número de empleado
+
+                                </label>
+
+                            </div>
+
+
+                            <!-- TIPO DE PERSONAL -->
+
+                            <div class="checkbox-item">
+
+                                <label>
+
+                                    <input
+                                        type="checkbox"
+                                        name="mostrar_tipo_personal"
+                                        {% if configuracion.mostrar_tipo_personal %}
+                                            checked
+                                        {% endif %}
+                                    >
+
+                                    Tipo de personal
+
+                                </label>
+
+                            </div>
+
+
+                            <!-- CARGO -->
+
+                            <div class="checkbox-item">
+
+                                <label>
+
+                                    <input
+                                        type="checkbox"
+                                        name="mostrar_cargo"
+                                        {% if configuracion.mostrar_cargo %}
+                                            checked
+                                        {% endif %}
+                                    >
+
+                                    Cargo
+
+                                </label>
+
+                            </div>
+
+
+                            <!-- ÁREA -->
+
+                            <div class="checkbox-item">
+
+                                <label>
+
+                                    <input
+                                        type="checkbox"
+                                        name="mostrar_area"
+                                        {% if configuracion.mostrar_area %}
+                                            checked
+                                        {% endif %}
+                                    >
+
+                                    Área
+
+                                </label>
+
+                            </div>
+
+
+                            <!-- CORREO -->
+
+                            <div class="checkbox-item">
+
+                                <label>
+
+                                    <input
+                                        type="checkbox"
+                                        name="mostrar_correo"
+                                        {% if configuracion.mostrar_correo %}
+                                            checked
+                                        {% endif %}
+                                    >
+
+                                    Correo
+
+                                </label>
+
+                            </div>
+
+
+                            <!-- TELÉFONO -->
+
+                            <div class="checkbox-item">
+
+                                <label>
+
+                                    <input
+                                        type="checkbox"
+                                        name="mostrar_telefono"
+                                        {% if configuracion.mostrar_telefono %}
+                                            checked
+                                        {% endif %}
+                                    >
+
+                                    Teléfono
+
+                                </label>
+
+                            </div>
+
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- PIE -->
+
+                    <div class="form-group">
+
+                        <label>
+                            Texto del pie
+                        </label>
+
+
+                        <input
+                            type="text"
+                            name="texto_pie"
+                            value="{{ configuracion.texto_pie }}"
+                        >
+
+                    </div>
+
+
+                    <!-- GUARDAR -->
+
+                    <button
+                        type="submit"
+                        class="btn-save"
+                    >
+
+                        Guardar diseño
+
+                    </button>
+
+
+                </form>
+
+            </section>
+
+
+            <!-- =================================================
+                 VISTA PREVIA
+                 ================================================= -->
+
+            <section class="config-card">
+
+                <h3>
+                    Vista previa
+                </h3>
+                <div class="layout-tools"><span>Arrastra los elementos sobre la credencial para acomodarlos.</span><button type="button" id="resetLayout">Restablecer posiciones</button></div>
+
+
+                <div class="preview-container">
+
+
+                    <div
+                        class="credencial"
+                        id="credencialPreview"
+                    >
+
+
+                        <!-- =================================================
+                             ENCABEZADO
+                             ================================================= -->
+
+                        <div
+                            class="credencial-header"
+                            style="
+                                background:
+                                {{ configuracion.color_principal }};
+                            "
+                        >
+
+
+                            <div class="institucion layout-draggable" data-layout-key="institucion">
+
+
+                                {% if configuracion.logo %}
+
+                                <img
+                                    src="/static/uploads/{{ configuracion.logo }}"
+                                    class="credencial-logo"
+                                    id="logoPreview"
+                                    alt="Logo"
+                                >
+
+                                {% endif %}
+
+
+                                <div class="institucion-texto">
+
+                                    <p class="credencial-institucion">
+
+                                        {{ configuracion.nombre_institucion }}
+
+                                    </p>
+
+
+                                    <p class="credencial-subtitulo">
+
+                                        {{ configuracion.subtitulo }}
+
+                                    </p>
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="credencial-titulo layout-draggable" data-layout-key="titulo">
+
+                                Credencial del personal
+
+                            </div>
+
+
+                        </div>
+
+
+                        <!-- =================================================
+                             CUERPO
+                             ================================================= -->
+
+                        <div class="credencial-body">
+
+
+                            <!-- FOTO -->
+
+                            <div
+                                class="foto-container layout-draggable" data-layout-key="foto"
+                                {% if not configuracion.mostrar_foto %}
+                                style="display:none;"
+                                {% endif %}
+                            >
+
+                                <div class="credencial-foto">
+                                    <div
+                                        id="fotoPlaceholder"
+                                        class="foto-placeholder"
+                                    >
+                                        <svg viewBox="0 0 80 100" aria-hidden="true" focusable="false">
+                                            <circle cx="40" cy="28" r="18"></circle>
+                                            <path d="M8 96c2-24 14-39 32-39s30 15 32 39H8z"></path>
+                                        </svg>
+                                        <span>Fotografía</span>
+                                    </div>
+
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- DATOS -->
+
+                            <div class="datos layout-draggable" data-layout-key="datos">
+
+
+                                <!-- NOMBRE -->
+
+                                <div
+                                    class="credencial-nombre"
+                                    style="
+                                        color:
+                                        {{ configuracion.color_texto }};
+
+                                        font-size:
+                                        {{ configuracion.tamano_nombre }}px;
+
+                                        font-family:
+                                        {{ configuracion.fuente }};
+                                    "
+                                >
+
+                                    Carlos Andres Romero Ochoa
+
+                                </div>
+
+
+                                <!-- NÚMERO DE EMPLEADO -->
+
+                                <div
+                                    class="matricula-preview"
+                                    style="
+                                        color:
+                                        {{ configuracion.color_texto }};
+
+                                        font-family:
+                                        {{ configuracion.fuente }};
+
+                                        {% if not configuracion.mostrar_matricula %}
+                                        display:none;
+                                        {% endif %}
+                                    "
+                                >
+
+                                    Número de empleado:
+
+                                    <strong>
+                                        22015021
+                                    </strong>
+
+                                </div>
+
+
+                                <!-- DATOS -->
+
+                                <div class="credencial-datos">
+
+
+                                    <!-- TIPO DE PERSONAL -->
+
+                                    <div
+                                        class="dato dato-tipo-personal"
+                                        {% if not configuracion.mostrar_tipo_personal %}
+                                        style="display:none;"
+                                        {% endif %}
+                                    >
+
+                                        <strong>
+                                            Tipo de personal
+                                        </strong>
+
+
+                                        <span>
+                                            Administrativo
+                                        </span>
+
+                                    </div>
+
+
+                                    <!-- CARGO -->
+
+                                    <div
+                                        class="dato dato-cargo"
+                                        {% if not configuracion.mostrar_cargo %}
+                                        style="display:none;"
+                                        {% endif %}
+                                    >
+
+                                        <strong>
+                                            Cargo
+                                        </strong>
+
+
+                                        <span>
+                                            Docente
+                                        </span>
+
+                                    </div>
+
+
+                                    <!-- ÁREA -->
+
+                                    <div
+                                        class="dato dato-area"
+                                        {% if not configuracion.mostrar_area %}
+                                        style="display:none;"
+                                        {% endif %}
+                                    >
+
+                                        <strong>
+                                            Área
+                                        </strong>
+
+
+                                        <span>
+                                            Académica
+                                        </span>
+
+                                    </div>
+
+
+                                    <!-- CORREO -->
+
+                                    <div
+                                        class="dato dato-correo"
+                                        {% if not configuracion.mostrar_correo %}
+                                        style="display:none;"
+                                        {% endif %}
+                                    >
+
+                                        <strong>
+                                            Correo
+                                        </strong>
+
+
+                                        <span>
+                                            personal@institucion.edu.mx
+                                        </span>
+
+                                    </div>
+
+
+                                    <!-- TELÉFONO -->
+
+                                    <div
+                                        class="dato dato-telefono"
+                                        {% if not configuracion.mostrar_telefono %}
+                                        style="display:none;"
+                                        {% endif %}
+                                    >
+
+                                        <strong>
+                                            Teléfono
+                                        </strong>
+
+
+                                        <span>
+                                            449 000 0000
+                                        </span>
+
+                                    </div>
+
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- QR -->
+
+                            <div
+                                class="qr-container layout-draggable" data-layout-key="qr"
+                                {% if not configuracion.mostrar_qr %}
+                                style="display:none;"
+                                {% endif %}
+                            >
+
+
+                                <img
+                                    id="qrPreview"
+                                    class="qr-imagen"
+                                    src="/static/uploads/{{ qr_preview }}?v={{ qr_preview }}"
+                                    alt="Código QR"
+                                >
+
+
+                                <div class="qr-text">
+
+                                    Presentar para registro
+
+                                </div>
+
+
+                            </div>
+
+
+                        </div>
+
+
+                        <!-- PIE -->
+
+                        <div
+                            class="credencial-footer layout-draggable" data-layout-key="pie"
+                            style="
+                                background:
+                                {{ configuracion.color_secundario }};
+                            "
+                        >
+
+                            {{ configuracion.texto_pie }}
+
+                        </div>
+
+
+                    </div>
+
+                </div>
+
+            </section>
+
+            <section class="config-card free-editor-card">
+                <h3>Diseño personalizado desde cero</h3>
+                <p class="free-hint">Importa un PowerPoint con el frente y reverso en dos diapositivas o juntos lado a lado en una diapositiva. Se conservarán como fondos; el PDF incluirá ambos lados para imprimir a doble cara por el borde largo.</p>
+                <button type="button" class="free-mode-button" id="createFreeDesign">Crear diseño desde cero</button>
+                <button type="button" class="free-mode-button" id="useClassicDesign">Volver al diseño actual</button>
+                <div id="freeEditor" class="free-editor" hidden>
+                    <div class="free-toolbar">
+                        <button type="button" data-add-element="rect">＋ Franja / rectángulo</button>
+                        <button type="button" data-add-element="text">＋ Texto</button>
+                        <button type="button" data-add-element="field">＋ Dato variable</button>
+                        <button type="button" data-add-element="logo">＋ Escudo / logo</button>
+                        <button type="button" data-add-element="photo">＋ Fotografía</button>
+                        <button type="button" data-add-element="image">＋ Imagen personalizada</button>
+                        <button type="button" data-add-element="qr">＋ Código QR</button>
+                        <label class="free-import-button">Importar PowerPoint (2 caras)<input type="file" id="powerpointImport" accept=".pptx,application/vnd.openxmlformats-officedocument.presentationml.presentation"></label>
+                        <label style="display:flex;align-items:center;gap:7px;margin-left:auto;font-size:13px;">Fondo <input type="color" id="freeBackground" value="#ffffff"></label>
+                        <button type="button" id="deleteFreeElement">Eliminar seleccionado</button>
+                    </div>
+                    <div class="free-template-toolbar" aria-label="Cara de la credencial">
+                        <strong>Cara:</strong>
+                        <button type="button" class="cred-side-button is-active" data-cred-side="frente">Frente</button>
+                        <button type="button" class="cred-side-button" data-cred-side="reverso">Reverso</button>
+                    </div>
+                    <div class="free-template-toolbar">
+                        <strong>Plantillas de alumnos y personal:</strong>
+                        <input id="templateName" type="text" maxlength="100" placeholder="Nombre de la plantilla">
+                        <button type="button" id="saveTemplate">Guardar plantilla</button>
+                        <select id="savedTemplates" aria-label="Plantillas guardadas"><option value="">Selecciona una plantilla</option></select>
+                        <button type="button" id="loadTemplate">Cargar</button>
+                        <button type="button" id="deleteTemplate">Eliminar</button>
+                    </div>
+                    <div class="free-editor-body">
+                        <div class="free-canvas-wrap"><div class="free-canvas" id="freeCanvas" aria-label="Lienzo editable de credencial"></div></div>
+                        <aside class="free-inspector">
+                            <strong>Elemento seleccionado</strong>
+                            <div id="freeNoSelection" class="free-hint">Selecciona o agrega un elemento.</div>
+                            <div id="freeProperties" hidden>
+                                <label>Dato que se mostrará</label><select id="freeField"><option value="">Texto fijo</option><option value="nombre">Nombre completo</option><option value="matricula">Número de empleado</option><option value="tipo_personal">Tipo de personal</option><option value="cargo">Cargo</option><option value="area">Área</option><option value="correo">Correo</option><option value="telefono">Teléfono</option><option value="institucion">Institución</option><option value="subtitulo">Subtítulo</option><option value="texto_pie">Texto de pie</option></select>
+                                <label>Texto</label><textarea id="freeText" rows="3"></textarea>
+                                <div class="free-inspector-grid"><div><label>Ancho</label><input id="freeWidth" type="number" min="12" max="700"></div><div><label>Alto</label><input id="freeHeight" type="number" min="12" max="400"></div></div>
+                                <div class="free-inspector-grid"><div><label>Tamaño de texto</label><input id="freeFontSize" type="number" min="8" max="80"></div><div><label>Color texto / franja</label><input id="freeColor" type="color" value="#111827"></div></div>
+                                <label>Tipo de letra</label><select id="freeFontFamily"><option value="Arial">Arial</option><option value="Times">Times New Roman</option><option value="Courier">Courier</option></select>
+                                <label class="free-bold-option"><input id="freeBold" type="checkbox"> Texto en negritas</label>
+                                <label>Fondo de la forma</label><input id="freeFill" type="color" value="#2563eb">
+                                <div id="freeImageProperties" hidden>
+                                    <label>Imagen del elemento</label><input id="freeImage" type="file" accept=".png,.jpg,.jpeg,.webp,image/png,image/jpeg,image/webp">
+                                    <label>Ajuste de imagen</label><select id="freeImageFit"><option value="contain">Mostrar completa</option><option value="cover">Rellenar el marco</option><option value="stretch">Llenar sin recortar</option></select>
+                                </div>
+                            </div>
+                        </aside>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+
+    </main>
+
+
+    <!-- =====================================================
+         JAVASCRIPT
+         ===================================================== -->
+
+    <script>
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            function () {
+
+
+                /* =================================================
+                   CAMPOS DEL FORMULARIO
+                   ================================================= */
+
+                const institucion =
+                    document.querySelector(
+                        '[name="nombre_institucion"]'
+                    );
+
+
+                const subtitulo =
+                    document.querySelector(
+                        '[name="subtitulo"]'
+                    );
+
+
+                const logoInput =
+                    document.querySelector(
+                        '[name="logo"]'
+                    );
+
+
+                const colorPrincipal =
+                    document.querySelector(
+                        '[name="color_principal"]'
+                    );
+
+
+                const colorSecundario =
+                    document.querySelector(
+                        '[name="color_secundario"]'
+                    );
+
+
+                const colorTexto =
+                    document.querySelector(
+                        '[name="color_texto"]'
+                    );
+
+
+                const fuente =
+                    document.querySelector(
+                        '[name="fuente"]'
+                    );
+
+
+                const tamanoNombre =
+                    document.querySelector(
+                        '[name="tamano_nombre"]'
+                    );
+
+
+                const tamanoQR =
+                    document.querySelector(
+                        '[name="tamano_qr"]'
+                    );
+
+
+                const mostrarFoto =
+                    document.querySelector(
+                        '[name="mostrar_foto"]'
+                    );
+
+
+                const mostrarQR =
+                    document.querySelector(
+                        '[name="mostrar_qr"]'
+                    );
+
+
+                const mostrarMatricula =
+                    document.querySelector(
+                        '[name="mostrar_matricula"]'
+                    );
+
+
+                const mostrarTipoPersonal =
+                    document.querySelector(
+                        '[name="mostrar_tipo_personal"]'
+                    );
+
+
+                const mostrarCargo =
+                    document.querySelector(
+                        '[name="mostrar_cargo"]'
+                    );
+
+
+                const mostrarArea =
+                    document.querySelector(
+                        '[name="mostrar_area"]'
+                    );
+
+
+                const mostrarCorreo =
+                    document.querySelector(
+                        '[name="mostrar_correo"]'
+                    );
+
+
+                const mostrarTelefono =
+                    document.querySelector(
+                        '[name="mostrar_telefono"]'
+                    );
+
+
+                const textoPie =
+                    document.querySelector(
+                        '[name="texto_pie"]'
+                    );
+
+
+                /* =================================================
+                   ELEMENTOS DE LA VISTA PREVIA
+                   ================================================= */
+
+                const header =
+                    document.querySelector(
+                        '.credencial-header'
+                    );
+
+
+                const footer =
+                    document.querySelector(
+                        '.credencial-footer'
+                    );
+
+
+                const institucionPreview =
+                    document.querySelector(
+                        '.credencial-institucion'
+                    );
+
+
+                const subtituloPreview =
+                    document.querySelector(
+                        '.credencial-subtitulo'
+                    );
+
+
+                const nombrePreview =
+                    document.querySelector(
+                        '.credencial-nombre'
+                    );
+
+
+                const matriculaPreview =
+                    document.querySelector(
+                        '.matricula-preview'
+                    );
+
+
+                const fotoContainer =
+                    document.querySelector(
+                        '.foto-container'
+                    );
+
+
+                const qrContainer =
+                    document.querySelector(
+                        '.qr-container'
+                    );
+
+
+
+                const datoTipoPersonal =
+                    document.querySelector(
+                        '.dato-tipo-personal'
+                    );
+
+
+                const datoCargo =
+                    document.querySelector(
+                        '.dato-cargo'
+                    );
+
+
+                const datoArea =
+                    document.querySelector(
+                        '.dato-area'
+                    );
+
+
+                const datoCorreo =
+                    document.querySelector(
+                        '.dato-correo'
+                    );
+
+
+                const datoTelefono =
+                    document.querySelector(
+                        '.dato-telefono'
+                    );
+
+
+                /* =================================================
+                   ACTUALIZAR TEXTOS
+                   ================================================= */
+
+                function actualizarTexto() {
+
+
+                    if (
+                        institucion &&
+                        institucionPreview
+                    ) {
+
+                        institucionPreview.textContent =
+                            institucion.value;
+
+                    }
+
+
+                    if (
+                        subtitulo &&
+                        subtituloPreview
+                    ) {
+
+                        subtituloPreview.textContent =
+                            subtitulo.value;
+
+                    }
+
+
+                    if (
+                        textoPie &&
+                        footer
+                    ) {
+
+                        footer.textContent =
+                            textoPie.value;
+
+                    }
+
+                }
+
+
+                /* =================================================
+                   ACTUALIZAR COLORES
+                   ================================================= */
+
+                function actualizarColores() {
+
+
+                    if (
+                        header &&
+                        colorPrincipal
+                    ) {
+
+                        header.style.background =
+                            colorPrincipal.value;
+
+                    }
+
+
+                    if (
+                        footer &&
+                        colorSecundario
+                    ) {
+
+                        footer.style.background =
+                            colorSecundario.value;
+
+                    }
+
+
+                    if (
+                        nombrePreview &&
+                        colorTexto
+                    ) {
+
+                        nombrePreview.style.color =
+                            colorTexto.value;
+
+                    }
+
+
+                    if (
+                        matriculaPreview &&
+                        colorTexto
+                    ) {
+
+                        matriculaPreview.style.color =
+                            colorTexto.value;
+
+                    }
+
+                }
+
+
+                /* =================================================
+                   ACTUALIZAR FUENTE
+                   ================================================= */
+
+                function actualizarFuente() {
+
+
+                    if (
+                        !nombrePreview
+                    ) {
+
+                        return;
+
+                    }
+
+
+                    if (
+                        fuente
+                    ) {
+
+                        nombrePreview.style.fontFamily =
+                            fuente.value;
+
+                    }
+
+
+                    if (
+                        tamanoNombre
+                    ) {
+
+                        nombrePreview.style.fontSize =
+                            tamanoNombre.value + "px";
+
+                    }
+
+
+                    if (
+                        matriculaPreview &&
+                        fuente
+                    ) {
+
+                        matriculaPreview.style.fontFamily =
+                            fuente.value;
+
+                    }
+
+                }
+
+
+                /* =================================================
+                   ACTUALIZAR ELEMENTOS VISIBLES
+                   ================================================= */
+
+                function actualizarElementos() {
+
+
+                    /* FOTO */
+
+                    if (
+                        fotoContainer &&
+                        mostrarFoto
+                    ) {
+
+                        fotoContainer.style.display =
+                            mostrarFoto.checked
+                                ? "block"
+                                : "none";
+
+                    }
+
+
+                    /* QR */
+
+                    if (
+                        qrContainer &&
+                        mostrarQR
+                    ) {
+
+                        qrContainer.style.display =
+                            mostrarQR.checked
+                                ? "block"
+                                : "none";
+
+                    }
+
+                    if (
+                        tamanoQR &&
+                        qrContainer
+                    ) {
+
+                        const tamano = parseInt(
+                            tamanoQR.value
+                        ) || 300;
+
+                        qrContainer.style.width =
+                            tamano + "px";
+
+                        qrContainer.style.flex =
+                            "0 0 " + tamano + "px";
+
+                        const qrImagen =
+                            qrContainer.querySelector(
+                                ".qr-imagen"
+                            );
+
+                        if (qrImagen) {
+
+                            qrImagen.style.width =
+                                tamano + "px";
+
+                            qrImagen.style.height =
+                                tamano + "px";
+
+                        }
+
+                    }
+
+
+                    /* NÚMERO DE EMPLEADO */
+
+                    if (
+                        matriculaPreview &&
+                        mostrarMatricula
+                    ) {
+
+                        matriculaPreview.style.display =
+                            mostrarMatricula.checked
+                                ? "block"
+                                : "none";
+
+                    }
+
+
+                    /* TIPO DE PERSONAL */
+
+                    if (
+                        datoTipoPersonal &&
+                        mostrarTipoPersonal
+                    ) {
+
+                        datoTipoPersonal.style.display =
+                            mostrarTipoPersonal.checked
+                                ? ""
+                                : "none";
+
+                    }
+
+
+                    /* CARGO */
+
+                    if (
+                        datoCargo &&
+                        mostrarCargo
+                    ) {
+
+                        datoCargo.style.display =
+                            mostrarCargo.checked
+                                ? ""
+                                : "none";
+
+                    }
+
+
+                    /* ÁREA */
+
+                    if (
+                        datoArea &&
+                        mostrarArea
+                    ) {
+
+                        datoArea.style.display =
+                            mostrarArea.checked
+                                ? ""
+                                : "none";
+
+                    }
+
+
+                    /* CORREO */
+
+                    if (
+                        datoCorreo &&
+                        mostrarCorreo
+                    ) {
+
+                        datoCorreo.style.display =
+                            mostrarCorreo.checked
+                                ? ""
+                                : "none";
+
+                    }
+
+
+                    /* TELÉFONO */
+
+                    if (
+                        datoTelefono &&
+                        mostrarTelefono
+                    ) {
+
+                        datoTelefono.style.display =
+                            mostrarTelefono.checked
+                                ? ""
+                                : "none";
+
+                    }
+
+                }
+
+
+                /* =================================================
+                   LOGO EN TIEMPO REAL
+                   ================================================= */
+
+                if (
+                    logoInput
+                ) {
+
+                    logoInput.addEventListener(
+                        "change",
+                        function () {
+
+
+                            const archivo =
+                                this.files[0];
+
+
+                            if (
+                                !archivo
+                            ) {
+
+                                return;
+
+                            }
+
+
+                            const lector =
+                                new FileReader();
+
+
+                            lector.onload =
+                                function (evento) {
+
+
+                                    let logo =
+                                        document.querySelector(
+                                            '#logoPreview'
+                                        );
+
+
+                                    if (
+                                        !logo
+                                    ) {
+
+
+                                        logo =
+                                            document.createElement(
+                                                'img'
+                                            );
+
+
+                                        logo.id =
+                                            'logoPreview';
+
+
+                                        logo.className =
+                                            'credencial-logo';
+
+
+                                        logo.alt =
+                                            'Logo';
+
+
+                                        const institucion =
+                                            document.querySelector(
+                                                '.institucion'
+                                            );
+
+
+                                        if (
+                                            institucion
+                                        ) {
+
+                                            institucion.insertBefore(
+                                                logo,
+                                                institucion.firstChild
+                                            );
+
+                                        }
+
+                                    }
+
+
+                                    logo.src =
+                                        evento.target.result;
+
+                                };
+
+
+                            lector.readAsDataURL(
+                                archivo
+                            );
+
+                        }
+                    );
+
+                }
+
+
+                /* =================================================
+                   SELECTORES DE COLOR
+                   ================================================= */
+
+                const colorPickers =
+                    document.querySelectorAll(
+                        '.color-row input[type="color"]'
+                    );
+
+
+                colorPickers.forEach(
+                    function (picker) {
+
+
+                        picker.addEventListener(
+                            "input",
+                            function () {
+
+
+                                const textInput =
+                                    this.parentElement.querySelector(
+                                        'input[type="text"]'
+                                    );
+
+
+                                if (
+                                    textInput
+                                ) {
+
+                                    textInput.value =
+                                        this.value;
+
+                                }
+
+
+                                actualizarColores();
+
+                            }
+                        );
+
+                    }
+                );
+
+
+                /* =================================================
+                   CAMPOS DE COLOR
+                   ================================================= */
+
+                [
+                    colorPrincipal,
+                    colorSecundario,
+                    colorTexto
+
+                ].forEach(
+                    function (input) {
+
+
+                        if (
+                            input
+                        ) {
+
+                            input.addEventListener(
+                                "input",
+                                actualizarColores
+                            );
+
+                        }
+
+                    }
+                );
+
+
+                /* =================================================
+                   CAMPOS DE TEXTO
+                   ================================================= */
+
+                if (
+                    institucion
+                ) {
+
+                    institucion.addEventListener(
+                        "input",
+                        actualizarTexto
+                    );
+
+                }
+
+
+                if (
+                    subtitulo
+                ) {
+
+                    subtitulo.addEventListener(
+                        "input",
+                        actualizarTexto
+                    );
+
+                }
+
+
+                if (
+                    textoPie
+                ) {
+
+                    textoPie.addEventListener(
+                        "input",
+                        actualizarTexto
+                    );
+
+                }
+
+
+                /* =================================================
+                   FUENTE
+                   ================================================= */
+
+                if (
+                    fuente
+                ) {
+
+                    fuente.addEventListener(
+                        "change",
+                        actualizarFuente
+                    );
+
+                }
+
+
+                if (
+                    tamanoNombre
+                ) {
+
+                    tamanoNombre.addEventListener(
+                        "input",
+                        actualizarFuente
+                    );
+
+                }
+
+                if (
+                    tamanoQR
+                ) {
+
+                    tamanoQR.addEventListener(
+                        "input",
+                        actualizarElementos
+                    );
+
+                }
+
+
+                /* =================================================
+                   CHECKBOXES
+                   ================================================= */
+
+                [
+                    mostrarFoto,
+                    mostrarQR,
+                    mostrarMatricula,
+                    mostrarTipoPersonal,
+                    mostrarCargo,
+                    mostrarArea,
+                    mostrarCorreo,
+                    mostrarTelefono
+
+                ].forEach(
+                    function (checkbox) {
+
+
+                        if (
+                            checkbox
+                        ) {
+
+                            checkbox.addEventListener(
+                                "change",
+                                actualizarElementos
+                            );
+
+                        }
+
+                    }
+                );
+
+
+                /* =================================================
+                   INICIALIZAR VISTA PREVIA
+                   ================================================= */
+
+                actualizarTexto();
+
+                actualizarColores();
+
+                actualizarFuente();
+
+                actualizarElementos();
+
+
+            }
+        );
+
+    </script>
+
+
+<script>
+(function () {
+    var card = document.getElementById("credencialPreview");
+    var form = document.querySelector('form[action^="/credencial/configuracion"]');
+    var hidden = document.getElementById("layoutJsonInput");
+    var editor = document.getElementById("freeEditor");
+    var canvas = document.getElementById("freeCanvas");
+    if (!card || !form || !hidden || !editor || !canvas) return;
+
+    var layout = {{ configuracion.layout|default({}, true)|tojson }} || {};
+    var frente = layout._free || {enabled:false, background:"#ffffff", elements:[]};
+    var reverso = frente.back || {enabled:false, background:"#ffffff", elements:[]};
+    var ladoActivo = "frente";
+    var free = frente;
+    function sincronizarCaras() {
+        if (ladoActivo === "frente") frente = free; else reverso = free;
+        frente.back = reverso;
+        layout._free = frente;
+    }
+    var selectedId = null;
+    var classicDrag = null;
+    var classicScaleX = card.offsetWidth / card.getBoundingClientRect().width;
+    var classicScaleY = card.offsetHeight / card.getBoundingClientRect().height;
+    function applyClassicOffsets() {
+        card.querySelectorAll("[data-layout-key]").forEach(function (el) {
+            var p = layout[el.dataset.layoutKey] || {x:0,y:0};
+            el.style.position = "relative";
+            el.style.left = (Number(p.x)||0) + "px";
+            el.style.top = (Number(p.y)||0) + "px";
+        });
+    }
+    card.addEventListener("pointerdown", function (event) {
+        if (free.enabled) return;
+        var el = event.target.closest("[data-layout-key]");
+        if (!el || event.button !== 0) return;
+        var key = el.dataset.layoutKey, p = layout[key] || {x:0,y:0};
+        classicDrag = {el:el,key:key,id:event.pointerId,startX:event.clientX,startY:event.clientY,x:Number(p.x)||0,y:Number(p.y)||0};
+        el.classList.add("is-dragging");
+        try { card.setPointerCapture(event.pointerId); } catch (error) {}
+        event.preventDefault();
+    });
+    card.addEventListener("pointermove", function (event) {
+        if (!classicDrag || classicDrag.id !== event.pointerId) return;
+        layout[classicDrag.key] = {x:Math.round(classicDrag.x+(event.clientX-classicDrag.startX)*classicScaleX),y:Math.round(classicDrag.y+(event.clientY-classicDrag.startY)*classicScaleY)};
+        applyClassicOffsets();
+    });
+    function endClassic(event) { if (classicDrag && (!event || event.pointerId===classicDrag.id)) { classicDrag.el.classList.remove("is-dragging"); classicDrag=null; } }
+    card.addEventListener("pointerup", endClassic);
+    card.addEventListener("pointercancel", endClassic);
+    applyClassicOffsets();
+    var drag = null;
+    var sample = {"nombre": "Nombre del personal", "matricula": "EMP-001", "tipo_personal": "Administrativo", "cargo": "Docente", "area": "Académica", "correo": "personal@institucion.edu.mx", "telefono": "449 000 0000", "institucion": "Institución escolar", "subtitulo": "Personal", "texto_pie": "Credencial del personal"};
+    var cardPreview = card.closest(".config-card");
+    var field = document.getElementById("freeField");
+    var text = document.getElementById("freeText");
+    var width = document.getElementById("freeWidth");
+    var height = document.getElementById("freeHeight");
+    var fontSize = document.getElementById("freeFontSize");
+    var fontFamily = document.getElementById("freeFontFamily");
+    var bold = document.getElementById("freeBold");
+    var color = document.getElementById("freeColor");
+    var fill = document.getElementById("freeFill");
+    var imageProperties = document.getElementById("freeImageProperties");
+    var imageFit = document.getElementById("freeImageFit");
+    var imageInput = document.getElementById("freeImage");
+    var freeLogoPreviewSrc = null;
+    var properties = document.getElementById("freeProperties");
+    var noSelection = document.getElementById("freeNoSelection");
+
+    function createId() { return "el-" + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+    function valueOf(el) { return el ? el.value : ""; }
+    function current() { return free.elements.find(function (e) { return e.id === selectedId; }) || null; }
+    function showMode() {
+        editor.hidden = !free.enabled;
+        if (cardPreview) cardPreview.hidden = !!free.enabled;
+        document.getElementById("freeBackground").value = free.background || "#ffffff";
+        document.querySelectorAll("[data-cred-side]").forEach(function (button) {
+            button.classList.toggle("is-active", button.dataset.credSide === ladoActivo);
+        });
+        render();
+    }
+    document.querySelectorAll("[data-cred-side]").forEach(function (button) {
+        button.addEventListener("click", function () {
+            sincronizarCaras();
+            ladoActivo = button.dataset.credSide;
+            free = ladoActivo === "frente" ? frente : reverso;
+            if (ladoActivo === "reverso" && frente.enabled) free.enabled = true;
+            selectedId = null;
+            showMode();
+        });
+    });
+    function fieldText(el) { return el.field ? (sample[el.field] || el.field) : (el.text || ""); }
+    function render() {
+        canvas.innerHTML = "";
+        canvas.style.background = free.background || "#ffffff";
+        (free.elements || []).forEach(function (item, index) {
+            var node = document.createElement("div");
+            node.className = "design-node" + (item.id === selectedId ? " selected" : "");
+            node.dataset.id = item.id;
+            node.dataset.type = item.type;
+            node.style.left = (Number(item.x)||0) + "px";
+            node.style.top = (Number(item.y)||0) + "px";
+            node.style.width = (Number(item.w)||120) + "px";
+            node.style.height = (Number(item.h)||48) + "px";
+            node.style.zIndex = String(index + 1);
+            if (item.type === "rect") node.style.background = item.fill || "#2563eb";
+            if (item.type === "text") {
+                var label = document.createElement("div");
+                label.className = "node-text";
+                label.textContent = fieldText(item);
+                label.style.color = item.color || "#111827";
+                label.style.fontSize = (Number(item.fontSize)||18) + "px";
+                label.style.fontFamily = item.fontFamily === "Times" ? "'Times New Roman', serif" : item.fontFamily === "Courier" ? "'Courier New', monospace" : "Arial, sans-serif";
+                label.style.fontWeight = item.bold ? "700" : "400";
+                node.appendChild(label);
+            } else if (item.type === "logo" || item.type === "photo" || item.type === "image" || item.type === "qr") {
+                var image = document.createElement("img");
+                image.alt = item.type === "logo" ? "Escudo" : item.type === "photo" ? "Fotografía" : "Código QR";
+                var logoSrc = document.getElementById("logoPreview");
+                var qrSrc = document.getElementById("qrPreview");
+                if (item.type === "logo" && freeLogoPreviewSrc) image.src = freeLogoPreviewSrc;
+                else if (item.type === "logo" && logoSrc) image.src = logoSrc.src;
+                else if (item.type === "image" && (item.imagePreview || item.image)) image.src = item.imagePreview || ("/static/uploads/" + item.image);
+                else if (item.type === "qr" && qrSrc) image.src = qrSrc.src;
+                else if (item.type === "photo") {
+                    image.src = "data:image/svg+xml," + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 100"><rect width="80" height="100" fill="#e2e8f0"/><circle cx="40" cy="30" r="18" fill="#94a3b8"/><path d="M8 100c2-26 14-42 32-42s30 16 32 42" fill="#94a3b8"/></svg>');
+                }
+                if (item.type === "logo" && !freeLogoPreviewSrc && !logoSrc) {
+                    node.textContent = "Escudo";
+                    node.style.display = "grid";
+                    node.style.placeItems = "center";
+                    node.style.border = "1px dashed #94a3b8";
+                } else {
+                    image.style.objectFit = item.type === "photo" || (item.type === "image" && item.fit === "cover") ? "cover" : (item.type === "image" && item.fit === "stretch" ? "fill" : "contain");
+                node.appendChild(image);
+                }
+            }
+            if (item.id === selectedId) {
+                var handle = document.createElement("span");
+                handle.className = "resize-handle";
+                handle.dataset.resize = "true";
+                node.appendChild(handle);
+            }
+            canvas.appendChild(node);
+        });
+        canvas.querySelectorAll(".design-node").forEach(function (node) {
+            node.addEventListener("pointerdown", function (event) {
+                var item = free.elements.find(function (e) { return e.id === node.dataset.id; });
+                if (!item || event.button !== 0) return;
+                selectedId = item.id;
+                canvas.querySelectorAll(".design-node.selected").forEach(function (selected) { selected.classList.remove("selected"); });
+                var resizing = !!event.target.closest("[data-resize]");
+                drag = {id:item.id, mode:resizing?"resize":"move", startX:event.clientX, startY:event.clientY,
+                    x:item.x, y:item.y, w:item.w, h:item.h, pointerId:event.pointerId};
+                node.classList.add("selected");
+                try { canvas.setPointerCapture(event.pointerId); } catch (error) {}
+                syncInspector();
+                event.preventDefault();
+            });
+        });
+        syncInspector();
+    }
+    function syncInspector() {
+        var item = current();
+        properties.hidden = !item;
+        noSelection.hidden = !!item;
+        if (!item) return;
+        field.value = item.field || "";
+        text.value = item.text || "";
+        width.value = Math.round(item.w || 120);
+        height.value = Math.round(item.h || 48);
+        fontSize.value = Math.round(item.fontSize || 18);
+        fontFamily.value = item.fontFamily || "Arial";
+        bold.checked = !!item.bold;
+        color.value = item.color || "#111827";
+        fill.value = item.fill || "#2563eb";
+        imageFit.value = item.fit || "contain";
+        imageProperties.hidden = item.type !== "image";
+        text.disabled = !!item.field || !["text"].includes(item.type);
+        field.disabled = item.type !== "text";
+        fontSize.disabled = item.type !== "text";
+        fontFamily.disabled = item.type !== "text";
+        bold.disabled = item.type !== "text";
+        color.disabled = item.type !== "text";
+        fill.disabled = item.type !== "rect";
+    }
+    function addElement(type) {
+        free.enabled = true;
+        var n = free.elements.length;
+        var item = {id:createId(), type:type, x:35+(n%5)*22, y:35+(n%4)*22, w:220, h:46,
+            text:"Escribe tu texto", field:"", fill:"#2563eb", color:"#111827", fontSize:22, fontFamily:"Arial", bold:false};
+        if (type === "rect") { item.x=0; item.y=0; item.w=38; item.h=400; item.fill="#0f766e"; }
+        if (type === "field") { item.type="text"; item.field=field.options.length>1?field.options[1].value:"nombre"; item.text=""; item.w=260; }
+        if (type === "logo") { item.w=90; item.h=90; item.text=""; }
+        if (type === "photo") { item.w=120; item.h=150; item.text=""; }
+        if (type === "image") { item.w=120; item.h=100; item.text=""; item.image=""; item.fit="contain"; }
+        if (type === "qr") { item.w=100; item.h=100; item.text=""; }
+        free.elements.push(item);
+        selectedId = item.id;
+        showMode();
+    }
+    function updateSelected() {
+        var item = current(); if (!item) return;
+        item.field = valueOf(field);
+        item.text = valueOf(text);
+        item.w = Math.max(12,Math.min(700,Number(valueOf(width))||12));
+        item.h = Math.max(12,Math.min(400,Number(valueOf(height))||12));
+        item.fontSize = Math.max(8,Math.min(80,Number(valueOf(fontSize))||18));
+        item.fontFamily = valueOf(fontFamily) || "Arial";
+        item.bold = !!bold.checked;
+        item.color = valueOf(color) || "#111827";
+        item.fill = valueOf(fill) || "#2563eb";
+        item.fit = valueOf(imageFit) || "contain";
+        render();
+    }
+
+    document.querySelectorAll("[data-add-element]").forEach(function (button) {
+        button.addEventListener("click", function () { addElement(button.dataset.addElement); });
+    });
+    [field,text,width,height,fontSize,fontFamily,bold,color,fill,imageFit].forEach(function (input) {
+        input.addEventListener("input", updateSelected);
+        input.addEventListener("change", updateSelected);
+    });
+    imageInput.addEventListener("change", async function () {
+        var item = current(); var file = imageInput.files && imageInput.files[0];
+        if (!item || item.type !== "image" || !file) return;
+        var localUrl = URL.createObjectURL(file);
+        item.imagePreview = localUrl; render();
+        var data = new FormData(); data.append("imagen", file);
+        save.disabled = true; save.textContent = "Cargando imagen…";
+        try {
+            var response = await fetch("/credencial/configuracion/subir-imagen", {method:"POST",body:data,credentials:"same-origin"});
+            var result = await response.json();
+            if (!response.ok) throw new Error(result.error || "No se pudo cargar la imagen");
+            item.image = result.filename; item.imagePreview = result.url; render();
+        } catch (error) { alert(error.message || "No se pudo cargar la imagen."); }
+        finally { save.disabled = false; save.textContent = "Guardar diseño personalizado"; }
+    });
+    var powerpointInput = document.getElementById("powerpointImport");
+    powerpointInput.addEventListener("change", async function () {
+        var file = powerpointInput.files && powerpointInput.files[0];
+        if (!file) return;
+        var data = new FormData(); data.append("presentacion", file);
+        save.disabled = true; save.textContent = "Importando PowerPoint…";
+        try {
+            var response = await fetch("/credencial/configuracion/subir-powerpoint", {method:"POST", body:data, credentials:"same-origin"});
+            var result = await response.json();
+            if (!response.ok) throw new Error(result.error || "No se pudo importar la presentación.");
+            frente.elements = (frente.elements || []).filter(function (item) { return !(item.type === "image" && String(item.image || "").startsWith("diseno_powerpoint_")); });
+            reverso.elements = (reverso.elements || []).filter(function (item) { return !(item.type === "image" && String(item.image || "").startsWith("diseno_powerpoint_")); });
+            frente.elements.unshift({id:createId(),type:"image",x:0,y:0,w:700,h:400,image:result.frontFilename,imagePreview:result.frontUrl,fit:"stretch",text:"",field:"",fill:"#ffffff",color:"#111827",fontSize:18,fontFamily:"Arial",bold:false});
+            reverso.elements.unshift({id:createId(),type:"image",x:0,y:0,w:700,h:400,image:result.backFilename,imagePreview:result.backUrl,fit:"stretch",text:"",field:"",fill:"#ffffff",color:"#111827",fontSize:18,fontFamily:"Arial",bold:false});
+            frente.enabled = true; reverso.enabled = true; ladoActivo = "frente"; free = frente; sincronizarCaras();
+            selectedId = null; showMode();
+        } catch (error) {
+            alert(error.message || "No se pudo importar la presentación.");
+        } finally {
+            save.disabled = false; save.textContent = "Guardar diseño personalizado";
+            powerpointInput.value = "";
+        }
+    });
+    var logoInput = document.querySelector('[name="logo"]');
+    if (logoInput) logoInput.addEventListener("change", function () {
+        var file = logoInput.files && logoInput.files[0]; if (!file) return;
+        var reader = new FileReader(); reader.onload = function () { freeLogoPreviewSrc = reader.result; render(); };
+        reader.readAsDataURL(file);
+    });
+
+    canvas.addEventListener("pointermove", function (event) {
+        if (!drag || event.pointerId !== drag.pointerId) return;
+        var item = free.elements.find(function (e) { return e.id === drag.id; }); if (!item) return;
+        var dx = event.clientX - drag.startX, dy = event.clientY - drag.startY;
+        if (drag.mode === "resize") {
+            item.w = Math.max(12,Math.min(700,Math.round(drag.w + dx)));
+            item.h = Math.max(12,Math.min(400,Math.round(drag.h + dy)));
+        } else {
+            item.x = Math.max(0,Math.min(700-item.w,Math.round(drag.x + dx)));
+            item.y = Math.max(0,Math.min(400-item.h,Math.round(drag.y + dy)));
+        }
+        render();
+    });
+    function finishDrag(event) { if (drag && (!event || event.pointerId === drag.pointerId)) drag = null; }
+    canvas.addEventListener("pointerup", finishDrag);
+    canvas.addEventListener("pointercancel", finishDrag);
+    canvas.addEventListener("pointerdown", function (event) { if (event.target === canvas) { selectedId=null; render(); } });
+    document.getElementById("freeBackground").addEventListener("input", function (event) { free.background=event.target.value; render(); });
+    document.getElementById("deleteFreeElement").addEventListener("click", function () { free.elements=free.elements.filter(function(e){return e.id!==selectedId;}); selectedId=null; render(); });
+    document.getElementById("createFreeDesign").addEventListener("click", function () { free={enabled:true,background:"#ffffff",elements:[]}; selectedId=null; showMode(); });
+    document.getElementById("useClassicDesign").addEventListener("click", function () { free.enabled=false; showMode(); });
+    form.addEventListener("submit", function () {
+        sincronizarCaras();
+        hidden.value = JSON.stringify(layout);
+    });
+    var save = document.createElement("button");
+    save.type = "button"; save.id = "saveFreeDesign"; save.className = "free-mode-button"; save.textContent = "Guardar diseño personalizado";
+    document.querySelector(".free-toolbar").appendChild(save);
+    save.addEventListener("click", function () { sincronizarCaras(); hidden.value=JSON.stringify(layout); if (form.requestSubmit) form.requestSubmit(); else form.submit(); });
+
+    var templateType = "personal";
+    var templateSelect = document.getElementById("savedTemplates");
+    var templateName = document.getElementById("templateName");
+    var templateCache = [];
+    async function refreshTemplates() {
+        try {
+            var response = await fetch("/credencial/plantillas?tipo=todas", {credentials:"same-origin"});
+            var result = await response.json();
+            if (!response.ok) throw new Error(result.error || "No se pudieron cargar las plantillas");
+            templateCache = result;
+            templateSelect.innerHTML = '<option value="">Selecciona una plantilla</option>';
+            templateCache.forEach(function (template) {
+                var option = document.createElement("option");
+                option.value = template.id;
+                option.textContent = (template.tipo === "alumno" ? "Alumnos · " : "Personal · ") + template.nombre;
+                templateSelect.appendChild(option);
+            });
+        } catch (error) { console.error(error); }
+    }
+    document.getElementById("saveTemplate").addEventListener("click", async function () {
+        var name = templateName.value.trim();
+        if (!name) { alert("Escribe un nombre para la plantilla."); templateName.focus(); return; }
+        if (!free.enabled) { alert("Activa o carga un diseño personalizado antes de guardarlo."); return; }
+        var existing = templateCache.find(function (item) { return item.tipo === templateType && item.nombre.toLowerCase() === name.toLowerCase(); });
+        if (existing) {
+            if (!confirm("Ya existe una plantilla con ese nombre. ¿Quieres reemplazarla?")) return;
+            name = existing.nombre;
+        }
+        sincronizarCaras();
+        var data = new FormData(); data.append("tipo", templateType); data.append("nombre", name); data.append("diseño_json", JSON.stringify(layout));
+        try {
+            var response = await fetch("/credencial/plantillas", {method:"POST", body:data, credentials:"same-origin"});
+            var result = await response.json();
+            if (!response.ok) throw new Error(result.error || "No se pudo guardar la plantilla");
+            await refreshTemplates(); templateSelect.value = String(result.id);
+            alert("Plantilla guardada correctamente.");
+        } catch (error) { alert(error.message || "No se pudo guardar la plantilla."); }
+    });
+    document.getElementById("loadTemplate").addEventListener("click", function () {
+        var template = templateCache.find(function (item) { return String(item.id) === templateSelect.value; });
+        if (!template) { alert("Selecciona una plantilla para cargarla."); return; }
+        frente = JSON.parse(JSON.stringify(template.diseño));
+        reverso = frente.back || {enabled:false, background:"#ffffff", elements:[]};
+        ladoActivo = "frente"; free = frente;
+        if (template.tipo === "alumno") {
+            var personalFields = ["nombre", "matricula", "tipo_personal", "cargo", "area", "correo", "telefono", "institucion", "subtitulo", "texto_pie"];
+            var fieldLabels = {grupo:"Grupo", grado:"Grado", turno:"Turno"};
+            free.elements.forEach(function (item) {
+                if (item.type === "text" && item.field && !personalFields.includes(item.field)) {
+                    item.text = fieldLabels[item.field] || item.text || item.field;
+                    item.field = "";
+                }
+            });
+            templateName.value = template.nombre + " - Personal";
+        } else {
+            templateName.value = template.nombre;
+        }
+        selectedId = null; showMode();
+        alert("Plantilla cargada en el editor. Pulsa ‘Guardar diseño personalizado’ para aplicarla a la credencial.");
+    });
+    document.getElementById("deleteTemplate").addEventListener("click", async function () {
+        if (!templateSelect.value) { alert("Selecciona una plantilla para eliminarla."); return; }
+        if (!confirm("¿Eliminar la plantilla seleccionada?")) return;
+        try {
+            var response = await fetch("/credencial/plantillas/" + encodeURIComponent(templateSelect.value) + "?tipo=" + templateType, {method:"DELETE", credentials:"same-origin"});
+            var result = await response.json();
+            if (!response.ok) throw new Error(result.error || "No se pudo eliminar la plantilla");
+            await refreshTemplates();
+        } catch (error) { alert(error.message || "No se pudo eliminar la plantilla."); }
+    });
+    refreshTemplates();
+
+    showMode();
+})();
+</script>
+    <script src="/static/js/navigation.js"></script>
+</body>
+
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="/static/css/style.css?v=20261018-3">
+
+    <title>Horarios y asistencia</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: var(--background);
+            color: var(--text);
+        }
+
+        .contenedor {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0;
+        }
+
+        .titulo {
+            font-size: 30px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .descripcion {
+            color: #6b7280;
+            margin-bottom: 30px;
+        }
+
+        .tarjeta {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+        .seccion {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 25px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .campo {
+            margin-bottom: 24px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .ayuda {
+            display: block;
+            margin-top: 7px;
+            font-size: 13px;
+            color: #6b7280;
+        }
+
+        input[type="time"],
+        input[type="number"] {
+            width: 100%;
+            max-width: 350px;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        .fila {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(250px, 1fr));
+            gap: 25px;
+        }
+
+        .activo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .activo input {
+            width: 18px;
+            height: 18px;
+        }
+
+        .botones {
+            margin-top: 30px;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        button {
+            background: #0f766e;
+            color: white;
+            border: none;
+            padding: 13px 24px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #115e59;
+        }
+
+        .volver {
+            text-decoration: none;
+            color: #374151;
+            padding: 13px 20px;
+        }
+
+        .mensaje {
+            background: #dcfce7;
+            color: #166534;
+            border-radius: 8px;
+            padding: 12px 15px;
+            margin-bottom: 25px;
+        }
+
+        @media (max-width: 700px) {
+
+            .fila {
+                grid-template-columns: 1fr;
+            }
+
+            .contenedor {
+                margin: 0 auto;
+                padding: 0;
+            }
+
+            .tarjeta {
+                padding: 20px;
+            }
+
+        }
+</style>
+
+</head>
+
+<body>
+
+{% include "_sidebar.html" %}
+
+<main class="content">
+<div class="contenedor">
+
+    <div class="titulo">
+        🕐 Horarios y asistencia
+    </div>
+
+    <div class="descripcion">
+        Configura el horario utilizado por SICAE para determinar
+        entradas puntuales y retardos.
+    </div>
+
+    <div class="tarjeta">
+
+        {% if mensaje %}
+        <div class="mensaje">
+            {{ mensaje }}
+        </div>
+        {% endif %}
+
+        <div class="seccion">
+            Horario de entrada
+        </div>
+
+        <form method="post" action="/configuracion/asistencia">
+
+            <div class="fila">
+
+                <div class="campo">
+
+                    <label for="hora_entrada">
+                        Hora oficial de entrada
+                    </label>
+
+                    <input
+                        type="time"
+                        id="hora_entrada"
+                        name="hora_entrada"
+                        value="{{ configuracion_asistencia.hora_entrada }}"
+                        required
+                    >
+
+                    <span class="ayuda">
+                        Hora a partir de la cual se considera el inicio de clases.
+                    </span>
+
+                </div>
+
+                <div class="campo">
+
+                    <label for="tolerancia_minutos">
+                        Tolerancia para retardo
+                    </label>
+
+                    <input
+                        type="number"
+                        id="tolerancia_minutos"
+                        name="tolerancia_minutos"
+                        value="{{ configuracion_asistencia.tolerancia_minutos }}"
+                        min="0"
+                        max="180"
+                        required
+                    >
+
+                    <span class="ayuda">
+                        Minutos después de la hora oficial antes de marcar retardo.
+                    </span>
+
+                </div>
+
+            </div>
+
+            <div class="campo">
+
+                <label for="hora_cierre_entrada">
+                    Hora de cierre de entradas
+                </label>
+
+                <input
+                    type="time"
+                    id="hora_cierre_entrada"
+                    name="hora_cierre_entrada"
+                    value="{{ configuracion_asistencia.hora_cierre_entrada }}"
+                    required
+                >
+
+                <span class="ayuda">
+                    Después de esta hora podremos determinar las faltas automáticamente.
+                </span>
+
+            </div>
+
+            <div class="activo">
+
+                <input
+                    type="checkbox"
+                    id="activo"
+                    name="activo"
+                    value="1"
+                    {% if configuracion_asistencia.activo %}checked{% endif %}
+                >
+
+                <label for="activo">
+                    Activar control de retardos y faltas
+                </label>
+
+            </div>
+
+            <div class="botones">
+
+                <button type="submit">
+                    💾 Guardar configuración
+                </button>
+
+                <a
+                    class="volver"
+                    href="/"
+                >
+                    Cancelar
+                </a>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+</main>
+
+</body>
+
+</html>
+
+
+

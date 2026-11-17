@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Credencial - {{ personal.nombre }}
+    </title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+
+        body {
+
+            margin: 0;
+
+            min-height: 100vh;
+
+            display: flex;
+
+            flex-direction: column;
+
+            align-items: center;
+
+            justify-content: center;
+
+            background: #f1f5f9;
+
+            font-family:
+                {{ configuracion_personal.fuente }};
+
+        }
+
+
+        .contenedor {
+
+            display: flex;
+
+            flex-direction: column;
+
+            align-items: center;
+
+            gap: 25px;
+
+        }
+
+
+        /* ==================================================
+           CREDENCIAL
+        ================================================== */
+
+        .credencial {
+
+            position: relative;
+
+            width: 760px;
+
+            min-height: 460px;
+
+            background: white;
+
+            border-radius: 25px;
+
+            overflow: hidden;
+
+            box-shadow:
+                0 20px 45px rgba(0,0,0,.18);
+
+            border:
+                3px solid
+                {{ configuracion_personal.color_principal }};
+
+        }
+
+
+        /* ==================================================
+           ENCABEZADO
+        ================================================== */
+
+        .encabezado {
+
+            min-height: 110px;
+
+            background:
+                {{ configuracion_personal.color_principal }};
+
+            color: white;
+
+            display: flex;
+
+            align-items: center;
+
+            padding: 18px 25px;
+
+            gap: 20px;
+
+        }
+
+
+        .logo {
+
+            width: 75px;
+
+            height: 75px;
+
+            object-fit: contain;
+
+            background: white;
+
+            border-radius: 12px;
+
+            padding: 5px;
+
+            flex-shrink: 0;
+
+        }
+
+
+        .institucion {
+
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 5px;
+
+        }
+
+
+        .institucion h1 {
+
+            margin: 0;
+
+            font-size: 28px;
+
+            word-break: break-word;
+
+        }
+
+
+        .institucion p {
+
+            margin: 0;
+
+            font-size: 15px;
+
+            opacity: .9;
+
+            word-break: break-word;
+
+        }
+
+
+        /* ==================================================
+           CONTENIDO
+        ================================================== */
+
+        .contenido {
+
+            display: flex;
+
+            padding: 30px;
+
+            gap: 30px;
+
+            min-height: 300px;
+
+        }
+
+
+        /* ==================================================
+           FOTO
+        ================================================== */
+
+        .zona-foto {
+
+            width: 190px;
+
+            display: flex;
+
+            justify-content: center;
+
+            align-items: flex-start;
+
+            flex-shrink: 0;
+
+        }
+
+
+        .foto {
+
+            width: 175px;
+
+            height: 215px;
+
+            object-fit: cover;
+
+            border-radius: 15px;
+
+            border:
+                4px solid
+                {{ configuracion_personal.color_secundario }};
+
+            background: #e5e7eb;
+
+        }
+
+
+        .sin-foto {
+
+            width: 175px;
+
+            height: 215px;
+
+            border-radius: 15px;
+
+            border:
+                4px solid
+                {{ configuracion_personal.color_secundario }};
+
+            background: #e5e7eb;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            color: #64748b;
+
+            font-size: 15px;
+
+        }
+
+
+        /* ==================================================
+           DATOS
+        ================================================== */
+
+        .datos {
+
+            flex: 1;
+
+            padding-top: 5px;
+
+            min-width: 0;
+
+        }
+
+
+        .nombre {
+
+            margin:
+                0 0 20px 0;
+
+            font-size:
+                {{ configuracion_personal.tamano_nombre }}px;
+
+            color:
+                {{ configuracion_personal.color_texto }};
+
+            font-family:
+                {{ configuracion_personal.fuente }};
+
+            line-height: 1.1;
+
+            word-break: break-word;
+
+            overflow-wrap: anywhere;
+
+        }
+
+
+        .dato {
+
+            margin-bottom: 10px;
+
+            font-size: 17px;
+
+            color:
+                {{ configuracion_personal.color_texto }};
+
+            font-family:
+                {{ configuracion_personal.fuente }};
+
+        }
+
+
+        .dato strong {
+
+            font-weight: 700;
+
+        }
+
+
+        /* ==================================================
+           QR
+        ================================================== */
+
+        .zona-qr {
+
+            width: {{ configuracion_personal.tamano_qr }}px;
+
+            display: flex;
+
+            flex-direction: column;
+
+            align-items: center;
+
+            justify-content: center;
+
+            flex-shrink: 0;
+
+        }
+
+
+        .qr {
+
+            width: {{ configuracion_personal.tamano_qr }}px;
+
+            height: {{ configuracion_personal.tamano_qr }}px;
+
+            object-fit: contain;
+
+        }
+
+
+        .texto-qr {
+
+            margin-top: 8px;
+
+            font-size: 12px;
+
+            color: #64748b;
+
+            text-align: center;
+
+        }
+
+
+        /* ==================================================
+           PIE
+        ================================================== */
+
+        .pie {
+
+            position: absolute;
+
+            bottom: 0;
+
+            left: 0;
+
+            right: 0;
+
+            height: 38px;
+
+            background:
+                {{ configuracion_personal.color_secundario }};
+
+            color: white;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            font-size: 13px;
+
+            font-family:
+                {{ configuracion_personal.fuente }};
+
+            text-align: center;
+
+            padding: 0 15px;
+
+        }
+
+
+        /* ==================================================
+           BOTONES
+        ================================================== */
+
+        .acciones {
+
+            display: flex;
+
+            gap: 12px;
+
+            flex-wrap: wrap;
+
+            justify-content: center;
+
+        }
+
+
+        .boton {
+
+            display: inline-flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            padding: 13px 22px;
+
+            border-radius: 9px;
+
+            text-decoration: none;
+
+            border: none;
+
+            cursor: pointer;
+
+            font-size: 15px;
+
+            font-weight: 600;
+
+        }
+
+
+        .boton-pdf {
+
+            background:
+                {{ configuracion_personal.color_principal }};
+
+            color: white;
+
+        }
+
+
+        .boton-pdf:hover {
+
+            opacity: .9;
+
+        }
+
+
+        .boton-regresar {
+
+            background: #64748b;
+
+            color: white;
+
+        }
+
+
+        .boton-regresar:hover {
+
+            background: #475569;
+
+        }
+
+
+        /* ==================================================
+           IMPRESIÓN
+        ================================================== */
+
+        @media print {
+
+            body {
+
+                background: white;
+
+                min-height: auto;
+
+            }
+
+
+            .acciones {
+
+                display: none;
+
+            }
+
+
+            .credencial {
+
+                box-shadow: none;
+
+                width: 760px;
+
+            }
+
+        }
+
+
+        /* ==================================================
+           RESPONSIVE
+        ================================================== */
+
+        @media(max-width: 850px) {
+
+            .credencial {
+
+                width: 95vw;
+
+            }
+
+
+            .contenido {
+
+                flex-wrap: wrap;
+
+            }
+
+
+            .zona-qr {
+
+                width: 100%;
+
+                flex-direction: row;
+
+                gap: 15px;
+
+            }
+
+        }
+
+    
+</style>
+
+</head>
+
+
+<body>
+
+
+<div class="contenedor">
+
+
+    <!-- ==================================================
+         CREDENCIAL
+    ================================================== -->
+
+    <div class="credencial">
+
+
+        <!-- ==================================================
+             ENCABEZADO
+        ================================================== -->
+
+        <div class="encabezado">
+
+
+            {% if configuracion_personal.logo %}
+
+                <img
+
+                    class="logo"
+
+                    src="/static/uploads/{{ configuracion_personal.logo }}"
+
+                    alt="Logo"
+
+                >
+
+            {% endif %}
+
+
+            <div class="institucion">
+
+                <h1>
+
+                    {{ configuracion_personal.nombre_institucion }}
+
+                </h1>
+
+
+                {% if configuracion_personal.subtitulo %}
+
+                    <p>
+
+                        {{ configuracion_personal.subtitulo }}
+
+                    </p>
+
+                {% endif %}
+
+            </div>
+
+
+        </div>
+
+
+        <!-- ==================================================
+             CONTENIDO
+        ================================================== -->
+
+        <div class="contenido">
+
+
+            <!-- ==================================================
+                 FOTO
+            ================================================== -->
+
+            {% if configuracion_personal.mostrar_foto %}
+
+                <div class="zona-foto">
+
+
+                    {% if personal.foto %}
+
+                        <img
+
+                            class="foto"
+
+                            src="/static/uploads/{{ personal.foto }}?v={{ personal.id }}"
+
+                            alt="Foto de {{ personal.nombre }}"
+
+                        >
+
+                    {% else %}
+
+                        <div class="sin-foto">
+
+                            SIN FOTO
+
+                        </div>
+
+                    {% endif %}
+
+
+                </div>
+
+            {% endif %}
+
+
+            <!-- ==================================================
+                 DATOS
+            ================================================== -->
+
+            <div class="datos">
+
+
+                <!-- NOMBRE -->
+
+                <h2 class="nombre">
+
+                    {{ personal.nombre }}
+
+                    {{ personal.apellido_paterno }}
+
+                    {{ personal.apellido_materno or '' }}
+
+                </h2>
+
+
+                <!-- MATRÍCULA -->
+
+                {% if configuracion_personal.mostrar_matricula %}
+
+                    <div class="dato">
+
+                        <strong>
+                            Número de empleado:
+                        </strong>
+
+                        {{ personal.numero_empleado }}
+
+                    </div>
+
+                {% endif %}
+
+
+                <!-- TIPO DE PERSONAL -->
+
+                {% if configuracion_personal.mostrar_tipo_personal %}
+
+                    <div class="dato">
+
+                        <strong>
+                            Tipo de personal:
+                        </strong>
+
+                        {{ personal.tipo_personal or 'No especificado' }}
+
+                    </div>
+
+                {% endif %}
+
+
+                <!-- CARGO -->
+
+                {% if configuracion_personal.mostrar_cargo %}
+
+                    <div class="dato">
+
+                        <strong>
+                            Cargo:
+                        </strong>
+
+                        {{ personal.cargo or 'No especificado' }}
+
+                    </div>
+
+                {% endif %}
+
+
+                <!-- ÁREA -->
+
+                {% if configuracion_personal.mostrar_area %}
+
+                    <div class="dato">
+
+                        <strong>
+                            Área:
+                        </strong>
+
+                        {{ personal.area or 'No especificada' }}
+
+                    </div>
+
+                {% endif %}
+
+
+                <!-- CORREO -->
+
+                {% if configuracion_personal.mostrar_correo and personal.correo %}
+
+                    <div class="dato">
+
+                        <strong>
+                            Correo:
+                        </strong>
+
+                        {{ personal.correo }}
+
+                    </div>
+
+                {% endif %}
+
+
+                <!-- TELÉFONO -->
+
+                {% if configuracion_personal.mostrar_telefono and personal.telefono %}
+
+                    <div class="dato">
+
+                        <strong>
+                            Teléfono:
+                        </strong>
+
+                        {{ personal.telefono }}
+
+                    </div>
+
+                {% endif %}
+
+
+            </div>
+
+
+            <!-- ==================================================
+                 QR
+            ================================================== -->
+
+            {% if configuracion_personal.mostrar_qr %}
+
+                <div class="zona-qr">
+
+
+                    {% if personal.qr %}
+
+                        <img
+
+                            class="qr"
+
+                            src="/static/uploads/{{ personal.qr }}?v={{ personal.id }}"
+
+                            alt="Código QR del personal"
+
+                        >
+
+
+                        <div class="texto-qr">
+
+                            Escanea para registrar asistencia
+
+                        </div>
+
+                    {% endif %}
+
+
+                </div>
+
+            {% endif %}
+
+
+        </div>
+
+
+        <!-- ==================================================
+             PIE
+        ================================================== -->
+
+        {% if configuracion_personal.texto_pie %}
+
+            <div class="pie">
+
+                {{ configuracion_personal.texto_pie }}
+
+            </div>
+
+        {% endif %}
+
+
+    </div>
+
+
+    <!-- ==================================================
+         BOTONES
+    ================================================== -->
+
+    <div class="acciones">
+
+
+        <a
+
+            href="/administracion/personal/{{ personal.id }}/credencial/pdf"
+
+            target="_blank"
+
+            class="boton boton-pdf"
+
+        >
+
+            PDF Generar credencial PDF
+
+        </a>
+
+
+        <a
+
+            href="/administracion/personal"
+
+            class="boton boton-regresar"
+
+        >
+
+            ← Regresar
+
+        </a>
+
+
+    </div>
+
+
+</div>
+
+
+    <script src="/static/js/navigation.js"></script>
+<script>
+(function () {
+ const card=document.querySelector(".credencial");
+ if(!card) return;
+ const config={{ configuracion_personal.layout|default({}, true)|tojson }} || {};
+ const layout=config;
+ const free=layout._free || {};
+ const scaleX=760/700, scaleY=460/400;
+ if(free.enabled){
+  const sources={logo:card.querySelector(".logo")?.src,photo:card.querySelector(".foto")?.src,qr:card.querySelector(".qr")?.src};
+  const fields={{ {"nombre": ((personal.nombre or "") ~ " " ~ (personal.apellido_paterno or "") ~ " " ~ (personal.apellido_materno or ""))|trim, "matricula": personal.numero_empleado or "", "tipo_personal": personal.tipo_personal or "", "cargo": personal.cargo or "", "area": personal.area or "", "correo": personal.correo or "", "telefono": personal.telefono or "", "institucion": configuracion_personal.nombre_institucion, "subtitulo": configuracion_personal.subtitulo, "texto_pie": configuracion_personal.texto_pie}|tojson }};
+  card.innerHTML=""; card.style.position="relative"; card.style.width="700px"; card.style.height="400px"; card.style.minHeight="400px"; card.style.boxSizing="border-box"; card.style.padding="0"; card.style.borderRadius="20px"; card.style.background=free.background||"#fff";
+  (free.elements||[]).forEach(function(item){
+   const node=document.createElement("div"); node.style.position="absolute"; node.style.left=(Number(item.x)||0)+"px"; node.style.top=(Number(item.y)||0)+"px"; node.style.width=(Number(item.w)||120)+"px"; node.style.height=(Number(item.h)||48)+"px"; node.style.boxSizing="border-box"; node.style.overflow="hidden";
+   if(item.type==="rect") node.style.background=item.fill||"#2563eb";
+   if(item.type==="text"){ node.textContent=item.field?(fields[item.field]||""):(item.text||""); node.style.color=item.color||"#111827"; node.style.fontSize=(Number(item.fontSize)||18)+"px"; node.style.fontFamily=item.fontFamily==="Times"?"'Times New Roman',serif":item.fontFamily==="Courier"?"'Courier New',monospace":"Arial,sans-serif"; node.style.fontWeight=item.bold?"700":"400"; node.style.whiteSpace="pre-wrap"; }
+   if(["logo","photo","image","qr"].includes(item.type)) { const img=document.createElement("img"); img.alt=item.type; img.style.width="100%"; img.style.height="100%"; img.style.objectFit=item.type==="photo"||(item.type==="image"&&item.fit==="cover")?"cover":"contain"; if(item.type==="image"&&item.image) { img.src="/static/uploads/"+item.image; node.appendChild(img); } else if(sources[item.type]) { img.src=sources[item.type]; node.appendChild(img); } else if(item.type==="photo") { img.src="data:image/svg+xml,"+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 100"><rect width="80" height="100" fill="#e2e8f0"/><circle cx="40" cy="30" r="18" fill="#94a3b8"/><path d="M8 100c2-26 14-42 32-42s30 16 32 42" fill="#94a3b8"/></svg>'); node.appendChild(img); } else if(item.type==="logo") { node.textContent="Escudo"; node.style.display="grid"; node.style.placeItems="center"; } }
+   card.appendChild(node);
+  });
+  return;
+ }
+ const map={foto:".zona-foto",datos:".datos",qr:".zona-qr",pie:".pie",institucion:".institucion",titulo:".titulo-credencial"};
+ Object.entries(map).forEach(([key,selector])=>{ const point=layout[key]; if(!point)return; document.querySelectorAll(selector).forEach(el=>{el.style.transform="translate("+((Number(point.x)||0)*scaleX)+"px,"+((Number(point.y)||0)*scaleY)+"px)";}); });
+ if(layout.institucion) document.querySelectorAll(".logo").forEach(el=>{const point=layout.institucion;el.style.transform="translate("+((Number(point.x)||0)*scaleX)+"px,"+((Number(point.y)||0)*scaleY)+"px)";});
+})();
+</script>
+</body>
+
+</html>
+
+
+
+
+
+
+
+

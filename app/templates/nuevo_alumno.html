@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Nuevo Alumno - SICAE WEB</title>
+
+    <link
+        rel="stylesheet"
+        href="/static/css/style.css?v=20261018-3"
+    >
+
+    <style>
+
+        .form-container {
+            max-width: 900px;
+        }
+
+        .form-section {
+            margin-bottom: 30px;
+        }
+
+        .form-section h3 {
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 15px;
+            background: white;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #2563eb;
+        }
+
+        .photo-section {
+            margin-bottom: 25px;
+        }
+
+        .photo-section label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .photo-info {
+            color: #6b7280;
+            font-size: 14px;
+            margin-top: 8px;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        .btn-primary {
+            background: #111827;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1f2937;
+        }
+
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        .btn-secondary:hover {
+            background: #d1d5db;
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 15px 18px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #fecaca;
+        }
+
+        .alert-error strong {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 16px;
+        }
+
+        .required {
+            color: #dc2626;
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <!-- ================================= -->
+    <!-- BARRA LATERAL -->
+    <!-- ================================= -->
+
+    {% include "_sidebar.html" %}
+
+
+    <!-- ================================= -->
+    <!-- CONTENIDO -->
+    <!-- ================================= -->
+
+    <main class="content">
+
+
+        <header class="header">
+
+            <h2>
+                Nuevo alumno
+            </h2>
+
+            <p>
+                Registrar un nuevo alumno
+            </p>
+
+        </header>
+
+
+        <!-- ================================= -->
+        <!-- ERROR DE MATRÍCULA -->
+        <!-- ================================= -->
+
+        {% if error == "matricula" %}
+
+        <div class="alert-error">
+
+            <strong>
+                ⚠️ Matrícula duplicada
+            </strong>
+
+            La matrícula ingresada ya está registrada
+            para otro alumno.
+
+            <br>
+
+            Por favor, verifica la matrícula e intenta
+            nuevamente.
+
+        </div>
+
+        {% endif %}
+
+
+        <!-- ================================= -->
+        <!-- FORMULARIO -->
+        <!-- ================================= -->
+
+        <div class="card form-container">
+
+
+            <form
+                method="post"
+                action="/alumnos/nuevo"
+                enctype="multipart/form-data"
+            >
+
+
+                <!-- ================================= -->
+                <!-- DATOS PERSONALES -->
+                <!-- ================================= -->
+
+                <section class="form-section">
+
+                    <h3>
+                        Datos personales
+                    </h3>
+
+
+                    <!-- MATRÍCULA -->
+
+                    <div class="form-group">
+
+                        <label for="matricula">
+
+                            Matrícula
+
+                            <span class="required">
+                                *
+                            </span>
+
+                        </label>
+
+
+                        <input
+                            id="matricula"
+                            type="text"
+                            name="matricula"
+                            maxlength="50"
+                            required
+                            placeholder="Ejemplo: 20260001"
+                            class="form-control"
+                        >
+
+                    </div>
+
+
+                    <!-- NOMBRE -->
+
+                    <div class="form-group">
+
+                        <label for="nombre">
+
+                            Nombre
+
+                            <span class="required">
+                                *
+                            </span>
+
+                        </label>
+
+
+                        <input
+                            id="nombre"
+                            type="text"
+                            name="nombre"
+                            maxlength="100"
+                            required
+                            placeholder="Nombre del alumno"
+                            class="form-control"
+                        >
+
+                    </div>
+
+
+                    <!-- APELLIDO PATERNO -->
+
+                    <div class="form-group">
+
+                        <label for="apellido_paterno">
+
+                            Apellido paterno
+
+                            <span class="required">
+                                *
+                            </span>
+
+                        </label>
+
+
+                        <input
+                            id="apellido_paterno"
+                            type="text"
+                            name="apellido_paterno"
+                            maxlength="100"
+                            required
+                            placeholder="Apellido paterno"
+                            class="form-control"
+                        >
+
+                    </div>
+
+
+                    <!-- APELLIDO MATERNO -->
+
+                    <div class="form-group">
+
+                        <label for="apellido_materno">
+
+                            Apellido materno
+
+                        </label>
+
+
+                        <input
+                            id="apellido_materno"
+                            type="text"
+                            name="apellido_materno"
+                            maxlength="100"
+                            placeholder="Apellido materno"
+                            class="form-control"
+                        >
+
+                    </div>
+
+
+                    <!-- FECHA DE NACIMIENTO -->
+
+                    <div class="form-group">
+
+                        <label for="fecha_nacimiento">
+
+                            Fecha de nacimiento
+
+                        </label>
+
+
+                        <input
+                            id="fecha_nacimiento"
+                            type="date"
+                            name="fecha_nacimiento"
+                            class="form-control"
+                        >
+
+                    </div>
+
+                </section>
+
+
+                <!-- ================================= -->
+                <!-- INFORMACIÓN ESCOLAR -->
+                <!-- ================================= -->
+
+                <section class="form-section">
+
+                    <h3>
+                        Información escolar
+                    </h3>
+
+
+                    <div class="form-group">
+
+                        <label for="grupo_id">
+
+                            Grupo
+
+                            <span class="required">
+                                *
+                            </span>
+
+                        </label>
+
+
+                        <select
+                            id="grupo_id"
+                            name="grupo_id"
+                            required
+                            class="form-control"
+                        >
+
+                            <option value="">
+                                Seleccionar grupo
+                            </option>
+
+
+                            {% for grupo in grupos %}
+
+
+                            <option
+                                value="{{ grupo.id }}"
+
+                                {% if grupo_seleccionado is defined
+                                    and grupo_seleccionado is not none
+                                    and grupo.id == grupo_seleccionado
+                                %}
+
+                                    selected
+
+                                {% endif %}
+                            >
+
+                                {{ grupo.nombre_grupo }}
+                                -
+                                {{ grupo.grado }}°
+                                {{ grupo.nombre }}
+                                -
+                                {{ grupo.turno }}
+
+                            </option>
+
+
+                            {% endfor %}
+
+
+                        </select>
+
+                    </div>
+
+                </section>
+
+
+                <!-- ================================= -->
+                <!-- INFORMACIÓN DE CONTACTO -->
+                <!-- ================================= -->
+
+                <section class="form-section">
+
+                    <h3>
+                        Información de contacto
+                    </h3>
+
+
+                    <!-- CORREO -->
+
+                    <div class="form-group">
+
+                        <label for="correo">
+                            Correo electrónico
+                        </label>
+
+
+                        <input
+                            id="correo"
+                            type="email"
+                            name="correo"
+                            maxlength="150"
+                            placeholder="correo@ejemplo.com"
+                            class="form-control"
+                        >
+
+                    </div>
+
+
+                    <!-- TELÉFONO -->
+
+                    <div class="form-group">
+
+                        <label for="telefono">
+                            Teléfono
+                        </label>
+
+
+                        <input
+                            id="telefono"
+                            type="tel"
+                            name="telefono"
+                            maxlength="30"
+                            placeholder="Ejemplo: 4491234567"
+                            class="form-control"
+                        >
+
+                    </div>
+
+                </section>
+
+
+                <!-- ================================= -->
+                <!-- FOTOGRAFÍA -->
+                <!-- ================================= -->
+
+                <section class="form-section">
+
+                    <h3>
+                        Fotografía
+                    </h3>
+
+
+                    <div class="photo-section">
+
+
+                        <label for="foto">
+                            Foto del alumno
+                        </label>
+
+
+                        <input
+                            id="foto"
+                            type="file"
+                            name="foto"
+                            accept="image/*"
+                        >
+
+
+                        <p class="photo-info">
+
+                            Selecciona una fotografía
+                            del alumno.
+
+                        </p>
+
+
+                    </div>
+
+                </section>
+
+
+                <!-- ================================= -->
+                <!-- BOTONES -->
+                <!-- ================================= -->
+
+                <div class="buttons">
+
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary"
+                    >
+
+                        Guardar alumno
+
+                    </button>
+
+
+                    <a
+                        href="/alumnos"
+                        class="btn btn-secondary"
+                    >
+
+                        Cancelar
+
+                    </a>
+
+
+                </div>
+
+
+            </form>
+
+
+        </div>
+
+
+    </main>
+
+
+    <script src="/static/js/navigation.js"></script>
+</body>
+
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

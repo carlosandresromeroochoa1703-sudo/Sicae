@@ -1,0 +1,1439 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Escáner de asistencias - SICAE WEB
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="/static/css/style.css?v=20261018-3"
+    >
+
+    <style>
+
+        .scanner-page {
+            max-width: 1050px;
+            margin: 0 auto;
+        }
+
+        .scanner-grid {
+            display: grid;
+            grid-template-columns:
+                minmax(320px, 1fr)
+                minmax(280px, 420px);
+            gap: 24px;
+            align-items: start;
+        }
+
+        .scanner-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow:
+                0 4px 15px rgba(0,0,0,.08);
+        }
+
+        #reader {
+            width: 100%;
+            max-width: 380px;
+            margin: 0 auto;
+            overflow: hidden;
+            border-radius: 12px;
+        }
+
+        .scanner-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .scanner-btn {
+            flex: 1;
+            border: 0;
+            border-radius: 9px;
+            padding: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            background: #2563eb;
+            color: white;
+        }
+
+        .scanner-btn.secondary {
+            background: #374151;
+        }
+
+        .manual {
+            display: flex;
+            gap: 8px;
+            margin-top: 18px;
+        }
+
+        .manual input {
+            flex: 1;
+            padding: 11px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 15px;
+        }
+
+        .result {
+            min-height: 250px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .result-photo {
+            width: 115px;
+            height: 135px;
+            object-fit: cover;
+            border-radius: 12px;
+            border: 3px solid #e5e7eb;
+            margin-bottom: 15px;
+        }
+
+        .result-name {
+            font-size: 23px;
+            font-weight: bold;
+            margin: 5px 0;
+        }
+
+        .result-data {
+            color: #6b7280;
+            margin: 4px 0;
+        }
+
+        .movement {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 10px 22px;
+            border-radius: 999px;
+            color: white;
+            font-weight: bold;
+        }
+
+        .entrada {
+            background: #16a34a;
+        }
+
+        .salida {
+            background: #dc2626;
+        }
+
+        .message {
+            padding: 12px;
+            border-radius: 9px;
+            margin-top: 14px;
+            display: none;
+        }
+
+        .message.error {
+            display: block;
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .message.ok {
+            display: block;
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        @media (max-width: 850px) {
+
+            .scanner-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .scanner-actions {
+                flex-direction: column;
+            }
+
+        }
+
+        @media (max-width: 600px) {
+            .scanner-page { padding: 0 4px; }
+            .scanner-grid {
+                grid-template-columns: minmax(125px, .9fr) minmax(155px, 1.1fr);
+                gap: 8px;
+            }
+            .scanner-card { min-width: 0; padding: 10px; border-radius: 12px; }
+            .scanner-card h3 { margin: 0 0 8px; font-size: 15px; }
+            #reader { max-width: none; min-height: 125px; }
+            #reader video { max-height: 175px !important; object-fit: cover; }
+            .scanner-actions {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 6px;
+                margin-top: 8px;
+            }
+            .scanner-btn { min-width: 0; padding: 8px 5px; font-size: 11px; }
+            #physicalBtn { grid-column: 1 / -1; }
+            .result { min-height: 180px; padding: 4px; }
+            .result-photo { width: 58px; height: 66px; margin-bottom: 6px; }
+            .result-name { font-size: 15px; overflow-wrap: anywhere; }
+            .result-data { font-size: 11px; overflow-wrap: anywhere; }
+            .movement { margin-top: 7px; padding: 6px 12px; font-size: 12px; }
+            .message { margin-top: 8px; padding: 8px; font-size: 11px; }
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    {% include "_sidebar.html" %}
+
+
+
+    <main class="content">
+
+        <div class="scanner-page">
+
+            <div class="page-header">
+
+                <div class="page-title">
+
+                    <h2>
+                        Escáner de asistencias
+                    </h2>
+
+                    <p>
+                        Selecciona si registrarás una entrada,
+                        una salida o el movimiento automático,
+                        y escanea el código QR del alumno.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="scanner-grid">
+
+
+                <section class="scanner-card">
+
+                    <h3>
+                        Escáner QR
+                    </h3>
+
+                    <label for="movementMode" style="display:block;margin:0 0 8px;font-weight:700;">Tipo de registro</label>
+                    <select id="movementMode" style="width:100%;margin-bottom:14px;padding:11px;border:1px solid #d1d5db;border-radius:8px;font:inherit;">
+                        <option value="AUTO">Automático (entrada y salida)</option>
+                        <option value="ENTRADA">Solo entrada</option>
+                        <option value="SALIDA">Solo salida</option>
+                    </select>
+
+
+                    <div id="reader"></div>
+
+
+                    <div class="scanner-actions">
+
+                        <button
+                            id="startBtn"
+                            class="scanner-btn"
+                            type="button"
+                        >
+                            📷 Iniciar cámara
+                        </button>
+
+
+                        <button
+                            id="physicalBtn"
+                            class="scanner-btn"
+                            type="button"
+                        >
+                            🔌 Iniciar escáner físico
+                        </button>
+
+
+                        <button
+                            id="stopBtn"
+                            class="scanner-btn secondary"
+                            type="button"
+                        >
+                            ⏹️ Detener
+                        </button>
+
+                    </div>
+
+
+                    <div
+                        class="manual"
+                        style="display: none;"
+                    >
+
+                        <input
+                            id="manualMatricula"
+                            type="text"
+                            placeholder="Matrícula (prueba manual)"
+                        >
+
+                        <button
+                            id="manualBtn"
+                            class="scanner-btn"
+                            type="button"
+                        >
+                            Registrar
+                        </button>
+
+                    </div>
+
+
+                    <div
+                        id="message"
+                        class="message"
+                    ></div>
+
+                </section>
+
+
+
+                <section class="scanner-card">
+
+                    <h3>
+                        Último registro
+                    </h3>
+
+
+                    <div
+                        id="result"
+                        class="result"
+                    >
+
+                        <p>
+                            Esperando un código QR...
+                        </p>
+
+                    </div>
+
+                </section>
+
+
+            </div>
+
+        </div>
+
+    </main>
+
+
+
+    <script
+        src="https://unpkg.com/html5-qrcode"
+        type="text/javascript"
+    ></script>
+
+
+    <script>
+
+        // ==================================================
+        // VARIABLES
+        // ==================================================
+
+        let scanner = null;
+
+        let activo = false;
+
+        let procesando = false;
+
+        let ultimoCodigo = "";
+
+        let ultimoTiempo = 0;
+
+        let temporizadorResultado = null;
+
+
+        // ==================================================
+        // ESCÁNER FÍSICO
+        // ==================================================
+
+        let escanerFisicoActivo = false;
+
+        let bufferEscaner = "";
+
+        let ultimoCaracterTiempo = 0;
+
+
+        // ==================================================
+        // ELEMENTOS
+        // ==================================================
+
+        const message =
+            document.getElementById("message");
+
+        const result =
+            document.getElementById("result");
+
+        const movementMode = document.getElementById("movementMode");
+
+
+        // ==================================================
+        // MENSAJES
+        // ==================================================
+
+        function mostrarMensaje(
+            texto,
+            tipo
+        ) {
+
+            message.textContent =
+                texto;
+
+            message.className =
+                "message " + tipo;
+
+        }
+
+
+        function limpiarMensaje() {
+
+            message.textContent = "";
+
+            message.className =
+                "message";
+
+        }
+
+
+        // ==================================================
+        // LIMPIAR RESULTADO AUTOMÁTICAMENTE
+        // ==================================================
+
+        function limpiarResultadoAutomaticamente() {
+
+            if (temporizadorResultado) {
+
+                clearTimeout(
+                    temporizadorResultado
+                );
+
+            }
+
+            temporizadorResultado =
+                setTimeout(
+
+                    function() {
+
+                        result.innerHTML =
+                            "<p>Esperando un código QR...</p>";
+
+                        limpiarMensaje();
+
+                        ultimoCodigo = "";
+
+                        ultimoTiempo = 0;
+
+                    },
+
+                    9000
+
+                );
+
+        }
+
+
+        // ==================================================
+        // REGISTRAR MATRÍCULA
+        // ==================================================
+
+        async function registrar(
+            matricula
+        ) {
+
+            matricula =
+                String(
+                    matricula || ""
+                ).trim();
+
+
+            if (!matricula) {
+
+                return;
+
+            }
+
+
+            // Evitar procesamiento simultáneo
+
+            if (procesando) {
+
+                return;
+
+            }
+
+
+            const ahora =
+                Date.now();
+
+
+            // Evitar registrar dos veces
+            // al mismo alumno durante 5 segundos
+
+            if (
+
+                matricula ===
+                ultimoCodigo
+
+                &&
+
+                ahora -
+                ultimoTiempo
+                < 5000
+
+            ) {
+
+                return;
+
+            }
+
+
+            procesando = true;
+
+
+            ultimoCodigo =
+                matricula;
+
+
+            ultimoTiempo =
+                ahora;
+
+
+            try {
+
+                const respuesta =
+                    await fetch(
+                        "/api/escaner",
+                        {
+
+                            method:
+                                "POST",
+
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
+
+                            body:
+                                JSON.stringify({
+                                    matricula:
+                                        matricula,
+                                    movimiento:
+                                        movementMode.value
+                                })
+
+                        }
+                    );
+
+
+                const datos =
+                    await respuesta.json();
+
+
+                // ==================================================
+                // ALUMNO NO ENCONTRADO
+                // ==================================================
+
+                if (!datos.ok) {
+
+                    mostrarMensaje(
+
+                        datos.mensaje ||
+                        "No se pudo registrar.",
+
+                        "error"
+
+                    );
+
+
+                    result.innerHTML =
+
+                        "<p>" +
+
+                        "No se encontró un alumno " +
+
+                        "con la matrícula " +
+
+                        "<strong>" +
+
+                        escapar(
+                            matricula
+                        ) +
+
+                        "</strong>." +
+
+                        "</p>";
+
+
+                    limpiarResultadoAutomaticamente();
+
+                    return;
+
+                }
+                // ==================================================
+                // DATOS DE LA PERSONA ESCANEADA
+                // ==================================================
+
+                const tipo =
+                    datos.tipo || "alumno";
+
+
+                // ==================================================
+                // PERSONAL
+                // ==================================================
+
+                if (tipo === "personal") {
+
+                    const personal =
+                        datos.personal || {};
+
+
+                    const foto =
+                        personal.foto
+
+                            ? "/static/uploads/" +
+                              encodeURIComponent(
+                                  personal.foto
+                              )
+
+                            : "";
+
+
+                    result.innerHTML =
+
+                        (
+
+                            foto
+
+                            ?
+
+                            '<img class="result-photo" src="' +
+                            foto +
+                            '" alt="Foto del personal">'
+
+                            :
+
+                            ''
+
+                        )
+
+                        +
+
+                        '<div class="result-name">' +
+
+                        escapar(
+                            personal.nombre || ""
+                        ) +
+
+                        '</div>'
+
+                        +
+
+                        '<div class="result-data">' +
+
+                        'Número de empleado: <strong>' +
+
+                        escapar(
+                            personal.numero_empleado || ""
+                        ) +
+
+                        '</strong>' +
+
+                        '</div>'
+
+                        +
+
+                        '<div class="result-data">' +
+
+                        escapar(
+                            personal.tipo_personal || ""
+                        ) +
+
+                        '</div>'
+
+                        +
+
+                        '<div class="result-data">' +
+
+                        escapar(
+                            personal.cargo || ""
+                        ) +
+
+                        '</div>'
+
+                        +
+
+                        '<div class="result-data">' +
+
+                        escapar(
+                            personal.area || ""
+                        ) +
+
+                        '</div>'
+
+                        +
+
+                        '<div class="movement ' +
+
+                        (
+
+                            datos.movimiento ===
+                            "ENTRADA"
+
+                            ?
+
+                            "entrada"
+
+                            :
+
+                            "salida"
+
+                        )
+
+                        + '">' +
+
+                        escapar(
+                            datos.movimiento || ""
+                        ) +
+
+                        '</div>'
+
+                        +
+
+                        '<div class="result-data">' +
+
+                        'Fecha: ' +
+
+                        escapar(
+                            datos.fecha || ""
+                        ) +
+
+                        '</div>'
+
+                        +
+
+                        '<div class="result-data">' +
+
+                        'Hora: ' +
+
+                        escapar(
+                            datos.hora || ""
+                        ) +
+
+                        '</div>';
+
+
+                }
+
+
+                // ==================================================
+                // ALUMNO
+                // ==================================================
+
+                else {
+
+                    const alumno =
+                        datos.alumno || {};
+
+
+                    const foto =
+                        alumno.foto
+
+                            ? "/static/uploads/" +
+                              encodeURIComponent(
+                                  alumno.foto
+                              )
+
+                            : "";
+
+
+                    result.innerHTML =
+
+                        (
+
+                            foto
+
+                            ?
+
+                            '<img class="result-photo" src="' +
+                            foto +
+                            '" alt="Foto del alumno">'
+
+                            :
+
+                            ''
+
+                        )
+
+                        +
+
+                        '<div class="result-name">' +
+
+                        escapar(
+                            alumno.nombre || ""
+                        ) +
+
+                        '</div>'
+
+                        +
+
+                        '<div class="result-data">' +
+
+                        'Matrícula: <strong>' +
+
+                        escapar(
+                            alumno.matricula || ""
+                        ) +
+
+                        '</strong>' +
+
+                        '</div>'
+
+                        +
+
+                        '<div class="result-data">' +
+
+                        escapar(
+                            alumno.grupo || ""
+                        ) +
+
+                        '</div>'
+
+                        +
+
+                        '<div class="result-data">' +
+
+                        escapar(
+                            alumno.turno || ""
+                        ) +
+
+                        '</div>'
+
+                        +
+
+                        '<div class="movement ' +
+
+                        (
+
+                            datos.movimiento ===
+                            "ENTRADA"
+
+                            ?
+
+                            "entrada"
+
+                            :
+
+                            "salida"
+
+                        )
+
+                        + '">' +
+
+                        escapar(
+                            datos.movimiento || ""
+                        ) +
+
+                        '</div>'
+
+                        +
+
+                        (
+                            datos.estado_asistencia
+                                ? '<div class="result-data"><strong>' +
+                                  escapar(datos.estado_asistencia) +
+                                  '</strong></div>'
+                                : ''
+                        )
+
+                        +
+
+                        '<div class="result-data">' +
+
+                        'Fecha: ' +
+
+                        escapar(
+                            datos.fecha || ""
+                        ) +
+
+                        '</div>'
+
+                        +
+
+                        '<div class="result-data">' +
+
+                        'Hora: ' +
+
+                        escapar(
+                            datos.hora || ""
+                        ) +
+
+                        '</div>';
+
+                }
+
+
+
+                mostrarMensaje(
+
+                    datos.mensaje ||
+
+                    "Registro realizado correctamente.",
+
+                    "ok"
+
+                );
+
+
+                // Limpiar resultado después de 5 segundos
+
+                limpiarResultadoAutomaticamente();
+
+            }
+
+
+            catch (error) {
+
+                console.error(
+                    error
+                );
+
+
+                mostrarMensaje(
+
+                    "No fue posible " +
+                    "comunicarse con el servidor.",
+
+                    "error"
+
+                );
+
+            }
+
+
+            finally {
+
+                procesando =
+                    false;
+
+            }
+
+        }
+
+
+        // ==================================================
+        // ESCAPAR TEXTO
+        // ==================================================
+
+        function escapar(
+            texto
+        ) {
+
+            const div =
+                document.createElement(
+                    "div"
+                );
+
+
+            div.textContent =
+                texto;
+
+
+            return div.innerHTML;
+
+        }
+
+
+        // ==================================================
+        // INICIAR CÁMARA
+        // ==================================================
+
+        async function iniciarCamara() {
+
+            detenerEscanerFisico();
+
+            if (activo) {
+                return;
+            }
+
+            limpiarMensaje();
+
+            try {
+
+                scanner = new Html5Qrcode("reader");
+
+                await scanner.start(
+                    { facingMode: "environment" },
+
+                    {
+                        fps: 15,
+
+                        qrbox: function(
+                            viewfinderWidth,
+                            viewfinderHeight
+                        ) {
+
+                            const tamano =
+                                Math.min(
+                                    viewfinderWidth * 0.70,
+                                    viewfinderHeight * 0.70,
+                                    220
+                                );
+
+                            const areaCompacta = Math.max(120, tamano);
+
+                            return {
+                                width: areaCompacta,
+                                height: areaCompacta
+                            };
+
+                        }
+                    },
+
+                    function(decodedText) {
+
+                        registrar(decodedText);
+
+                    },
+
+                    function() {
+
+                        // Error normal de lectura.
+
+                    }
+
+                );
+
+                activo = true;
+
+                mostrarMensaje(
+                    "Cámara activa. " +
+                    "Presenta el QR del alumno.",
+                    "ok"
+                );
+
+            }
+
+            catch (error) {
+
+                console.error(error);
+
+                mostrarMensaje(
+                    "Error de cámara: " +
+                    (
+                        error && error.message
+                            ? error.message
+                            : String(error)
+                    ),
+                    "error"
+                );
+
+            }
+
+        }
+
+        // ==================================================
+        // DETENER CÁMARA
+        // ==================================================
+
+        async function detenerCamara() {
+
+            if (
+                !scanner ||
+                !activo
+            ) {
+
+                return;
+
+            }
+
+
+            try {
+
+                await scanner.stop();
+
+                await scanner.clear();
+
+            }
+
+            catch (error) {
+
+                console.error(
+                    error
+                );
+
+            }
+
+
+            activo = false;
+
+            scanner = null;
+
+        }
+
+
+        // ==================================================
+        // INICIAR ESCÁNER FÍSICO
+        // ==================================================
+
+        function iniciarEscanerFisico() {
+
+            if (activo) {
+
+                detenerCamara();
+
+            }
+
+
+            escanerFisicoActivo =
+                true;
+
+
+            bufferEscaner =
+                "";
+
+
+            ultimoCaracterTiempo =
+                0;
+
+
+            limpiarMensaje();
+
+
+            mostrarMensaje(
+
+                "Escáner físico activo. " +
+                "Esperando código QR...",
+
+                "ok"
+
+            );
+
+        }
+
+
+        // ==================================================
+        // DETENER ESCÁNER FÍSICO
+        // ==================================================
+
+        function detenerEscanerFisico() {
+
+            escanerFisicoActivo =
+                false;
+
+
+            bufferEscaner =
+                "";
+
+
+            ultimoCaracterTiempo =
+                0;
+
+        }
+
+
+        // ==================================================
+        // RECIBIR LECTOR FÍSICO
+        // ==================================================
+
+        document.addEventListener(
+
+            "keydown",
+
+            async function(event) {
+
+                if (
+                    !escanerFisicoActivo
+                ) {
+
+                    return;
+
+                }
+
+
+                const ahora =
+                    Date.now();
+
+
+                if (
+
+                    ahora -
+                    ultimoCaracterTiempo
+                    > 100
+
+                ) {
+
+                    bufferEscaner =
+                        "";
+
+                }
+
+
+                ultimoCaracterTiempo =
+                    ahora;
+
+
+                // ENTER = FIN DEL ESCANEO
+
+                if (
+                    event.key ===
+                    "Enter"
+                ) {
+
+                    event.preventDefault();
+
+
+                    const matricula =
+                        bufferEscaner.trim();
+
+
+                    bufferEscaner =
+                        "";
+
+
+                    if (!matricula) {
+
+                        return;
+
+                    }
+
+
+                    await registrar(
+                        matricula
+                    );
+
+
+                    return;
+
+                }
+
+
+                // CARACTERES DEL ESCÁNER
+
+                if (
+                    event.key.length === 1
+                ) {
+
+                    bufferEscaner +=
+                        event.key;
+
+                }
+
+            }
+
+        );
+
+
+        // ==================================================
+        // BOTÓN INICIAR CÁMARA
+        // ==================================================
+
+        document
+            .getElementById(
+                "startBtn"
+            )
+            .addEventListener(
+                "click",
+                iniciarCamara
+            );
+
+
+        // ==================================================
+        // BOTÓN ESCÁNER FÍSICO
+        // ==================================================
+
+        document
+            .getElementById(
+                "physicalBtn"
+            )
+            .addEventListener(
+                "click",
+                iniciarEscanerFisico
+            );
+
+
+        // ==================================================
+        // BOTÓN DETENER
+        // ==================================================
+
+        document
+            .getElementById(
+                "stopBtn"
+            )
+            .addEventListener(
+
+                "click",
+
+                async function() {
+
+                    detenerEscanerFisico();
+
+                    await detenerCamara();
+
+                    mostrarMensaje(
+
+                        "Escáner detenido.",
+
+                        "ok"
+
+                    );
+
+                }
+
+            );
+
+
+        // ==================================================
+        // PRUEBA MANUAL
+        // ==================================================
+
+        const manualMatricula =
+            document.getElementById(
+                "manualMatricula"
+            );
+
+
+        document
+            .getElementById(
+                "manualBtn"
+            )
+            .addEventListener(
+
+                "click",
+
+                async function() {
+
+                    const matricula =
+                        manualMatricula
+                            .value
+                            .trim();
+
+
+                    if (!matricula) {
+
+                        return;
+
+                    }
+
+
+                    await registrar(
+                        matricula
+                    );
+
+
+                    manualMatricula.value =
+                        "";
+
+                    manualMatricula.focus();
+
+                }
+
+            );
+
+
+        manualMatricula
+            .addEventListener(
+
+                "keydown",
+
+                async function(event) {
+
+                    if (
+                        event.key ===
+                        "Enter"
+                    ) {
+
+                        event.preventDefault();
+
+
+                        const matricula =
+                            manualMatricula
+                                .value
+                                .trim();
+
+
+                        if (!matricula) {
+
+                            return;
+
+                        }
+
+
+                        await registrar(
+                            matricula
+                        );
+
+
+                        manualMatricula.value =
+                            "";
+
+                        manualMatricula.focus();
+
+                    }
+
+                }
+
+            );
+
+
+        // ==================================================
+        // CERRAR CÁMARA AL SALIR
+        // ==================================================
+
+        window.addEventListener(
+
+            "beforeunload",
+
+            detenerCamara
+
+        );
+
+
+        // ==================================================
+        // ACTIVAR ESCÁNER FÍSICO AUTOMÁTICAMENTE
+        // ==================================================
+
+        window.addEventListener(
+
+            "DOMContentLoaded",
+
+            function() {
+
+                iniciarEscanerFisico();
+
+            }
+
+        );
+
+    </script>
+
+    <script src="/static/js/navigation.js"></script>
+</body>
+
+</html>
+
+
+
+
+
+
+
+
+
+

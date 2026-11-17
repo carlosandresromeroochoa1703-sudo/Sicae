@@ -1,0 +1,1417 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Estadísticas - SICAE WEB</title>
+
+    <link
+        rel="stylesheet"
+        href="/static/css/style.css?v=20261018-3"
+    >
+
+    <style>
+
+        /* ==================================================
+           ENCABEZADO
+           ================================================== */
+
+        .estadisticas-header {
+            margin-bottom: 25px;
+        }
+
+        .estadisticas-header h2 {
+            margin-bottom: 6px;
+        }
+
+        .estadisticas-header p {
+            margin: 0;
+            color: #6b7280;
+        }
+
+
+        /* ==================================================
+           FILTROS
+           ================================================== */
+
+        .estadisticas-filtros {
+
+            background: white;
+
+            border-radius: 16px;
+
+            padding: 22px;
+
+            margin-bottom: 25px;
+
+            box-shadow:
+                0 4px 15px
+                rgba(0, 0, 0, .08);
+
+        }
+
+        .filtros-grid {
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(
+                    auto-fit,
+                    minmax(180px, 1fr)
+                );
+
+            gap: 16px;
+
+            align-items: end;
+
+        }
+
+        .filtro-grupo {
+
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 7px;
+
+        }
+
+        .filtro-grupo label {
+
+            font-size: 13px;
+
+            font-weight: 600;
+
+            color: #374151;
+
+        }
+
+        .filtro-grupo select,
+        .filtro-grupo input {
+
+            width: 100%;
+
+            box-sizing: border-box;
+
+            padding: 10px 12px;
+
+            border: 1px solid #d1d5db;
+
+            border-radius: 9px;
+
+            background: white;
+
+            font-size: 14px;
+
+        }
+
+        .boton-filtrar {
+
+            border: none;
+
+            border-radius: 9px;
+
+            padding: 11px 18px;
+
+            background: #111827;
+
+            color: white;
+
+            font-weight: 600;
+
+            cursor: pointer;
+
+            transition:
+                transform .2s ease,
+                box-shadow .2s ease;
+
+        }
+
+        .boton-filtrar:hover {
+
+            transform: translateY(-2px);
+
+            box-shadow:
+                0 5px 12px
+                rgba(0, 0, 0, .15);
+
+        }
+
+
+        /* ==================================================
+           TARJETAS
+           ================================================== */
+
+        .estadisticas-cards {
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(
+                    auto-fit,
+                    minmax(180px, 1fr)
+                );
+
+            gap: 18px;
+
+            margin-bottom: 25px;
+
+        }
+
+        .estadistica-card {
+
+            background: white;
+
+            border-radius: 16px;
+
+            padding: 22px;
+
+            box-shadow:
+                0 4px 15px
+                rgba(0, 0, 0, .08);
+
+            transition:
+                transform .2s ease,
+                box-shadow .2s ease;
+
+        }
+
+        .estadistica-card:hover {
+
+            transform: translateY(-3px);
+
+            box-shadow:
+                0 8px 20px
+                rgba(0, 0, 0, .11);
+
+        }
+
+        .estadistica-card h3 {
+
+            margin: 0 0 10px;
+
+            font-size: 14px;
+
+            color: #6b7280;
+
+        }
+
+        .estadistica-numero {
+
+            font-size: 32px;
+
+            font-weight: 700;
+
+            color: #111827;
+
+        }
+
+        .estadistica-descripcion {
+
+            margin-top: 5px;
+
+            color: #6b7280;
+
+            font-size: 12px;
+
+        }
+
+
+        /* ==================================================
+           CONTENEDORES
+           ================================================== */
+
+        .estadisticas-grid {
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(
+                    auto-fit,
+                    minmax(350px, 1fr)
+                );
+
+            gap: 22px;
+
+            margin-bottom: 25px;
+
+        }
+
+        .estadisticas-seccion {
+
+            background: white;
+
+            border-radius: 16px;
+
+            padding: 22px;
+
+            box-shadow:
+                0 4px 15px
+                rgba(0, 0, 0, .08);
+
+        }
+
+        .estadisticas-seccion h3 {
+
+            margin-top: 0;
+
+            margin-bottom: 18px;
+
+            color: #111827;
+
+        }
+
+
+        /* ==================================================
+           TABLAS
+           ================================================== */
+
+        .estadisticas-tabla-container {
+
+            overflow-x: auto;
+
+        }
+
+        .estadisticas-tabla {
+
+            width: 100%;
+
+            border-collapse: collapse;
+
+            min-width: 500px;
+
+        }
+
+        .estadisticas-tabla th {
+
+            text-align: left;
+
+            padding: 11px;
+
+            background: #f3f4f6;
+
+            color: #374151;
+
+            font-size: 13px;
+
+        }
+
+        .estadisticas-tabla td {
+
+            padding: 11px;
+
+            border-bottom:
+                1px solid #e5e7eb;
+
+            font-size: 13px;
+
+        }
+
+        .estadisticas-tabla tr:last-child td {
+
+            border-bottom: none;
+
+        }
+
+
+        /* ==================================================
+           PORCENTAJE
+           ================================================== */
+
+        .porcentaje {
+
+            font-weight: 700;
+
+        }
+
+        .barra-fondo {
+
+            width: 100%;
+
+            height: 8px;
+
+            background: #e5e7eb;
+
+            border-radius: 20px;
+
+            overflow: hidden;
+
+            margin-top: 5px;
+
+        }
+
+        .barra-progreso {
+
+            height: 100%;
+
+            background: #16a34a;
+
+            border-radius: 20px;
+
+            transition: width .4s ease;
+
+        }
+
+
+        /* ==================================================
+           GRÁFICAS PROFESIONALES
+           ================================================== */
+
+        .resumen-visual {
+            display: grid;
+            grid-template-columns: 180px 1fr;
+            gap: 25px;
+            align-items: center;
+            margin-bottom: 25px;
+            padding: 22px;
+            background: linear-gradient(
+                135deg,
+                #f8fafc,
+                #eef2ff
+            );
+            border: 1px solid #e5e7eb;
+            border-radius: 18px;
+        }
+
+        .grafica-donut {
+            width: 145px;
+            height: 145px;
+            margin: auto;
+            border-radius: 50%;
+            background:
+                conic-gradient(
+                    #2563eb 0% {{ resumen.porcentaje }}%,
+                    #e5e7eb {{ resumen.porcentaje }}% 100%
+                );
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            box-shadow:
+                0 10px 25px rgba(37, 99, 235, .14);
+            animation: donutEntrada .9s ease-out;
+        }
+
+        .grafica-donut::after {
+            content: "";
+            position: absolute;
+            width: 105px;
+            height: 105px;
+            background: white;
+            border-radius: 50%;
+        }
+
+        .donut-contenido {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+        }
+
+        .donut-porcentaje {
+            font-size: 25px;
+            font-weight: 800;
+            color: #111827;
+            line-height: 1;
+        }
+
+        .donut-texto {
+            margin-top: 5px;
+            font-size: 11px;
+            color: #6b7280;
+            font-weight: 600;
+        }
+
+        .resumen-detalles {
+            display: grid;
+            grid-template-columns:
+                repeat(3, minmax(100px, 1fr));
+            gap: 12px;
+        }
+
+        .resumen-detalle {
+            padding: 14px;
+            background: white;
+            border-radius: 13px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .resumen-detalle span {
+            display: block;
+            font-size: 11px;
+            color: #6b7280;
+            margin-bottom: 5px;
+        }
+
+        .resumen-detalle strong {
+            font-size: 21px;
+            color: #111827;
+        }
+
+        @keyframes donutEntrada {
+            from {
+                transform: scale(.75) rotate(-20deg);
+                opacity: .2;
+            }
+
+            to {
+                transform: scale(1) rotate(0);
+                opacity: 1;
+            }
+        }
+
+        @media (max-width: 700px) {
+
+            .resumen-visual {
+                grid-template-columns: 1fr;
+            }
+
+            .resumen-detalles {
+                grid-template-columns: 1fr;
+            }
+
+        }
+        .grafica-container {
+            min-height: 290px;
+            display: flex;
+            align-items: flex-end;
+            gap: 14px;
+            padding: 25px 15px 10px;
+            overflow-x: auto;
+            position: relative;
+            background:
+                linear-gradient(
+                    to top,
+                    transparent 24.5%,
+                    #eef2f7 25%,
+                    transparent 25.5%,
+                    transparent 49.5%,
+                    #eef2f7 50%,
+                    transparent 50.5%,
+                    transparent 74.5%,
+                    #eef2f7 75%,
+                    transparent 75.5%
+                );
+            border-radius: 14px;
+        }
+
+        .grafica-columna {
+            min-width: 48px;
+            flex: 1;
+            max-width: 75px;
+            height: 245px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            position: relative;
+        }
+
+        .grafica-barra {
+            width: 30px;
+            max-width: 42px;
+            min-height: 5px;
+            background:
+                linear-gradient(
+                    180deg,
+                    #2563eb 0%,
+                    #4f46e5 100%
+                );
+            border-radius: 9px 9px 4px 4px;
+            box-shadow:
+                0 7px 16px rgba(37, 99, 235, .22);
+            transition:
+                transform .25s ease,
+                filter .25s ease;
+            transform-origin: bottom;
+            animation: graficaEntrada .7s cubic-bezier(.22,1,.36,1);
+        }
+
+        .grafica-barra:hover {
+            transform: scaleX(1.12);
+            filter: brightness(1.08);
+        }
+
+        .grafica-valor {
+            font-size: 12px;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 7px;
+        }
+
+        .grafica-label {
+            margin-top: 10px;
+            font-size: 10px;
+            color: #6b7280;
+            white-space: nowrap;
+        }
+
+        @keyframes graficaEntrada {
+            from {
+                transform: scaleY(0);
+                opacity: .2;
+            }
+
+            to {
+                transform: scaleY(1);
+                opacity: 1;
+            }
+        }
+        .grafica-grados {
+            display: grid;
+            gap: 18px;
+            margin-bottom: 25px;
+        }
+
+        .grado-item {
+            display: grid;
+            grid-template-columns: 70px 1fr 65px;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .grado-nombre {
+            font-weight: 700;
+            color: #111827;
+        }
+
+        .grado-barra-fondo {
+            height: 14px;
+            background: #eef2f7;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .grado-barra {
+            height: 100%;
+            border-radius: 20px;
+            background:
+                linear-gradient(
+                    90deg,
+                    #2563eb,
+                    #7c3aed
+                );
+            box-shadow:
+                0 4px 10px rgba(37, 99, 235, .18);
+            animation:
+                barraGrado .8s cubic-bezier(.22,1,.36,1);
+        }
+
+        .grado-porcentaje {
+            text-align: right;
+            font-size: 13px;
+            font-weight: 700;
+            color: #374151;
+        }
+
+        @keyframes barraGrado {
+            from {
+                width: 0 !important;
+            }
+        }
+
+        .grafica-grupos {
+            display: grid;
+            gap: 14px;
+            margin-bottom: 28px;
+        }
+
+        .grupo-item {
+            display: grid;
+            grid-template-columns: 150px 1fr 70px;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .grupo-nombre {
+            font-size: 13px;
+            font-weight: 700;
+            color: #1f2937;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .grupo-barra-fondo {
+            height: 12px;
+            background: #eef2f7;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .grupo-barra {
+            height: 100%;
+            min-width: 4px;
+            border-radius: 20px;
+            background:
+                linear-gradient(
+                    90deg,
+                    #06b6d4,
+                    #2563eb
+                );
+            box-shadow:
+                0 4px 10px rgba(37, 99, 235, .16);
+            animation:
+                barraGrupo .8s cubic-bezier(.22,1,.36,1);
+        }
+
+        .grupo-porcentaje {
+            text-align: right;
+            font-size: 12px;
+            font-weight: 700;
+            color: #374151;
+        }
+
+        @keyframes barraGrupo {
+            from {
+                width: 0 !important;
+            }
+        }
+
+        @media (max-width: 700px) {
+
+            .grado-item {
+                grid-template-columns:
+                    55px 1fr 55px;
+                gap: 8px;
+            }
+
+        }
+
+        /* ==================================================
+           SIN DATOS
+           ================================================== */
+
+        .sin-datos {
+
+            text-align: center;
+
+            padding: 35px 20px;
+
+            color: #6b7280;
+
+        }
+
+
+        /* ==================================================
+           RESPONSIVE
+           ================================================== */
+
+        .estadisticas-grid {
+
+                grid-template-columns: 1fr;
+
+            }
+
+            .estadistica-numero {
+
+                font-size: 28px;
+
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <!-- ==========================================
+         BARRA LATERAL
+         ========================================== -->
+
+    {% include "_sidebar.html" %}
+
+
+    <!-- ==========================================
+         CONTENIDO
+         ========================================== -->
+
+    <main class="content">
+
+
+        <header class="estadisticas-header">
+
+            <h2>
+                📊 Estadísticas de asistencia
+            </h2>
+
+            <p>
+                Consulta el comportamiento de la asistencia
+                por periodo, grado y grupo.
+            </p>
+
+        </header>
+
+
+        <!-- ======================================
+             FILTROS
+             ====================================== -->
+
+        <section class="estadisticas-filtros">
+
+            <form
+                method="GET"
+                action="/estadisticas"
+            >
+
+                <div class="filtros-grid">
+
+
+                    <div class="filtro-grupo">
+
+                        <label for="periodo">
+                            Periodo
+                        </label>
+
+                        <select
+                            id="periodo"
+                            name="periodo"
+                        >
+
+                            <option value="dia"
+                                {% if periodo == 'dia' %}
+                                    selected
+                                {% endif %}
+                            >
+                                Día
+                            </option>
+
+                            <option value="semana"
+                                {% if periodo == 'semana' %}
+                                    selected
+                                {% endif %}
+                            >
+                                Semana
+                            </option>
+
+                            <option value="mes"
+                                {% if periodo == 'mes' %}
+                                    selected
+                                {% endif %}
+                            >
+                                Mes
+                            </option>
+
+                            <option value="anio"
+                                {% if periodo == 'anio' %}
+                                    selected
+                                {% endif %}
+                            >
+                                Año
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="filtro-grupo">
+
+                        <label for="fecha">
+                            Fecha
+                        </label>
+
+                        <input
+                            type="date"
+                            id="fecha"
+                            name="fecha"
+                            value="{{ fecha }}"
+                        >
+
+                    </div>
+
+
+                    <div class="filtro-grupo">
+
+                        <label for="grado">
+                            Grado
+                        </label>
+
+                        <select
+                            id="grado"
+                            name="grado"
+                        >
+
+                            <option value="">
+                                Todos los grados
+                            </option>
+
+                            {% for grado_item in grados %}
+
+                                <option
+                                    value="{{ grado_item }}"
+                                    {% if grado == grado_item %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    {{ grado_item }}° grado
+                                </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="filtro-grupo">
+
+                        <label for="grupo_id">
+                            Grupo
+                        </label>
+
+                        <select
+                            id="grupo_id"
+                            name="grupo_id"
+                        >
+
+                            <option value="">
+                                Todos los grupos
+                            </option>
+
+                            {% for grupo_item in grupos %}
+
+                                <option
+                                    value="{{ grupo_item.id }}"
+                                    {% if grupo_id == grupo_item.id %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    {{ grupo_item.nombre_grupo }}
+                                    — {{ grupo_item.grado }}°
+                                </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="filtro-grupo">
+
+                        <button
+                            type="submit"
+                            class="boton-filtrar"
+                        >
+                            🔎 Consultar estadísticas
+                        </button>
+
+                    </div>
+
+
+                </div>
+
+            </form>
+
+        </section>
+
+
+        <!-- ======================================
+             TARJETAS PRINCIPALES
+             ====================================== -->
+
+        <section class="estadisticas-cards">
+
+
+            <div class="estadistica-card">
+
+                <h3>
+                    👨‍🎓 Total de alumnos
+                </h3>
+
+            <div class="resumen-visual">
+
+                <div class="grafica-donut">
+
+                    <div class="donut-contenido">
+
+                        <div class="donut-porcentaje">
+                            {{ resumen.porcentaje }}%
+                        </div>
+
+                        <div class="donut-texto">
+                            Asistencia
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="resumen-detalles">
+
+                    <div class="resumen-detalle">
+                        <span>Total de alumnos</span>
+                        <strong>{{ resumen.total_alumnos }}</strong>
+                    </div>
+
+                    <div class="resumen-detalle">
+                        <span>Con asistencia</span>
+                        <strong>{{ resumen.asistencia }}</strong>
+                    </div>
+
+                    <div class="resumen-detalle">
+                        <span>Sin asistencia</span>
+                        <strong>{{ resumen.faltas }}</strong>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="estadisticas-resumen">
+                <div class="estadistica-numero">
+                    {{ resumen.total_alumnos }}
+                </div>
+
+                <div class="estadistica-descripcion">
+                    Alumnos activos
+                </div>
+
+            </div>
+
+
+            <div class="estadistica-card">
+
+                <h3>
+                    ✅ Con asistencia
+                </h3>
+
+                <div class="estadistica-numero">
+                    {{ resumen.asistencia }}
+                </div>
+
+                <div class="estadistica-descripcion">
+                    Alumnos con entrada registrada
+                </div>
+
+            </div>
+
+
+            <div class="estadistica-card">
+
+                <h3>
+                    ❌ Sin asistencia
+                </h3>
+
+                <div class="estadistica-numero">
+                    {{ resumen.faltas }}
+                </div>
+
+                <div class="estadistica-descripcion">
+                    Sin entrada registrada
+                </div>
+
+            </div>
+
+
+            <div class="estadistica-card">
+
+                <h3>
+                    📈 Asistencia
+                </h3>
+
+                <div class="estadistica-numero">
+                    {{ resumen.porcentaje }}%
+                </div>
+
+                <div class="estadistica-descripcion">
+                    Porcentaje del periodo
+                </div>
+
+            </div>
+
+
+        </section>
+
+
+        <!-- ======================================
+             GRÁFICA Y POR GRADO
+             ====================================== -->
+
+        <section class="estadisticas-grid">
+
+
+            <div class="estadisticas-seccion">
+
+                <h3>
+                    📈 Asistencia por fecha
+                </h3>
+
+                {% if asistencia_fecha %}
+
+                    <div class="grafica-container">
+
+                        {% set max_asistencia =
+                            asistencia_fecha
+                            |map(attribute='asistencia')
+                            |max
+                        %}
+
+                        {% for dato in asistencia_fecha %}
+
+                            <div class="grafica-columna">
+
+                                <div class="grafica-valor">
+                                    {{ dato.asistencia }}
+                                </div>
+
+                                <div
+                                    class="grafica-barra"
+                                    style="
+                                        height:
+                                        {{ (
+                                            dato.asistencia /
+                                            (max_asistencia or 1)
+                                        ) * 205 }}px;
+                                    "
+                                    title="{{ dato.fecha }} — {{ dato.asistencia }} asistencias"
+                                ></div>
+
+                                <div class="grafica-label">
+                                    {{ dato.fecha }}
+                                </div>
+
+                            </div>
+
+                        {% endfor %}
+
+                    </div>
+                {% else %}
+
+                    <div class="sin-datos">
+                        No hay registros de asistencia
+                        para el periodo seleccionado.
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+
+            <div class="estadisticas-seccion">
+
+                <h3>
+                    🎓 Asistencia por grado
+                </h3>
+
+                <div class="grafica-grados">
+
+                    {% for dato in estadisticas_grado %}
+
+                        <div class="grado-item">
+
+                            <div class="grado-nombre">
+                                {{ dato.grado }}° grado
+                            </div>
+
+                            <div class="grado-barra-fondo">
+
+                                <div
+                                    class="grado-barra"
+                                    style="width: {{ dato.porcentaje }}%;"
+                                    title="{{ dato.porcentaje }}% de asistencia"
+                                ></div>
+
+                            </div>
+
+                            <div class="grado-porcentaje">
+                                {{ dato.porcentaje }}%
+                            </div>
+
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+                <div class="grafica-grupos">
+
+                {% for dato in estadisticas_grupo %}
+
+                    <div class="grupo-item">
+
+                        <div
+                            class="grupo-nombre"
+                            title="{{ dato.nombre_grupo }}"
+                        >
+                            {{ dato.nombre_grupo }}
+                        </div>
+
+                        <div class="grupo-barra-fondo">
+
+                            <div
+                                class="grupo-barra"
+                                style="width: {{ dato.porcentaje }}%;"
+                                title="{{ dato.porcentaje }}% de asistencia"
+                            ></div>
+
+                        </div>
+
+                        <div class="grupo-porcentaje">
+                            {{ dato.porcentaje }}%
+                        </div>
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+            <div class="estadisticas-tabla-container">
+
+                    <table class="estadisticas-tabla">
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    Grado
+                                </th>
+
+                                <th>
+                                    Total
+                                </th>
+
+                                <th>
+                                    Asistencia
+                                </th>
+
+                                <th>
+                                    Faltas
+                                </th>
+
+                                <th>
+                                    %
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            {% for dato in estadisticas_grado %}
+
+                                <tr>
+
+                                    <td>
+                                        {{ dato.grado }}°
+                                    </td>
+
+                                    <td>
+                                        {{ dato.total_alumnos }}
+                                    </td>
+
+                                    <td>
+                                        {{ dato.asistencia }}
+                                    </td>
+
+                                    <td>
+                                        {{ dato.faltas }}
+                                    </td>
+
+                                    <td>
+
+                                        <span class="porcentaje">
+                                            {{ dato.porcentaje }}%
+                                        </span>
+
+                                        <div class="barra-fondo">
+
+                                            <div
+                                                class="barra-progreso"
+                                                style="
+                                                    width:
+                                                    {{ dato.porcentaje }}%;
+                                                "
+                                            ></div>
+
+                                        </div>
+
+                                    </td>
+
+                                </tr>
+
+                            {% else %}
+
+                                <tr>
+
+                                    <td
+                                        colspan="5"
+                                        class="sin-datos"
+                                    >
+                                        No hay datos disponibles.
+                                    </td>
+
+                                </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+
+        </section>
+
+
+        <!-- ======================================
+             POR GRUPO
+             ====================================== -->
+
+        <section class="estadisticas-seccion">
+
+            <h3>
+                🏫 Asistencia por grupo
+            </h3>
+
+            <div class="estadisticas-tabla-container">
+
+                <table class="estadisticas-tabla">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Grupo
+                            </th>
+
+                            <th>
+                                Grado
+                            </th>
+
+                            <th>
+                                Turno
+                            </th>
+
+                            <th>
+                                Total
+                            </th>
+
+                            <th>
+                                Asistencia
+                            </th>
+
+                            <th>
+                                Faltas
+                            </th>
+
+                            <th>
+                                Porcentaje
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        {% for dato in estadisticas_grupo %}
+
+                            <tr>
+
+                                <td>
+                                    {{ dato.nombre_grupo }}
+                                </td>
+
+                                <td>
+                                    {{ dato.grado }}°
+                                </td>
+
+                                <td>
+                                    {{ dato.turno }}
+                                </td>
+
+                                <td>
+                                    {{ dato.total_alumnos }}
+                                </td>
+
+                                <td>
+                                    {{ dato.asistencia }}
+                                </td>
+
+                                <td>
+                                    {{ dato.faltas }}
+                                </td>
+
+                                <td>
+
+                                    <span class="porcentaje">
+                                        {{ dato.porcentaje }}%
+                                    </span>
+
+                                    <div class="barra-fondo">
+
+                                        <div
+                                            class="barra-progreso"
+                                            style="
+                                                width:
+                                                {{ dato.porcentaje }}%;
+                                            "
+                                        ></div>
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+
+                        {% else %}
+
+                            <tr>
+
+                                <td
+                                    colspan="7"
+                                    class="sin-datos"
+                                >
+                                    No hay datos disponibles.
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+
+    </main>
+
+
+    <script src="/static/js/navigation.js"></script>
+
+</body>
+
+</html>
+
+
+
+
+
+
+
+
+
+

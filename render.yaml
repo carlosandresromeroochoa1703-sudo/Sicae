@@ -1,0 +1,39 @@
+services:
+  - type: web
+    name: sicae-web
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    dockerCommand: "sh -c 'python -m app.database.init_db && uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000}'"
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_HOST
+        fromDatabase:
+          name: sicae-db
+          property: host
+      - key: DATABASE_PORT
+        fromDatabase:
+          name: sicae-db
+          property: port
+      - key: DATABASE_NAME
+        fromDatabase:
+          name: sicae-db
+          property: database
+      - key: DATABASE_USER
+        fromDatabase:
+          name: sicae-db
+          property: user
+      - key: DATABASE_PASSWORD
+        fromDatabase:
+          name: sicae-db
+          property: password
+
+databases:
+  - name: sicae-db
+    databaseName: sicae
+    user: sicae
+    plan: free

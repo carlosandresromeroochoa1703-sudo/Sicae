@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Editar Grupo - SICAE WEB</title>
+
+    <link
+        rel="stylesheet"
+        href="/static/css/style.css?v=20261018-3"
+    >
+
+    <style>
+
+        .page-header {
+            margin-bottom: 25px;
+        }
+
+        .page-header h2 {
+            margin: 0;
+            font-size: 28px;
+        }
+
+        .page-header p {
+            margin-top: 8px;
+            color: #777;
+        }
+
+        .card {
+            background: white;
+            border-radius: 14px;
+            padding: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            max-width: 750px;
+        }
+
+        .form-group {
+            margin-bottom: 22px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #374151;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 15px;
+            background: white;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+        }
+
+        .form-help {
+            margin-top: 6px;
+            color: #6b7280;
+            font-size: 13px;
+        }
+
+        .button-container {
+            margin-top: 30px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 20px;
+            border-radius: 8px;
+            border: none;
+            text-decoration: none;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #d1d5db;
+        }
+
+        .group-info {
+            background: #f8fafc;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 25px;
+        }
+
+        .group-info strong {
+            color: #111827;
+        }
+
+        @media (max-width: 700px) {
+
+            .card {
+                padding: 20px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <!-- =====================================================
+         BARRA LATERAL
+         ===================================================== -->
+
+        {% include "_sidebar.html" %}
+
+
+    <!-- =====================================================
+         CONTENIDO
+         ===================================================== -->
+
+    <main class="content">
+
+
+        <!-- =================================================
+             ENCABEZADO
+             ================================================= -->
+
+        <header class="page-header">
+
+            <h2>
+                Editar Editar grupo
+            </h2>
+
+            <p>
+                Modificar la información del grupo
+            </p>
+
+        </header>
+
+
+        <!-- =================================================
+             FORMULARIO
+             ================================================= -->
+
+        <div class="card">
+
+
+            <!-- INFORMACIÓN ACTUAL -->
+
+            <div class="group-info">
+
+                <strong>
+                    ID del grupo:
+                </strong>
+
+                {{ grupo.id }}
+
+            </div>
+
+
+            <form
+                method="post"
+                action="/grupos/{{ grupo.id }}/editar"
+            >
+
+
+                <!-- =================================================
+                     NOMBRE DEL GRUPO
+                     ================================================= -->
+
+                <div class="form-group">
+
+                    <label for="nombre_grupo">
+
+                        Nombre del grupo
+
+                    </label>
+
+
+                    <input
+                        id="nombre_grupo"
+                        type="text"
+                        name="nombre_grupo"
+                        class="form-control"
+                        maxlength="100"
+                        value="{{ grupo.nombre_grupo }}"
+                        required
+                    >
+
+
+                    <div class="form-help">
+
+                        Ejemplo: Tiburones, Delfines, Leones, etc.
+
+                    </div>
+
+                </div>
+
+
+                <!-- =================================================
+                     GRADO
+                     ================================================= -->
+
+                <div class="form-group">
+
+                    <label for="grado">
+
+                        Grado
+
+                    </label>
+
+
+                    <input
+                        id="grado"
+                        type="number"
+                        name="grado"
+                        class="form-control"
+                        min="1"
+                        max="6"
+                        value="{{ grupo.grado }}"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- =================================================
+                     GRUPO
+                     ================================================= -->
+
+                <div class="form-group">
+
+                    <label for="nombre">
+
+                        Grupo
+
+                    </label>
+
+
+                    <input
+                        id="nombre"
+                        type="text"
+                        name="nombre"
+                        class="form-control"
+                        maxlength="10"
+                        value="{{ grupo.nombre }}"
+                        required
+                    >
+
+
+                    <div class="form-help">
+
+                        Ejemplo: A, B, C, D...
+
+                    </div>
+
+                </div>
+
+
+                <!-- =================================================
+                     TURNO
+                     ================================================= -->
+
+                <div class="form-group">
+
+                    <label for="turno">
+
+                        Turno
+
+                    </label>
+
+
+                    <select
+                        id="turno"
+                        name="turno"
+                        class="form-control"
+                        required
+                    >
+
+                        <option
+                            value="Matutino"
+                            {% if grupo.turno == "Matutino" %}
+                                selected
+                            {% endif %}
+                        >
+                            Matutino
+                        </option>
+
+
+                        <option
+                            value="Vespertino"
+                            {% if grupo.turno == "Vespertino" %}
+                                selected
+                            {% endif %}
+                        >
+                            Vespertino
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- =================================================
+                     BOTONES
+                     ================================================= -->
+
+                <div class="button-container">
+
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary"
+                    >
+                        Guardar Guardar cambios
+                    </button>
+
+
+                    <a
+                        href="/grupos"
+                        class="btn btn-secondary"
+                    >
+                        Cancelar
+                    </a>
+
+
+                </div>
+
+
+            </form>
+
+
+        </div>
+
+
+    </main>
+
+
+    <script src="/static/js/navigation.js"></script>
+</body>
+
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

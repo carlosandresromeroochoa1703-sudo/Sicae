@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Respaldos - SICAE WEB
+    </title>
+
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+
+        body {
+
+            margin: 0;
+
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+
+            background:
+                #f3f4f6;
+
+            color:
+                #111827;
+
+        }
+
+
+        .contenedor {
+
+            max-width:
+                1100px;
+
+            margin:
+                40px auto;
+
+            padding:
+                0 20px;
+
+        }
+
+
+        .encabezado {
+
+            display:
+                flex;
+
+            justify-content:
+                space-between;
+
+            align-items:
+                center;
+
+            margin-bottom:
+                30px;
+
+        }
+
+
+        .titulo {
+
+            font-size:
+                30px;
+
+            font-weight:
+                700;
+
+        }
+
+
+        .subtitulo {
+
+            margin-top:
+                6px;
+
+            color:
+                #6b7280;
+
+            font-size:
+                15px;
+
+        }
+
+
+        .boton {
+
+            display:
+                inline-flex;
+
+            align-items:
+                center;
+
+            justify-content:
+                center;
+
+            padding:
+                12px 20px;
+
+            border:
+                none;
+
+            border-radius:
+                8px;
+
+            cursor:
+                pointer;
+
+            text-decoration:
+                none;
+
+            font-size:
+                14px;
+
+            font-weight:
+                600;
+
+        }
+
+
+        .boton-principal {
+
+            background:
+                #1e3a8a;
+
+            color:
+                white;
+
+        }
+
+
+        .boton-principal:hover {
+
+            background:
+                #1e40af;
+
+        }
+
+
+        .boton-volver {
+
+            background:
+                #e5e7eb;
+
+            color:
+                #374151;
+
+        }
+
+
+        .boton-volver:hover {
+
+            background:
+                #d1d5db;
+
+        }
+
+
+        .tarjeta {
+
+            background:
+                white;
+
+            border-radius:
+                12px;
+
+            padding:
+                25px;
+
+            box-shadow:
+                0 4px 15px
+                rgba(
+                    0,
+                    0,
+                    0,
+                    0.08
+                );
+
+        }
+
+
+        .mensaje {
+
+            padding:
+                14px 18px;
+
+            border-radius:
+                8px;
+
+            margin-bottom:
+                20px;
+
+            font-size:
+                14px;
+
+        }
+
+
+        .mensaje-exito {
+
+            background:
+                #dcfce7;
+
+            color:
+                #166534;
+
+            border:
+                1px solid
+                #bbf7d0;
+
+        }
+
+
+        .mensaje-error {
+
+            background:
+                #fee2e2;
+
+            color:
+                #991b1b;
+
+            border:
+                1px solid
+                #fecaca;
+
+        }
+
+
+        table {
+
+            width:
+                100%;
+
+            border-collapse:
+                collapse;
+
+        }
+
+
+        thead {
+
+            background:
+                #1e3a8a;
+
+            color:
+                white;
+
+        }
+
+
+        th,
+        td {
+
+            padding:
+                14px;
+
+            text-align:
+                left;
+
+            border-bottom:
+                1px solid
+                #e5e7eb;
+
+        }
+
+
+        th {
+
+            font-size:
+                14px;
+
+        }
+
+
+        td {
+
+            font-size:
+                14px;
+
+        }
+
+
+        tbody tr:hover {
+
+            background:
+                #f9fafb;
+
+        }
+
+
+        .acciones {
+
+            display:
+                flex;
+
+            gap:
+                8px;
+
+            align-items:
+                center;
+
+        }
+
+
+        .boton-descargar {
+
+            background:
+                #2563eb;
+
+            color:
+                white;
+
+            padding:
+                8px 12px;
+
+            border-radius:
+                6px;
+
+            font-size:
+                13px;
+
+        }
+
+
+        .boton-descargar:hover {
+
+            background:
+                #1d4ed8;
+
+        }
+
+
+        .boton-eliminar {
+
+            background:
+                #dc2626;
+
+            color:
+                white;
+
+            padding:
+                8px 12px;
+
+            border:
+                none;
+
+            border-radius:
+                6px;
+
+            font-size:
+                13px;
+
+            cursor:
+                pointer;
+
+        }
+
+
+        .boton-eliminar:hover {
+
+            background:
+                #b91c1c;
+
+        }
+
+
+        .sin-respaldos {
+
+            text-align:
+                center;
+
+            padding:
+                50px 20px;
+
+            color:
+                #6b7280;
+
+        }
+
+
+        .informacion {
+
+            margin-top:
+                25px;
+
+            padding:
+                18px;
+
+            background:
+                #eff6ff;
+
+            border:
+                1px solid
+                #bfdbfe;
+
+            border-radius:
+                8px;
+
+            color:
+                #1e40af;
+
+            font-size:
+                14px;
+
+            line-height:
+                1.6;
+
+        }
+
+
+        @media (
+            max-width: 700px
+        ) {
+
+            .encabezado {
+
+                flex-direction:
+                    column;
+
+                align-items:
+                    flex-start;
+
+                gap:
+                    15px;
+
+            }
+
+
+            .acciones {
+
+                flex-direction:
+                    column;
+
+                align-items:
+                    flex-start;
+
+            }
+
+
+            table {
+
+                font-size:
+                    12px;
+
+            }
+
+
+            th,
+            td {
+
+                padding:
+                    9px;
+
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="contenedor">
+
+
+    <!-- ================================================= -->
+    <!-- ENCABEZADO -->
+    <!-- ================================================= -->
+
+    <div class="encabezado">
+
+
+        <div>
+
+            <div class="titulo">
+
+                Respaldos
+
+            </div>
+
+
+            <div class="subtitulo">
+
+                Copias de seguridad de la base de datos
+                de SICAE WEB
+
+            </div>
+
+        </div>
+
+
+        <div class="acciones">
+
+
+            <a
+                href="/administracion"
+                class="boton boton-volver"
+            >
+
+                ← Volver
+
+            </a>
+
+
+            <form
+                method="post"
+                action="/administracion/respaldos/generar"
+            >
+
+                <button
+                    type="submit"
+                    class="boton boton-principal"
+                >
+
+                    Generar respaldo
+
+                </button>
+
+            </form>
+
+
+        </div>
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- MENSAJES -->
+    <!-- ================================================= -->
+
+    {% if request.query_params.get("exito") %}
+
+        <div class="mensaje mensaje-exito">
+
+            El respaldo se generó correctamente.
+
+        </div>
+
+    {% endif %}
+
+
+    {% if request.query_params.get("error") %}
+
+        <div class="mensaje mensaje-error">
+
+            No fue posible generar el respaldo.
+            Revisa la consola de SICAE para obtener
+            más información.
+
+        </div>
+
+    {% endif %}
+
+
+    <!-- ================================================= -->
+    <!-- TABLA -->
+    <!-- ================================================= -->
+
+    <div class="tarjeta">
+
+
+        {% if respaldos %}
+
+
+            <table>
+
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Archivo
+                        </th>
+
+                        <th>
+                            Fecha
+                        </th>
+
+                        <th>
+                            Tamaño
+                        </th>
+
+                        <th>
+                            Acciones
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+
+                    {% for respaldo in respaldos %}
+
+
+                        <tr>
+
+
+                            <td>
+
+                                {{ respaldo.nombre }}
+
+                            </td>
+
+
+                            <td>
+
+                                {{
+                                    respaldo.fecha.strftime(
+                                        "%d/%m/%Y %H:%M:%S"
+                                    )
+                                }}
+
+                            </td>
+
+
+                            <td>
+
+                                {{
+                                    (
+                                        respaldo.tamano
+                                        / 1024
+                                    ) | round(2)
+                                }}
+                                KB
+
+                            </td>
+
+
+                            <td>
+
+
+                                <div class="acciones">
+
+
+                                    <a
+                                        href="/administracion/respaldos/descargar/{{ respaldo.nombre }}"
+                                        class="boton-descargar"
+                                    >
+
+                                        Descargar
+
+                                    </a>
+
+
+                                    <form
+                                        method="post"
+                                        action="/administracion/respaldos/eliminar/{{ respaldo.nombre }}"
+                                        onsubmit="return confirm('¿Deseas eliminar este respaldo?');"
+                                    >
+
+                                        <button
+                                            type="submit"
+                                            class="boton-eliminar"
+                                        >
+
+                                            Eliminar
+
+                                        </button>
+
+                                    </form>
+
+
+                                </div>
+
+
+                            </td>
+
+
+                        </tr>
+
+
+                    {% endfor %}
+
+
+                </tbody>
+
+
+            </table>
+
+
+        {% else %}
+
+
+            <div class="sin-respaldos">
+
+                <h3>
+
+                    No hay respaldos
+
+                </h3>
+
+
+                <p>
+
+                    Genera tu primer respaldo
+                    utilizando el botón
+                    "Generar respaldo".
+
+                </p>
+
+            </div>
+
+
+        {% endif %}
+
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- INFORMACIÓN -->
+    <!-- ================================================= -->
+
+    <div class="informacion">
+
+        <strong>
+            Información:
+        </strong>
+
+        Los respaldos contienen una copia de la
+        base de datos PostgreSQL de SICAE WEB.
+        Se recomienda generar respaldos periódicamente
+        y conservar una copia fuera de la computadora
+        donde está instalado el sistema.
+
+    </div>
+
+
+</div>
+
+
+    <script src="/static/js/navigation.js"></script>
+</body>
+
+</html>
+
+
+
