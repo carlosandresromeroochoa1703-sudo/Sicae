@@ -27,6 +27,8 @@ import json
 import secrets
 import tempfile
 import zipfile
+import re
+import unicodedata
 from threading import Lock, Thread
 from email.utils import parseaddr
 
@@ -637,6 +639,16 @@ def usuario_es_administrador(
 
 def usuario_puede_operar(request: Request):
     return request.session.get("rol") in {"administrador", "operador"}
+
+
+def normalizar_matricula_escaner(valor):
+    texto = unicodedata.normalize("NFKC", str(valor or ""))
+    texto = "".join(caracter for caracter in texto if not unicodedata.category(caracter).startswith("C")).strip().upper()
+    texto = re.sub(r"^(\d+)\.0+$", r"\1", texto)
+    clave = "".join(caracter for caracter in texto if caracter.isalnum())
+    if clave.isdigit():
+        clave = clave.lstrip("0") or "0"
+    return clave
 
 # ============================================================
 # ESTADÍSTICAS
@@ -8301,53 +8313,74 @@ def registrar_escaneo(
                 # BUSCAR ALUMNO
                 # ====================================================
 
+                clave_matricula = normalizar_matricula_escaner(matricula)
                 cursor.execute("""
-
+                    WITH alumnos_base AS (
+                        SELECT
+                            a.id,
+                            a.matricula,
+                            a.nombre,
+                            a.apellido_paterno,
+                            a.apellido_materno,
+                            a.correo,
+                            a.foto,
+                            g.nombre_grupo,
+                            g.grado,
+                            g.nombre AS grupo_nombre,
+                            g.turno,
+                            regexp_replace(
+                                regexp_replace(upper(btrim(a.matricula)), '\\.0+$', ''),
+                                '[^[:alnum:]]', '', 'g'
+                            ) AS clave_base
+                        FROM alumnos a
+                        LEFT JOIN grupos g ON a.grupo_id = g.id
+                        WHERE a.activo = TRUE
+                    ), alumnos_normalizados AS (
+                        SELECT *,
+                            CASE
+                                WHEN clave_base ~ '^[0-9]+$'
+                                THEN COALESCE(NULLIF(ltrim(clave_base, '0'), ''), '0')
+                                ELSE clave_base
+                            END AS clave_matricula
+                        FROM alumnos_base
+                    )
                     SELECT
+                        id, matricula, nombre, apellido_paterno, apellido_materno,
+                        correo, foto, nombre_grupo, grado, grupo_nombre, turno
+                    FROM alumnos_normalizados
+                    WHERE matricula = %s
+                       OR upper(btrim(matricula)) = upper(btrim(%s))
+                       OR clave_matricula = %s
+                    ORDER BY CASE
+                        WHEN matricula = %s THEN 0
+                        WHEN upper(btrim(matricula)) = upper(btrim(%s)) THEN 1
+                        ELSE 2
+                    END
+                    LIMIT 2;
+                """, (
+                    matricula,
+                    matricula,
+                    clave_matricula,
+                    matricula,
+                    matricula,
+                ))
 
-                        a.id,
+                candidatos = cursor.fetchall()
+                fila = candidatos[0] if candidatos else None
 
-                        a.matricula,
-
-                        a.nombre,
-
-                        a.apellido_paterno,
-
-                        a.apellido_materno,
-
-                        a.correo,
-
-                        a.foto,
-
-                        g.nombre_grupo,
-
-                        g.grado,
-
-                        g.nombre AS grupo_nombre,
-
-                        g.turno
-
-                    FROM alumnos a
-
-                    LEFT JOIN grupos g
-
-                        ON a.grupo_id = g.id
-
-                    WHERE
-                        a.activo = TRUE
-                        AND (
-                            a.matricula = %s
-                            OR upper(btrim(a.matricula)) = upper(btrim(%s))
-                            OR regexp_replace(upper(btrim(a.matricula)), '\\.0+$', '') =
-                               regexp_replace(upper(btrim(%s)), '\\.0+$', '')
-                        )
-                    ORDER BY CASE WHEN a.matricula = %s THEN 0 ELSE 1 END
-                    LIMIT 1;
-
-                """, (matricula, matricula, matricula, matricula))
-
-
-                fila = cursor.fetchone()
+                coincidencia_directa = bool(fila) and (
+                    fila[1] == matricula
+                    or str(fila[1]).strip().casefold() == matricula.casefold()
+                )
+                if len(candidatos) > 1 and not coincidencia_directa:
+                    return JSONResponse(
+                        {
+                            "ok": False,
+                            "mensaje": "La matrícula del QR coincide con más de un alumno. Revisa las matrículas duplicadas o sus ceros iniciales.",
+                            "matricula": matricula,
+                        },
+                        status_code=409,
+                    )
 
 
                 if fila is None:
