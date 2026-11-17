@@ -423,6 +423,10 @@ CREATE TABLE IF NOT EXISTS configuracion_sistema (
 
     logo_login VARCHAR(255),
 
+    logo_tamano INTEGER
+        NOT NULL
+        DEFAULT 120,
+
     fecha_actualizacion TIMESTAMP
         DEFAULT CURRENT_TIMESTAMP
 );

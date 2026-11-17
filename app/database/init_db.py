@@ -86,6 +86,7 @@ def crear_tablas():
                 cursor.execute(
                     CONFIGURACION_SISTEMA
                 )
+                cursor.execute("ALTER TABLE configuracion_sistema ADD COLUMN IF NOT EXISTS logo_tamano INTEGER NOT NULL DEFAULT 120;")
 
 
                 # ====================================================

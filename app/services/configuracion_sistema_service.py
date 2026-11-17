@@ -76,7 +76,7 @@ def crear_configuracion_sistema():
                     color_secundario,
                     color_fondo_login,
                     color_texto_login,
-                logo_tamano,
+                    logo_tamano
                 )
                 VALUES (
                     'SICAE WEB',
