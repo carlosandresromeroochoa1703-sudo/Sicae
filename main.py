@@ -8382,6 +8382,36 @@ def registrar_escaneo(
                         status_code=409,
                     )
 
+                # Las credenciales antiguas pueden contener el ID interno
+                # del alumno en vez de su matrícula. Se usa solo cuando no
+                # existe ninguna coincidencia por matrícula.
+                if fila is None and matricula.isdigit():
+                    cursor.execute("""
+                        SELECT
+                            a.id,
+                            a.matricula,
+                            a.nombre,
+                            a.apellido_paterno,
+                            a.apellido_materno,
+                            a.correo,
+                            a.foto,
+                            g.nombre_grupo,
+                            g.grado,
+                            g.nombre AS grupo_nombre,
+                            g.turno
+                        FROM alumnos a
+                        LEFT JOIN grupos g ON a.grupo_id = g.id
+                        WHERE a.id = %s AND a.activo = TRUE
+                        LIMIT 1;
+                    """, (int(matricula),))
+                    fila = cursor.fetchone()
+                    if fila:
+                        print(
+                            "QR de alumno resuelto por ID interno:",
+                            matricula,
+                            "-> matrícula",
+                            fila[1],
+                        )
 
                 if fila is None:
 
