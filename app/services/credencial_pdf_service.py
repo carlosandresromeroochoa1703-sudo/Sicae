@@ -1177,7 +1177,7 @@ def dibujar_credencial(
 
     # ========================================================
     # LOGO
-    with _mover_bloque_credencial(pdf, configuracion, "institucion", px, py):
+    with _mover_bloque_credencial(pdf, configuracion, "institucion", ESCALA_X, ESCALA_Y):
         #
         # HTML:
         # 60 x 60
@@ -1319,7 +1319,7 @@ def dibujar_credencial(
             )
 
     pdf.setFont(fuente_negrita, py(12))
-    with _mover_bloque_credencial(pdf, configuracion, "titulo", px, py):
+    with _mover_bloque_credencial(pdf, configuracion, "titulo", ESCALA_X, ESCALA_Y):
         pdf.drawRightString(
             x + ancho - px(25),
             y + alto - py(59),
@@ -1345,7 +1345,7 @@ def dibujar_credencial(
 
     # ========================================================
     # FOTO
-    with _mover_bloque_credencial(pdf, configuracion, "foto", px, py):
+    with _mover_bloque_credencial(pdf, configuracion, "foto", ESCALA_X, ESCALA_Y):
         #
         # HTML:
         # 120 x 145
@@ -1409,7 +1409,7 @@ def dibujar_credencial(
 
         # ========================================================
     # QR
-    with _mover_bloque_credencial(pdf, configuracion, "qr", px, py):
+    with _mover_bloque_credencial(pdf, configuracion, "qr", ESCALA_X, ESCALA_Y):
         #
         # HTML:
         # contenedor 105
@@ -1501,7 +1501,7 @@ def dibujar_credencial(
 
         # ========================================================
     # DATOS
-    with _mover_bloque_credencial(pdf, configuracion, "datos", px, py):
+    with _mover_bloque_credencial(pdf, configuracion, "datos", ESCALA_X, ESCALA_Y):
         # ========================================================
 
         if mostrar_foto:
@@ -1703,7 +1703,7 @@ def dibujar_credencial(
 
         # ========================================================
     # PIE
-    with _mover_bloque_credencial(pdf, configuracion, "pie", px, py):
+    with _mover_bloque_credencial(pdf, configuracion, "pie", ESCALA_X, ESCALA_Y):
         #
         # HTML:
         # min-height: 42px
@@ -2215,7 +2215,7 @@ def generar_pdf_credencial_personal(
 
     # ========================================================
     # LOGO
-    with _mover_bloque_credencial(c, configuracion, "institucion", sx, sy):
+    with _mover_bloque_credencial(c, configuracion, "institucion", ESCALA_X_PERSONAL, ESCALA_Y_PERSONAL):
         # ========================================================
 
         logo = configuracion.get(
@@ -2314,7 +2314,7 @@ def generar_pdf_credencial_personal(
             )
 
     c.setFont(fuente_negrita, sy(12))
-    with _mover_bloque_credencial(c, configuracion, "titulo", sx, sy):
+    with _mover_bloque_credencial(c, configuracion, "titulo", ESCALA_X_PERSONAL, ESCALA_Y_PERSONAL):
         c.drawRightString(
             margen_x + ancho - sx(25),
             margen_y + alto - sy(59),
@@ -2340,7 +2340,7 @@ def generar_pdf_credencial_personal(
 
     # ========================================================
     # FOTO
-    with _mover_bloque_credencial(c, configuracion, "foto", sx, sy):
+    with _mover_bloque_credencial(c, configuracion, "foto", ESCALA_X_PERSONAL, ESCALA_Y_PERSONAL):
         # ========================================================
 
         if configuracion.get(
@@ -2369,7 +2369,7 @@ def generar_pdf_credencial_personal(
 
         # ========================================================
     # DATOS
-    with _mover_bloque_credencial(c, configuracion, "datos", sx, sy):
+    with _mover_bloque_credencial(c, configuracion, "datos", ESCALA_X_PERSONAL, ESCALA_Y_PERSONAL):
         # ========================================================
 
         x_datos = margen_x + pxp(
@@ -2657,7 +2657,7 @@ def generar_pdf_credencial_personal(
 
         # ========================================================
     # QR
-    with _mover_bloque_credencial(c, configuracion, "qr", sx, sy):
+    with _mover_bloque_credencial(c, configuracion, "qr", ESCALA_X_PERSONAL, ESCALA_Y_PERSONAL):
         # ========================================================
 
         if configuracion.get(
@@ -2730,7 +2730,7 @@ def generar_pdf_credencial_personal(
 
         # ========================================================
     # PIE
-    with _mover_bloque_credencial(c, configuracion, "pie", sx, sy):
+    with _mover_bloque_credencial(c, configuracion, "pie", ESCALA_X_PERSONAL, ESCALA_Y_PERSONAL):
         # ========================================================
 
         texto_pie = str(
