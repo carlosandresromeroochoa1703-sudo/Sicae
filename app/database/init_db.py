@@ -42,6 +42,15 @@ def crear_tablas():
                         sql
                     )
 
+                cursor.execute("""
+                    INSERT INTO configuracion_asistencia (
+                        id, hora_entrada, tolerancia_minutos,
+                        hora_cierre_entrada, activo
+                    )
+                    VALUES (1, '07:30', 10, '08:30', TRUE)
+                    ON CONFLICT (id) DO NOTHING;
+                """)
+
                 # Añade el operador responsable a las bases instaladas previamente.
                 cursor.execute("ALTER TABLE accesos ADD COLUMN IF NOT EXISTS registrado_por VARCHAR(120);")
                 cursor.execute("ALTER TABLE accesos_personal ADD COLUMN IF NOT EXISTS registrado_por VARCHAR(120);")

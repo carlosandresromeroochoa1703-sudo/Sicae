@@ -170,6 +170,23 @@ TABLAS = {
 
 
     # ========================================================
+    # CONFIGURACIÓN DE ASISTENCIA
+    # ========================================================
+
+    "configuracion_asistencia": """
+        CREATE TABLE IF NOT EXISTS configuracion_asistencia (
+            id SMALLINT PRIMARY KEY DEFAULT 1 CHECK (id = 1),
+            hora_entrada TIME NOT NULL DEFAULT '07:30',
+            tolerancia_minutos INTEGER NOT NULL DEFAULT 10
+                CHECK (tolerancia_minutos BETWEEN 0 AND 180),
+            hora_cierre_entrada TIME NOT NULL DEFAULT '08:30',
+            activo BOOLEAN NOT NULL DEFAULT TRUE,
+            fecha_actualizacion TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+        );
+    """,
+
+
+    # ========================================================
     # PERSONAL
     # ========================================================
 
