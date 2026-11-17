@@ -17,7 +17,9 @@ def crear_tablas():
     try:
 
         with psycopg.connect(
-            **DATABASE_CONFIG
+            **DATABASE_CONFIG,
+            connect_timeout=10,
+            options="-c lock_timeout=30000 -c statement_timeout=120000",
         ) as conexion:
 
             with conexion.cursor() as cursor:
@@ -25,6 +27,10 @@ def crear_tablas():
                 # ====================================================
                 # TABLAS PRINCIPALES
                 # ====================================================
+
+                # Evita que dos instancias durante un despliegue intenten
+                # aplicar las mismas migraciones al mismo tiempo.
+                cursor.execute("SELECT pg_advisory_xact_lock(731904221);")
 
                 for nombre, sql in TABLAS.items():
 
@@ -39,6 +45,7 @@ def crear_tablas():
                 # Añade el operador responsable a las bases instaladas previamente.
                 cursor.execute("ALTER TABLE accesos ADD COLUMN IF NOT EXISTS registrado_por VARCHAR(120);")
                 cursor.execute("ALTER TABLE accesos_personal ADD COLUMN IF NOT EXISTS registrado_por VARCHAR(120);")
+                cursor.execute("ALTER TABLE configuracion_credencial_especial ADD COLUMN IF NOT EXISTS layout JSONB NOT NULL DEFAULT '{}'::jsonb;")
 
 
                 # ====================================================
@@ -103,6 +110,22 @@ def crear_tablas():
                 cursor.execute(
                     CONFIGURACION_NOTIFICACIONES
                 )
+
+                cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS plantillas_credencial (
+                        id SERIAL PRIMARY KEY,
+                        tipo VARCHAR(30) NOT NULL,
+                        nombre VARCHAR(100) NOT NULL,
+                        diseno JSONB NOT NULL,
+                        fecha_actualizacion TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                        CONSTRAINT plantillas_credencial_tipo_nombre_unico UNIQUE (tipo, nombre)
+                    );
+                """)
+                cursor.execute("ALTER TABLE plantillas_credencial DROP CONSTRAINT IF EXISTS plantillas_credencial_tipo_check;")
+                cursor.execute("""
+                    ALTER TABLE plantillas_credencial ADD CONSTRAINT plantillas_credencial_tipo_check
+                    CHECK (tipo IN ('alumno', 'personal', 'direccion', 'prefectura', 'conferencias', 'proveedores'));
+                """)
 
                 # Crea el primer administrador solo cuando se configuran
                 # credenciales de bootstrap y la tabla de usuarios está vacía.

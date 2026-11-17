@@ -27,6 +27,7 @@ import json
 import secrets
 import tempfile
 import zipfile
+from threading import Lock, Thread
 from email.utils import parseaddr
 
 from pathlib import Path
@@ -42,7 +43,7 @@ import psycopg
 from psycopg.errors import UniqueViolation
 
 from app.database.connection import DATABASE_CONFIG
-from app.database.schema import TABLAS
+from app.database.init_db import crear_tablas
 
 from app.services.notificaciones_email_service import (
     enviar_notificacion_acceso,
@@ -256,6 +257,52 @@ REPORTES_DIR.mkdir(
     exist_ok=True
 )
 
+_credenciales_jobs = {}
+_credenciales_jobs_lock = Lock()
+
+
+def _generar_credenciales_en_segundo_plano(job_id, alumnos, configuracion, ruta_pdf, cantidad_por_hoja, solo_qr):
+    try:
+        generar_pdf_credenciales(
+            alumnos=alumnos,
+            configuracion=configuracion,
+            ruta_pdf=ruta_pdf,
+            cantidad_por_hoja=cantidad_por_hoja,
+            solo_qr=solo_qr,
+        )
+        if not ruta_pdf.exists() or ruta_pdf.stat().st_size == 0:
+            raise RuntimeError("La generación terminó sin producir un PDF válido.")
+        with _credenciales_jobs_lock:
+            _credenciales_jobs[job_id]["estado"] = "listo"
+    except Exception as error:
+        print("Error generando credenciales:", error)
+        with _credenciales_jobs_lock:
+            _credenciales_jobs[job_id]["estado"] = "error"
+            _credenciales_jobs[job_id]["mensaje"] = str(error)[:300]
+
+
+def _encolar_generacion_credenciales(background_tasks, alumnos, configuracion, nombre_base, cantidad_por_hoja=8, solo_qr=False):
+    job_id = secrets.token_urlsafe(18)
+    nombre_archivo = f"{Path(nombre_base).stem}_{job_id[:8]}.pdf"
+    ruta_pdf = REPORTES_DIR / nombre_archivo
+    with _credenciales_jobs_lock:
+        _credenciales_jobs[job_id] = {
+            "estado": "generando",
+            "ruta": str(ruta_pdf),
+            "nombre": nombre_archivo,
+            "mensaje": "",
+        }
+    background_tasks.add_task(
+        _generar_credenciales_en_segundo_plano,
+        job_id,
+        alumnos,
+        configuracion,
+        ruta_pdf,
+        cantidad_por_hoja,
+        solo_qr,
+    )
+    return job_id
+
 
 # ============================================================
 # FASTAPI
@@ -288,45 +335,36 @@ app.add_middleware(
 
 
 @app.on_event("startup")
-def migrar_columnas_de_auditoria():
-    """Mantiene compatibles las bases instaladas antes del registro de operador."""
-    try:
-        with psycopg.connect(**DATABASE_CONFIG) as conexion:
-            with conexion.cursor() as cursor:
-                cursor.execute(
-                    "ALTER TABLE accesos ADD COLUMN IF NOT EXISTS registrado_por VARCHAR(120);"
-                )
-                cursor.execute(
-                    "ALTER TABLE accesos_personal ADD COLUMN IF NOT EXISTS registrado_por VARCHAR(120);"
-                )
-                for nombre_tabla in (
-                    "credenciales_especiales",
-                    "accesos_credenciales_especiales",
-                    "configuracion_credencial_especial",
-                ):
-                    cursor.execute(TABLAS[nombre_tabla])
-                cursor.execute(
-                    "ALTER TABLE configuracion_credencial_especial ADD COLUMN IF NOT EXISTS layout JSONB NOT NULL DEFAULT '{}'::jsonb;"
-                )
-                cursor.execute("""
-                    CREATE TABLE IF NOT EXISTS plantillas_credencial (
-                        id SERIAL PRIMARY KEY,
-                        tipo VARCHAR(30) NOT NULL,
-                        nombre VARCHAR(100) NOT NULL,
-                        diseno JSONB NOT NULL,
-                        fecha_actualizacion TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                        CONSTRAINT plantillas_credencial_tipo_nombre_unico UNIQUE (tipo, nombre)
-                    );
-                """)
-                cursor.execute("ALTER TABLE plantillas_credencial DROP CONSTRAINT IF EXISTS plantillas_credencial_tipo_check;")
-                cursor.execute("""
-                    ALTER TABLE plantillas_credencial ADD CONSTRAINT plantillas_credencial_tipo_check
-                    CHECK (tipo IN ('alumno', 'personal', 'direccion', 'prefectura', 'conferencias', 'proveedores'));
-                """)
-            conexion.commit()
-    except Exception as error:
-        # Una base nueva se inicializa con app.database.init_db antes de usarla.
-        print(f"No se pudieron actualizar las columnas de auditoría: {error}")
+def iniciar_inicializacion_de_base_de_datos():
+    """Inicializa/migra PostgreSQL sin retrasar la apertura del puerto HTTP."""
+    app.state.database_initialization = "pending"
+
+    def inicializar():
+        app.state.database_initialization = "running"
+        try:
+            if not crear_tablas():
+                raise RuntimeError("No se pudieron completar las migraciones de la base de datos.")
+            app.state.database_initialization = "ready"
+        except Exception as error:
+            app.state.database_initialization = "failed"
+            print(f"Error inicializando la base de datos: {error}")
+
+    Thread(target=inicializar, name="sicae-db-init", daemon=True).start()
+
+
+@app.middleware("http")
+async def esperar_inicializacion_de_base_de_datos(request: Request, call_next):
+    if request.url.path.startswith("/static/"):
+        return await call_next(request)
+    estado = getattr(app.state, "database_initialization", "pending")
+    if estado != "ready":
+        mensaje = (
+            "La base de datos aún se está inicializando. Recarga en unos segundos."
+            if estado in {"pending", "running"}
+            else "La inicialización de la base de datos falló. Revisa los logs del servicio."
+        )
+        return JSONResponse({"ok": False, "mensaje": mensaje}, status_code=503)
+    return await call_next(request)
 
 
 # ============================================================
@@ -1769,6 +1807,8 @@ def generar_credenciales_seleccionadas(
 
         request: Request,
 
+    background_tasks: BackgroundTasks,
+
     grupo_id: int,
 
     alumnos_ids: list[int] = Form([]),
@@ -1960,93 +2000,49 @@ def generar_credenciales_seleccionadas(
     # RUTA DEL PDF
     # ========================================================
 
-    ruta_pdf = (
-
-        REPORTES_DIR /
-        nombre_archivo
-
+    job_id = _encolar_generacion_credenciales(
+        background_tasks,
+        alumnos_seleccionados,
+        configuracion,
+        nombre_archivo,
+        cantidad_por_hoja,
+        solo_qr,
+    )
+    return templates.TemplateResponse(
+        request=request,
+        name="generando_credenciales.html",
+        context={"job_id": job_id},
     )
 
 
-    # ========================================================
-    # GENERAR PDF
-    # ========================================================
-
-    try:
-
-        generar_pdf_credenciales(
-
-            alumnos=
-                alumnos_seleccionados,
-
-            configuracion=
-                configuracion,
-
-            ruta_pdf=
-                ruta_pdf,
-
-            cantidad_por_hoja=cantidad_por_hoja,
-
-            solo_qr=solo_qr
-
-        )
-
-    except Exception as error:
-
-        print()
-        print("==========================================")
-        print("ERROR GENERANDO CREDENCIALES SELECCIONADAS")
-        print(error)
-        print("==========================================")
-        print()
+@app.get("/credenciales/generacion/{job_id}/estado")
+def estado_generacion_credenciales(request: Request, job_id: str):
+    if not usuario_autenticado(request) or not usuario_es_administrador(request):
+        return JSONResponse({"estado": "error", "mensaje": "Tu sesión expiró. Inicia sesión de nuevo."}, status_code=403)
+    with _credenciales_jobs_lock:
+        job = _credenciales_jobs.get(job_id)
+        if not job:
+            return JSONResponse({"estado": "error", "mensaje": "No se encontró esta generación. Vuelve a iniciar la descarga."}, status_code=404)
+        respuesta = {"estado": job["estado"], "mensaje": job["mensaje"]}
+        if job["estado"] == "listo":
+            respuesta["descarga"] = f"/credenciales/generacion/{job_id}/pdf"
+    return respuesta
 
 
-        return RedirectResponse(
-
-            url=(
-                f"/credencial/imprimir/"
-                f"grupo/{grupo_id}"
-            ),
-
-            status_code=303
-
-        )
-
-
-    # ========================================================
-    # VERIFICAR PDF
-    # ========================================================
-
-    if not ruta_pdf.exists():
-
-        return RedirectResponse(
-
-            url=(
-                f"/credencial/imprimir/"
-                f"grupo/{grupo_id}"
-            ),
-
-            status_code=303
-
-        )
-
-
-    # ========================================================
-    # ABRIR PDF
-    # ========================================================
-
+@app.get("/credenciales/generacion/{job_id}/pdf")
+def descargar_credenciales_generadas(request: Request, job_id: str):
+    if not usuario_autenticado(request) or not usuario_es_administrador(request):
+        return RedirectResponse(url="/login", status_code=303)
+    with _credenciales_jobs_lock:
+        job = _credenciales_jobs.get(job_id)
+        if not job or job["estado"] != "listo":
+            return RedirectResponse(url="/credencial/imprimir", status_code=303)
+        ruta_pdf, nombre_archivo = job["ruta"], job["nombre"]
     return FileResponse(
-
-        path=str(
-            ruta_pdf
-        ),
-
+        path=ruta_pdf,
         media_type="application/pdf",
-
         filename=nombre_archivo,
-
-        content_disposition_type="inline"
-
+        content_disposition_type="inline",
     )
 
 
@@ -2060,6 +2056,8 @@ def generar_credenciales_seleccionadas(
 def credenciales_grupo_pdf(
 
     request: Request,
+
+    background_tasks: BackgroundTasks,
 
     grupo_id: int
 
@@ -2181,72 +2179,17 @@ def credenciales_grupo_pdf(
         )
 
 
-    nombre_archivo = (
-
-        f"credenciales_{nombre_grupo}.pdf"
-
+    nombre_archivo = f"credenciales_{nombre_grupo}.pdf"
+    job_id = _encolar_generacion_credenciales(
+        background_tasks,
+        alumnos,
+        configuracion,
+        nombre_archivo,
     )
-
-
-    # ========================================================
-    # RUTA
-    # ========================================================
-
-    ruta_pdf = (
-
-        REPORTES_DIR /
-        nombre_archivo
-
-    )
-
-
-    # ========================================================
-    # GENERAR
-    # ========================================================
-
-    try:
-
-        generar_pdf_credenciales(
-
-            alumnos=alumnos,
-
-            configuracion=configuracion,
-
-            ruta_pdf=ruta_pdf
-
-        )
-
-    except Exception as error:
-
-        print()
-        print("==========================================")
-        print("ERROR GENERANDO CREDENCIALES DEL GRUPO")
-        print(error)
-        print("==========================================")
-        print()
-
-
-        return RedirectResponse(
-
-            url=f"/alumnos/grupo/{grupo_id}",
-
-            status_code=303
-
-        )
-
-
-    # ========================================================
-    # ABRIR
-    # ========================================================
-
-    return FileResponse(
-
-        path=str(ruta_pdf),
-
-        media_type="application/pdf",
-
-        filename=nombre_archivo
-
+    return templates.TemplateResponse(
+        request=request,
+        name="generando_credenciales.html",
+        context={"job_id": job_id},
     )
 
 # ============================================================
@@ -8253,6 +8196,10 @@ def registrar_escaneo(
         )
 
     ).strip()
+    # Algunos lectores QR añaden caracteres de control al final; Excel también
+    # puede importar una matrícula numérica como "12345.0". Conservamos el
+    # valor original para la búsqueda exacta y limpiamos solo controles.
+    matricula = "".join(caracter for caracter in matricula if caracter.isprintable()).strip()
 
     movimiento_solicitado = str(payload.get("movimiento") or "AUTO").strip().upper()
     if movimiento_solicitado not in {"AUTO", "ENTRADA", "SALIDA"}:
@@ -8368,16 +8315,17 @@ def registrar_escaneo(
                         ON a.grupo_id = g.id
 
                     WHERE
+                        a.activo = TRUE
+                        AND (
+                            a.matricula = %s
+                            OR upper(btrim(a.matricula)) = upper(btrim(%s))
+                            OR regexp_replace(upper(btrim(a.matricula)), '\\.0+$', '') =
+                               regexp_replace(upper(btrim(%s)), '\\.0+$', '')
+                        )
+                    ORDER BY CASE WHEN a.matricula = %s THEN 0 ELSE 1 END
+                    LIMIT 1;
 
-                        a.matricula = %s
-
-                        AND a.activo = TRUE;
-
-                """, (
-
-                    matricula,
-
-                ))
+                """, (matricula, matricula, matricula, matricula))
 
 
                 fila = cursor.fetchone()
