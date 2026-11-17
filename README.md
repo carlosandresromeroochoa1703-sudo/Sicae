@@ -39,9 +39,9 @@ No expongas PostgreSQL ni SICAE directamente a Internet. Para acceso fuera de la
 
 Consulta `.env.example`. Usa una `SECRET_KEY` privada y estable. No copies secretos de una computadora a repositorios públicos. SMTP es opcional y también se puede configurar desde el panel del sistema.
 
-### Crear el primer administrador en Render
+### Primer administrador en Render
 
-La inicialización crea las tablas, pero no incluye una cuenta predeterminada. Para crear el primer administrador, agrega `SICAE_INITIAL_ADMIN_USER` y `SICAE_INITIAL_ADMIN_PASSWORD` en **Environment** del servicio web de Render. Opcionalmente, agrega `SICAE_INITIAL_ADMIN_NAME`. Al iniciar, SICAE solo crea esa cuenta si la tabla `usuarios` está vacía. Después de entrar, puedes quitar esas variables del servicio; nunca las guardes en `render.yaml` ni en GitHub.
+El Blueprint define el usuario inicial como `admin` y Render genera su contraseña aleatoria. El servicio crea esa cuenta únicamente si la tabla `usuarios` está vacía. Consulta la contraseña en **Environment** del servicio web de Render. La contraseña se genera en Render y no se guarda en `render.yaml` ni en GitHub.
 
 ## Despliegue Docker
 

@@ -10,6 +10,12 @@ services:
         value: production
       - key: SECRET_KEY
         generateValue: true
+      - key: SICAE_INITIAL_ADMIN_USER
+        value: admin
+      - key: SICAE_INITIAL_ADMIN_PASSWORD
+        generateValue: true
+      - key: SICAE_INITIAL_ADMIN_NAME
+        value: Administrador
       - key: DATABASE_HOST
         fromDatabase:
           name: sicae-db
