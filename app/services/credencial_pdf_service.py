@@ -1797,7 +1797,9 @@ def generar_pdf_credenciales(
 
     cantidad_por_hoja=8,
 
-    solo_qr=False
+    solo_qr=False,
+
+    progress_callback=None,
 
 ):
 
@@ -1870,6 +1872,9 @@ def generar_pdf_credenciales(
 
     posiciones = calcular_posiciones(cantidad_por_hoja)
 
+    if progress_callback:
+        progress_callback(0, len(alumnos))
+
 
     pdf = canvas.Canvas(
 
@@ -1927,6 +1932,8 @@ def generar_pdf_credenciales(
                 )
 
             indice += 1
+            if progress_callback:
+                progress_callback(indice, len(alumnos))
 
 
         pdf.showPage()

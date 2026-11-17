@@ -263,19 +263,31 @@ _credenciales_jobs_lock = Lock()
 
 def _generar_credenciales_en_segundo_plano(job_id, alumnos, configuracion, ruta_pdf, cantidad_por_hoja, solo_qr):
     try:
+        total = len(alumnos)
+        print(f"[credenciales:{job_id}] Iniciando PDF para {total} alumnos.", flush=True)
+
+        def reportar_progreso(completadas, cantidad_total):
+            with _credenciales_jobs_lock:
+                job = _credenciales_jobs.get(job_id)
+                if job:
+                    job["completadas"] = completadas
+                    job["total"] = cantidad_total
+
         generar_pdf_credenciales(
             alumnos=alumnos,
             configuracion=configuracion,
             ruta_pdf=ruta_pdf,
             cantidad_por_hoja=cantidad_por_hoja,
             solo_qr=solo_qr,
+            progress_callback=reportar_progreso,
         )
         if not ruta_pdf.exists() or ruta_pdf.stat().st_size == 0:
             raise RuntimeError("La generación terminó sin producir un PDF válido.")
         with _credenciales_jobs_lock:
             _credenciales_jobs[job_id]["estado"] = "listo"
+        print(f"[credenciales:{job_id}] PDF listo: {ruta_pdf} ({ruta_pdf.stat().st_size} bytes).", flush=True)
     except Exception as error:
-        print("Error generando credenciales:", error)
+        print(f"[credenciales:{job_id}] Error generando PDF: {type(error).__name__}: {error}", flush=True)
         with _credenciales_jobs_lock:
             _credenciales_jobs[job_id]["estado"] = "error"
             _credenciales_jobs[job_id]["mensaje"] = str(error)[:300]
@@ -291,6 +303,8 @@ def _encolar_generacion_credenciales(background_tasks, alumnos, configuracion, n
             "ruta": str(ruta_pdf),
             "nombre": nombre_archivo,
             "mensaje": "",
+            "completadas": 0,
+            "total": len(alumnos),
         }
     background_tasks.add_task(
         _generar_credenciales_en_segundo_plano,
@@ -2023,7 +2037,12 @@ def estado_generacion_credenciales(request: Request, job_id: str):
         job = _credenciales_jobs.get(job_id)
         if not job:
             return JSONResponse({"estado": "error", "mensaje": "No se encontró esta generación. Vuelve a iniciar la descarga."}, status_code=404)
-        respuesta = {"estado": job["estado"], "mensaje": job["mensaje"]}
+        respuesta = {
+            "estado": job["estado"],
+            "mensaje": job["mensaje"],
+            "completadas": job.get("completadas", 0),
+            "total": job.get("total", 0),
+        }
         if job["estado"] == "listo":
             respuesta["descarga"] = f"/credenciales/generacion/{job_id}/pdf"
     return respuesta
