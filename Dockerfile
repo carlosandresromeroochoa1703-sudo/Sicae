@@ -15,4 +15,4 @@ COPY main.py ./
 COPY app ./app
 
 EXPOSE 8000
-CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+CMD ["sh", "-c", "python -m app.database.init_db && exec uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000}"]
