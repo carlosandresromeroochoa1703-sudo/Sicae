@@ -39,6 +39,10 @@ No expongas PostgreSQL ni SICAE directamente a Internet. Para acceso fuera de la
 
 Consulta `.env.example`. Usa una `SECRET_KEY` privada y estable. No copies secretos de una computadora a repositorios públicos. SMTP es opcional y también se puede configurar desde el panel del sistema.
 
+### Crear el primer administrador en Render
+
+La inicialización crea las tablas, pero no incluye una cuenta predeterminada. Para crear el primer administrador, agrega `SICAE_INITIAL_ADMIN_USER` y `SICAE_INITIAL_ADMIN_PASSWORD` en **Environment** del servicio web de Render. Opcionalmente, agrega `SICAE_INITIAL_ADMIN_NAME`. Al iniciar, SICAE solo crea esa cuenta si la tabla `usuarios` está vacía. Después de entrar, puedes quitar esas variables del servicio; nunca las guardes en `render.yaml` ni en GitHub.
+
 ## Despliegue Docker
 
 La imagen escucha en `PORT` (8000 por defecto). Configura las variables de entorno, inicializa las tablas con `python -m app.database.init_db` y monta almacenamiento persistente en `/app/app/static/uploads`, `/app/app/static/reportes` y `/app/backups` si necesitas conservar archivos entre despliegues. Configura HTTPS en el proveedor para habilitar la cámara y las cookies seguras.

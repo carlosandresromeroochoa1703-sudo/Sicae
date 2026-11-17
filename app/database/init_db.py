@@ -1,3 +1,6 @@
+import os
+
+import bcrypt
 import psycopg
 
 from app.database.connection import DATABASE_CONFIG
@@ -100,6 +103,33 @@ def crear_tablas():
                 cursor.execute(
                     CONFIGURACION_NOTIFICACIONES
                 )
+
+                # Crea el primer administrador solo cuando se configuran
+                # credenciales de bootstrap y la tabla de usuarios está vacía.
+                usuario_inicial = os.getenv("SICAE_INITIAL_ADMIN_USER", "").strip()
+                password_inicial = os.getenv("SICAE_INITIAL_ADMIN_PASSWORD", "")
+                if usuario_inicial and password_inicial:
+                    cursor.execute("SELECT EXISTS (SELECT 1 FROM usuarios);")
+                    if not cursor.fetchone()[0]:
+                        if len(password_inicial.encode("utf-8")) > 72:
+                            raise ValueError(
+                                "SICAE_INITIAL_ADMIN_PASSWORD no puede exceder 72 bytes."
+                            )
+                        nombre_inicial = (
+                            os.getenv("SICAE_INITIAL_ADMIN_NAME", "Administrador").strip()
+                            or "Administrador"
+                        )
+                        password_hash = bcrypt.hashpw(
+                            password_inicial.encode("utf-8"), bcrypt.gensalt()
+                        ).decode("utf-8")
+                        cursor.execute(
+                            """
+                            INSERT INTO usuarios (usuario, password, nombre, rol, activo)
+                            VALUES (%s, %s, %s, 'administrador', TRUE);
+                            """,
+                            (usuario_inicial, password_hash, nombre_inicial),
+                        )
+                        print("Se creó el administrador inicial configurado en el entorno.")
 
 
             conexion.commit()
