@@ -11,7 +11,6 @@ def obtener_configuracion_credencial_personal():
 
         with conexion.cursor() as cursor:
 
-            cursor.execute("ALTER TABLE configuracion_credencial_personal ADD COLUMN IF NOT EXISTS layout JSONB NOT NULL DEFAULT '{}'::jsonb;")
             cursor.execute("""
                 SELECT
                     id,
