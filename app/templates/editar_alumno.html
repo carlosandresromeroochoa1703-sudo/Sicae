@@ -354,6 +354,21 @@
                 </div>
 
 
+                <div class="form-group">
+                    <label for="numero_seguro_social">Número de seguro social</label>
+                    <input id="numero_seguro_social" type="text" name="numero_seguro_social" class="form-control" maxlength="30" value="{{ alumno.numero_seguro_social or '' }}">
+                </div>
+
+                <div class="form-group">
+                    <label for="nombre_padre">Nombre del padre</label>
+                    <input id="nombre_padre" type="text" name="nombre_padre" class="form-control" maxlength="200" value="{{ alumno.nombre_padre or '' }}">
+                </div>
+
+                <div class="form-group">
+                    <label for="curp">CURP</label>
+                    <input id="curp" type="text" name="curp" class="form-control" maxlength="18" value="{{ alumno.curp or '' }}" style="text-transform: uppercase;">
+                </div>
+
                 <!-- =================================================
                      INFORMACIÓN ESCOLAR
                      ================================================= -->

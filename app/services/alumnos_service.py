@@ -46,6 +46,9 @@ def obtener_alumnos():
                     a.apellido_paterno,
                     a.apellido_materno,
                     a.fecha_nacimiento,
+                    a.numero_seguro_social,
+                    a.nombre_padre,
+                    a.curp,
                     a.correo,
                     a.telefono,
                     a.foto,
@@ -109,6 +112,9 @@ def obtener_alumno(
                     apellido_paterno,
                     apellido_materno,
                     fecha_nacimiento,
+                    numero_seguro_social,
+                    nombre_padre,
+                    curp,
                     correo,
                     telefono,
                     foto,
@@ -155,6 +161,9 @@ def obtener_alumnos_por_grupo(
                     a.apellido_paterno,
                     a.apellido_materno,
                     a.fecha_nacimiento,
+                    a.numero_seguro_social,
+                    a.nombre_padre,
+                    a.curp,
                     a.correo,
                     a.telefono,
                     a.foto,
@@ -264,6 +273,9 @@ def obtener_alumno_detalle(
                     a.apellido_paterno,
                     a.apellido_materno,
                     a.fecha_nacimiento,
+                    a.numero_seguro_social,
+                    a.nombre_padre,
+                    a.curp,
                     a.correo,
                     a.telefono,
                     a.foto,
@@ -389,7 +401,13 @@ def crear_alumno(
 
     foto=None,
 
-    qr=None
+    qr=None,
+
+    numero_seguro_social=None,
+
+    nombre_padre=None,
+
+    curp=None
 
 ):
 
@@ -407,6 +425,9 @@ def crear_alumno(
                     apellido_paterno,
                     apellido_materno,
                     fecha_nacimiento,
+                    numero_seguro_social,
+                    nombre_padre,
+                    curp,
                     correo,
                     telefono,
                     foto,
@@ -418,6 +439,9 @@ def crear_alumno(
 
                 VALUES (
 
+                    %s,
+                    %s,
+                    %s,
                     %s,
                     %s,
                     %s,
@@ -442,6 +466,12 @@ def crear_alumno(
                 apellido_materno,
 
                 fecha_nacimiento,
+
+                numero_seguro_social,
+
+                nombre_padre,
+
+                curp,
 
                 correo,
 
@@ -484,7 +514,13 @@ def actualizar_alumno(
 
     foto=None,
 
-    qr=None
+    qr=None,
+
+    numero_seguro_social=None,
+
+    nombre_padre=None,
+
+    curp=None
 
 ):
 
@@ -504,6 +540,9 @@ def actualizar_alumno(
                     apellido_paterno = %s,
                     apellido_materno = %s,
                     fecha_nacimiento = %s,
+                    numero_seguro_social = %s,
+                    nombre_padre = %s,
+                    curp = %s,
                     correo = %s,
                     telefono = %s,
                     grupo_id = %s,
@@ -522,6 +561,12 @@ def actualizar_alumno(
                 apellido_materno,
 
                 fecha_nacimiento,
+
+                numero_seguro_social,
+
+                nombre_padre,
+
+                curp,
 
                 correo,
 
@@ -597,7 +642,10 @@ def importar_alumno_excel(
     fecha_nacimiento=None,
     correo="",
     telefono="",
-    grupo_id=None
+    grupo_id=None,
+    numero_seguro_social="",
+    nombre_padre="",
+    curp=""
 ):
 
     matricula = str(
@@ -623,6 +671,10 @@ def importar_alumno_excel(
     telefono = str(
         telefono or ""
     ).strip()
+
+    numero_seguro_social = str(numero_seguro_social or "").strip() or None
+    nombre_padre = str(nombre_padre or "").strip() or None
+    curp = str(curp or "").strip().upper() or None
 
 
     if not matricula:
@@ -657,6 +709,9 @@ def importar_alumno_excel(
                     apellido_paterno,
                     apellido_materno,
                     fecha_nacimiento,
+                    numero_seguro_social,
+                    nombre_padre,
+                    curp,
                     correo,
                     telefono,
                     foto,
@@ -665,6 +720,9 @@ def importar_alumno_excel(
                     activo
                 )
                 VALUES (
+                    %s,
+                    %s,
+                    %s,
                     %s,
                     %s,
                     %s,
@@ -685,6 +743,9 @@ def importar_alumno_excel(
                     apellido_paterno,
                     apellido_materno,
                     fecha_nacimiento,
+                    numero_seguro_social,
+                    nombre_padre,
+                    curp,
                     correo,
                     telefono,
                     grupo_id

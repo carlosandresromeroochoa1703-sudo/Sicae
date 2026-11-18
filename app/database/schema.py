@@ -95,6 +95,12 @@ TABLAS = {
 
             fecha_nacimiento DATE,
 
+            numero_seguro_social VARCHAR(30),
+
+            nombre_padre VARCHAR(200),
+
+            curp VARCHAR(18),
+
             correo VARCHAR(150),
 
             telefono VARCHAR(30),

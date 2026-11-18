@@ -5283,6 +5283,12 @@ async def guardar_edicion_alumno(
 
     fecha_nacimiento: str = Form(""),
 
+    numero_seguro_social: str = Form(""),
+
+    nombre_padre: str = Form(""),
+
+    curp: str = Form(""),
+
     correo: str = Form(""),
 
     telefono: str = Form(""),
@@ -5449,6 +5455,15 @@ async def guardar_edicion_alumno(
 
             fecha_nacimiento=
                 fecha_nacimiento,
+
+            numero_seguro_social=
+                numero_seguro_social.strip() or None,
+
+            nombre_padre=
+                nombre_padre.strip() or None,
+
+            curp=
+                curp.strip().upper() or None,
 
             correo=
                 correo,
@@ -6085,6 +6100,15 @@ async def guardar_nuevo_alumno(
     fecha_nacimiento: str =
         Form(""),
 
+    numero_seguro_social: str =
+        Form(""),
+
+    nombre_padre: str =
+        Form(""),
+
+    curp: str =
+        Form(""),
+
     correo: str =
         Form(""),
 
@@ -6193,6 +6217,15 @@ async def guardar_nuevo_alumno(
 
             fecha_nacimiento=
                 fecha_nacimiento,
+
+            numero_seguro_social=
+                numero_seguro_social.strip() or None,
+
+            nombre_padre=
+                nombre_padre.strip() or None,
+
+            curp=
+                curp.strip().upper() or None,
 
             correo=
                 correo,
@@ -6550,6 +6583,10 @@ async def importar_alumnos_excel(
                     "telefono"
                 )
 
+                numero_seguro_social = obtener_valor("numero_seguro_social")
+                nombre_padre = obtener_valor("nombre_padre")
+                curp = obtener_valor("curp")
+
 
                 # ============================================
                 # LIMPIAR MATRÍCULA
@@ -6645,6 +6682,12 @@ async def importar_alumnos_excel(
                         telefono=str(
                             telefono
                         ).strip(),
+
+                        numero_seguro_social=str(numero_seguro_social).strip(),
+
+                        nombre_padre=str(nombre_padre).strip(),
+
+                        curp=str(curp).strip().upper(),
 
                         grupo_id=grupo_id
 
