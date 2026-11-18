@@ -14,6 +14,7 @@ DATABASE_CONFIG = {
     "dbname": os.getenv("DATABASE_NAME", "sicae"),
     "user": os.getenv("DATABASE_USER", "postgres"),
     "password": os.getenv("DATABASE_PASSWORD", ""),
+    "options": "-c timezone=America/Mexico_City",
 }
 
 

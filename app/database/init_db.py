@@ -16,11 +16,16 @@ def crear_tablas():
 
     try:
 
-        with psycopg.connect(
+        configuracion_conexion = {
             **DATABASE_CONFIG,
-            connect_timeout=10,
-            options="-c lock_timeout=30000 -c statement_timeout=120000",
-        ) as conexion:
+            "connect_timeout": 10,
+            "options": (
+                "-c timezone=America/Mexico_City "
+                "-c lock_timeout=30000 "
+                "-c statement_timeout=120000"
+            ),
+        }
+        with psycopg.connect(**configuracion_conexion) as conexion:
 
             with conexion.cursor() as cursor:
 
@@ -54,6 +59,12 @@ def crear_tablas():
                 # Añade el operador responsable a las bases instaladas previamente.
                 cursor.execute("ALTER TABLE accesos ADD COLUMN IF NOT EXISTS registrado_por VARCHAR(120);")
                 cursor.execute("ALTER TABLE accesos_personal ADD COLUMN IF NOT EXISTS registrado_por VARCHAR(120);")
+                cursor.execute("ALTER TABLE accesos ALTER COLUMN hora TYPE TIME(0) USING hora::TIME(0);")
+                cursor.execute("ALTER TABLE accesos ALTER COLUMN hora SET DEFAULT CURRENT_TIME(0);")
+                cursor.execute("ALTER TABLE accesos_personal ALTER COLUMN hora TYPE TIME(0) USING hora::TIME(0);")
+                cursor.execute("ALTER TABLE accesos_personal ALTER COLUMN hora SET DEFAULT CURRENT_TIME(0);")
+                cursor.execute("ALTER TABLE accesos_credenciales_especiales ALTER COLUMN hora TYPE TIME(0) USING hora::TIME(0);")
+                cursor.execute("ALTER TABLE accesos_credenciales_especiales ALTER COLUMN hora SET DEFAULT CURRENT_TIME(0);")
                 cursor.execute("ALTER TABLE configuracion_credencial_especial ADD COLUMN IF NOT EXISTS layout JSONB NOT NULL DEFAULT '{}'::jsonb;")
 
 

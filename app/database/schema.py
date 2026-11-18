@@ -140,9 +140,9 @@ TABLAS = {
                 NOT NULL
                 DEFAULT CURRENT_DATE,
 
-            hora TIME
+            hora TIME(0)
                 NOT NULL
-                DEFAULT CURRENT_TIME,
+                DEFAULT CURRENT_TIME(0),
 
             movimiento VARCHAR(10)
                 NOT NULL,
@@ -246,9 +246,9 @@ TABLAS = {
                 NOT NULL
                 DEFAULT CURRENT_DATE,
 
-            hora TIME
+            hora TIME(0)
                 NOT NULL
-                DEFAULT CURRENT_TIME,
+                DEFAULT CURRENT_TIME(0),
 
             movimiento VARCHAR(10)
                 NOT NULL,
@@ -301,7 +301,7 @@ TABLAS = {
             id BIGSERIAL PRIMARY KEY,
             credencial_id BIGINT NOT NULL REFERENCES credenciales_especiales(id) ON DELETE CASCADE,
             fecha DATE NOT NULL DEFAULT CURRENT_DATE,
-            hora TIME NOT NULL DEFAULT CURRENT_TIME,
+            hora TIME(0) NOT NULL DEFAULT CURRENT_TIME(0),
             movimiento VARCHAR(10) NOT NULL CHECK (movimiento IN ('ENTRADA', 'SALIDA')),
             registrado_por VARCHAR(120)
         );
