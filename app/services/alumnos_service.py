@@ -201,6 +201,46 @@ def obtener_alumnos_por_grupo(
             return alumnos
 
 
+def obtener_lista_asistencia_manual(grupo_id):
+    """Lista alumnos activos del grupo con su último movimiento de hoy."""
+    with psycopg.connect(**DATABASE_CONFIG) as conexion:
+        with conexion.cursor() as cursor:
+            cursor.execute("""
+                SELECT
+                    a.id,
+                    a.matricula,
+                    a.nombre,
+                    a.apellido_paterno,
+                    a.apellido_materno,
+                    a.foto,
+                    g.nombre_grupo,
+                    g.grado,
+                    g.nombre AS grupo_nombre,
+                    g.turno,
+                    (
+                        SELECT ac.movimiento
+                        FROM accesos ac
+                        WHERE ac.alumno_id = a.id
+                          AND ac.fecha = CURRENT_DATE
+                        ORDER BY ac.hora DESC, ac.id DESC
+                        LIMIT 1
+                    ) AS ultimo_movimiento,
+                    (
+                        SELECT ac.hora
+                        FROM accesos ac
+                        WHERE ac.alumno_id = a.id
+                          AND ac.fecha = CURRENT_DATE
+                        ORDER BY ac.hora DESC, ac.id DESC
+                        LIMIT 1
+                    ) AS ultima_hora
+                FROM alumnos a
+                LEFT JOIN grupos g ON g.id = a.grupo_id
+                WHERE a.grupo_id = %s AND a.activo = TRUE
+                ORDER BY a.apellido_paterno, a.apellido_materno, a.nombre;
+            """, (grupo_id,))
+            return [fila_a_dict(cursor, fila) for fila in cursor.fetchall()]
+
+
 # ============================================================
 # OBTENER ALUMNO DETALLADO
 # ============================================================

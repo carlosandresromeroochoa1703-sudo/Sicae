@@ -62,6 +62,7 @@ from app.services.notificaciones_config_service import (
 from app.services.alumnos_service import (
     obtener_alumno_detalle,
     obtener_alumnos_por_grupo,
+    obtener_lista_asistencia_manual,
     obtener_grupos,
     eliminar_alumno,
     eliminar_alumnos,
@@ -7838,7 +7839,8 @@ async def guardar_configuracion_credencial_personal(
 
 @app.get("/escaner")
 def escaner(
-    request: Request
+    request: Request,
+    grupo_id: int = 0,
 ):
 
     if not usuario_autenticado(request):
@@ -7850,11 +7852,28 @@ def escaner(
     if not usuario_puede_operar(request):
         return RedirectResponse(url="/", status_code=303)
 
+    grupos = obtener_grupos()
+    grupo_seleccionado = next(
+        (grupo for grupo in grupos if grupo["id"] == grupo_id),
+        None,
+    )
+    alumnos_manual = (
+        obtener_lista_asistencia_manual(grupo_id)
+        if grupo_seleccionado
+        else []
+    )
+
     return templates.TemplateResponse(
 
         request=request,
 
-        name="escaner.html"
+        name="escaner.html",
+
+        context={
+            "grupos": grupos,
+            "grupo_seleccionado": grupo_seleccionado,
+            "alumnos_manual": alumnos_manual,
+        },
 
     )
 

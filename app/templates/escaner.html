@@ -151,6 +151,40 @@
             color: #166534;
         }
 
+        .manual-attendance {
+            margin-top: 24px;
+            padding: 24px;
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,.06);
+        }
+        .manual-attendance h3 { margin: 0 0 6px; }
+        .manual-intro { color: #64748b; margin: 0 0 18px; }
+        .manual-group-select { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:18px; }
+        .manual-group-select label { font-weight:700; }
+        .manual-group-select select { min-width:240px; max-width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:9px; font:inherit; }
+        .manual-groups { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; }
+        .manual-group-link { display:block; padding:16px; border:1px solid #dbe3ed; border-radius:12px; color:#0f172a; text-decoration:none; background:#f8fafc; }
+        .manual-group-link:hover { border-color:#2563eb; background:#eff6ff; }
+        .manual-group-link strong { display:block; margin-bottom:5px; }
+        .manual-group-link span { color:#64748b; font-size:13px; }
+        .manual-roster { display:grid; gap:8px; }
+        .manual-student { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:14px; align-items:center; padding:12px 14px; border:1px solid #e2e8f0; border-radius:11px; }
+        .manual-student-info { min-width:0; }
+        .manual-student-name { font-weight:750; overflow-wrap:anywhere; }
+        .manual-student-id { color:#64748b; font-size:13px; margin-top:3px; }
+        .manual-state { display:inline-block; margin-top:6px; padding:4px 8px; border-radius:999px; background:#f1f5f9; color:#475569; font-size:12px; font-weight:700; }
+        .manual-state.entrada { background:#dcfce7; color:#166534; }
+        .manual-state.salida { background:#fee2e2; color:#991b1b; }
+        .manual-actions { display:flex; gap:8px; }
+        .manual-action { border:0; border-radius:9px; padding:10px 12px; color:#fff; font:inherit; font-weight:700; cursor:pointer; white-space:nowrap; }
+        .manual-action.entry { background:#15803d; }
+        .manual-action.exit { background:#b91c1c; }
+        .manual-action:disabled { opacity:.45; cursor:not-allowed; }
+        .manual-feedback { min-height:20px; margin:8px 0 0; font-size:13px; color:#166534; }
+        .manual-feedback.error { color:#991b1b; }
+
         @media (max-width: 850px) {
 
             .scanner-grid {
@@ -187,6 +221,12 @@
             .result-data { font-size: 11px; overflow-wrap: anywhere; }
             .movement { margin-top: 7px; padding: 6px 12px; font-size: 12px; }
             .message { margin-top: 8px; padding: 8px; font-size: 11px; }
+            .manual-attendance { margin-top:14px; padding:14px; border-radius:12px; }
+            .manual-student { grid-template-columns:1fr; gap:9px; padding:11px; }
+            .manual-actions { display:grid; grid-template-columns:1fr 1fr; }
+            .manual-action { padding:10px 6px; font-size:13px; }
+            .manual-group-select { align-items:stretch; }
+            .manual-group-select select { width:100%; min-width:0; }
         }
 
     </style>
@@ -328,6 +368,64 @@
 
 
             </div>
+
+            <section class="manual-attendance" aria-labelledby="manualAttendanceTitle">
+                <h3 id="manualAttendanceTitle">📝 Registro manual por grupo</h3>
+                <p class="manual-intro">Abre un grupo y marca la entrada o salida junto al alumno. No necesitas buscarlo en toda la escuela.</p>
+
+                <form class="manual-group-select" method="get" action="/escaner">
+                    <label for="manualGroupSelect">Grupo:</label>
+                    <select id="manualGroupSelect" name="grupo_id" onchange="this.form.submit()">
+                        <option value="0">Selecciona un grupo</option>
+                        {% for grupo in grupos %}
+                            <option value="{{ grupo.id }}" {% if grupo_seleccionado and grupo.id == grupo_seleccionado.id %}selected{% endif %}>
+                                {{ grupo.nombre_grupo }} · {{ grupo.cantidad_alumnos }} alumnos
+                            </option>
+                        {% endfor %}
+                    </select>
+                </form>
+
+                {% if grupo_seleccionado %}
+                    <h4>{{ grupo_seleccionado.nombre_grupo }} · {{ grupo_seleccionado.grado }}° {{ grupo_seleccionado.nombre }}</h4>
+                    {% if alumnos_manual %}
+                        <div class="manual-roster">
+                            {% for alumno in alumnos_manual %}
+                                <article class="manual-student" data-matricula="{{ alumno.matricula }}" data-ultimo="{{ alumno.ultimo_movimiento or '' }}">
+                                    <div class="manual-student-info">
+                                        <div class="manual-student-name">{{ alumno.nombre }} {{ alumno.apellido_paterno }} {{ alumno.apellido_materno or '' }}</div>
+                                        <div class="manual-student-id">Matrícula: {{ alumno.matricula }}</div>
+                                        <span class="manual-state {% if alumno.ultimo_movimiento == 'ENTRADA' %}entrada{% elif alumno.ultimo_movimiento == 'SALIDA' %}salida{% endif %}">
+                                            {% if alumno.ultimo_movimiento %}
+                                                Último registro: {{ alumno.ultimo_movimiento }}{% if alumno.ultima_hora %} · {{ alumno.ultima_hora|string|truncate(5, True, '') }}{% endif %}
+                                            {% else %}
+                                                Sin registros hoy
+                                            {% endif %}
+                                        </span>
+                                        <p class="manual-feedback" aria-live="polite"></p>
+                                    </div>
+                                    <div class="manual-actions">
+                                        <button type="button" class="manual-action entry" data-movimiento="ENTRADA" {% if alumno.ultimo_movimiento == 'ENTRADA' %}disabled{% endif %} aria-label="Registrar entrada de {{ alumno.nombre }}">↘ Entrada</button>
+                                        <button type="button" class="manual-action exit" data-movimiento="SALIDA" {% if alumno.ultimo_movimiento == 'SALIDA' %}disabled{% endif %} aria-label="Registrar salida de {{ alumno.nombre }}">↗ Salida</button>
+                                    </div>
+                                </article>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p>No hay alumnos activos en este grupo.</p>
+                    {% endif %}
+                {% elif not grupos %}
+                    <p>No hay grupos activos para registrar asistencia.</p>
+                {% else %}
+                    <div class="manual-groups">
+                        {% for grupo in grupos %}
+                            <a class="manual-group-link" href="/escaner?grupo_id={{ grupo.id }}">
+                                <strong>{{ grupo.nombre_grupo }}</strong>
+                                <span>{{ grupo.grado }}° {{ grupo.nombre }} · {{ grupo.cantidad_alumnos }} alumnos</span>
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </section>
 
         </div>
 
@@ -1421,6 +1519,54 @@
 
         );
 
+    </script>
+
+    <script>
+        document.querySelectorAll(".manual-action").forEach(function (button) {
+            button.addEventListener("click", async function () {
+                const row = button.closest(".manual-student");
+                if (!row || row.dataset.busy === "1") return;
+
+                const feedback = row.querySelector(".manual-feedback");
+                const movementButtons = row.querySelectorAll(".manual-action");
+                const matricula = row.dataset.matricula;
+                const movimiento = button.dataset.movimiento;
+                row.dataset.busy = "1";
+                movementButtons.forEach(function (item) { item.disabled = true; });
+                feedback.classList.remove("error");
+                feedback.textContent = "Registrando…";
+
+                try {
+                    const response = await fetch("/api/escaner", {
+                        method: "POST",
+                        headers: {"Content-Type": "application/json"},
+                        body: JSON.stringify({matricula: matricula, movimiento: movimiento})
+                    });
+                    const result = await response.json();
+                    if (!response.ok || !result.ok) {
+                        throw new Error(result.mensaje || "No se pudo registrar el movimiento.");
+                    }
+
+                    row.dataset.ultimo = movimiento;
+                    const state = row.querySelector(".manual-state");
+                    state.classList.toggle("entrada", movimiento === "ENTRADA");
+                    state.classList.toggle("salida", movimiento === "SALIDA");
+                    state.textContent = `Último registro: ${movimiento} · ${result.hora || ""}`;
+                    feedback.textContent = result.mensaje || `${movimiento} registrada.`;
+                    movementButtons.forEach(function (item) {
+                        item.disabled = item.dataset.movimiento === movimiento;
+                    });
+                } catch (error) {
+                    feedback.classList.add("error");
+                    feedback.textContent = error.message || "No se pudo contactar al servidor.";
+                    movementButtons.forEach(function (item) {
+                        item.disabled = item.dataset.movimiento === row.dataset.ultimo;
+                    });
+                } finally {
+                    row.dataset.busy = "0";
+                }
+            });
+        });
     </script>
 
     <script src="/static/js/navigation.js"></script>
