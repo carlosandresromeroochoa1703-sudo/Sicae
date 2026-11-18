@@ -632,6 +632,9 @@ def _dibujar_diseno_libre(pdf, entidad, configuracion, x, y, personal=False, lad
         "nombre": " ".join(str(entidad.get(k, "") or "").strip() for k in
                             ("nombre", "apellido_paterno", "apellido_materno") if str(entidad.get(k, "") or "").strip()),
         "matricula": str(matricula or ""),
+        "numero_seguro_social": str(entidad.get("numero_seguro_social", "") or ""),
+        "nombre_padre": str(entidad.get("nombre_padre", "") or ""),
+        "curp": str(entidad.get("curp", "") or ""),
         "grupo": str(entidad.get("nombre_grupo", entidad.get("grupo_nombre", "")) or ""),
         "grado": str(entidad.get("grado", "") or ""),
         "turno": str(entidad.get("turno", "") or ""),
@@ -1589,7 +1592,7 @@ def dibujar_credencial(
             py(15)
         )
 
-        tamano_datos = py(13)
+        tamano_datos = py(11)
 
         def dibujar_dato(
             etiqueta,
@@ -1647,7 +1650,7 @@ def dibujar_credencial(
                 valor_ajustado
             )
 
-            posicion_y -= py(24)
+            posicion_y -= py(19)
 
         # ========================================================
         # MATRICULA
@@ -1700,6 +1703,13 @@ def dibujar_credencial(
                 "Turno:",
                 turno
             )
+
+        if alumno.get("numero_seguro_social"):
+            dibujar_dato("NSS:", alumno.get("numero_seguro_social"))
+        if alumno.get("nombre_padre"):
+            dibujar_dato("Padre:", alumno.get("nombre_padre"))
+        if alumno.get("curp"):
+            dibujar_dato("CURP:", alumno.get("curp"))
 
         # ========================================================
     # PIE

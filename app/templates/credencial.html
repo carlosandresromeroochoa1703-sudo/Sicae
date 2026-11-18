@@ -248,7 +248,7 @@
 
         .nombre {
 
-            margin: 0 0 25px 0;
+            margin: 0 0 12px 0;
 
             font-size:
                 {{ configuracion_credencial.tamano_nombre }}px;
@@ -263,9 +263,9 @@
 
         .dato {
 
-            margin-bottom: 12px;
+            margin-bottom: 7px;
 
-            font-size: 19px;
+            font-size: 15px;
 
             color:
                 {{ configuracion_credencial.color_texto }};
@@ -678,6 +678,16 @@
 
                 {% endif %}
 
+                {% if alumno.numero_seguro_social %}
+                    <div class="dato"><strong>NSS:</strong> {{ alumno.numero_seguro_social }}</div>
+                {% endif %}
+                {% if alumno.nombre_padre %}
+                    <div class="dato"><strong>Padre:</strong> {{ alumno.nombre_padre }}</div>
+                {% endif %}
+                {% if alumno.curp %}
+                    <div class="dato"><strong>CURP:</strong> {{ alumno.curp }}</div>
+                {% endif %}
+
 
             </div>
 
@@ -790,7 +800,7 @@
  const scaleX=760/700, scaleY=460/400;
  if(free.enabled){
   const sources={logo:card.querySelector(".logo")?.src,photo:card.querySelector(".foto")?.src,qr:card.querySelector(".qr")?.src};
-  const fields={{ {"nombre": ((alumno.nombre or "") ~ " " ~ (alumno.apellido_paterno or "") ~ " " ~ (alumno.apellido_materno or ""))|trim, "matricula": alumno.matricula or "", "grupo": alumno.nombre_grupo or "", "grado": alumno.grado or "", "turno": alumno.turno or "", "institucion": configuracion_credencial.nombre_institucion, "subtitulo": configuracion_credencial.subtitulo, "texto_pie": configuracion_credencial.texto_pie}|tojson }};
+  const fields={{ {"nombre": ((alumno.nombre or "") ~ " " ~ (alumno.apellido_paterno or "") ~ " " ~ (alumno.apellido_materno or ""))|trim, "matricula": alumno.matricula or "", "numero_seguro_social": alumno.numero_seguro_social or "", "nombre_padre": alumno.nombre_padre or "", "curp": alumno.curp or "", "grupo": alumno.nombre_grupo or "", "grado": alumno.grado or "", "turno": alumno.turno or "", "institucion": configuracion_credencial.nombre_institucion, "subtitulo": configuracion_credencial.subtitulo, "texto_pie": configuracion_credencial.texto_pie}|tojson }};
   card.innerHTML=""; card.style.position="relative"; card.style.width="700px"; card.style.height="400px"; card.style.minHeight="400px"; card.style.boxSizing="border-box"; card.style.padding="0"; card.style.borderRadius="20px"; card.style.background=free.background||"#fff";
   (free.elements||[]).forEach(function(item){
    const node=document.createElement("div"); node.style.position="absolute"; node.style.left=(Number(item.x)||0)+"px"; node.style.top=(Number(item.y)||0)+"px"; node.style.width=(Number(item.w)||120)+"px"; node.style.height=(Number(item.h)||48)+"px"; node.style.boxSizing="border-box"; node.style.overflow="hidden";
