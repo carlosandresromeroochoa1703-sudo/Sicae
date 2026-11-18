@@ -47,6 +47,22 @@ def crear_tablas():
                         sql
                     )
 
+                # Acelera la consulta del último movimiento durante escaneos
+                # simultáneos. Los índices también se aplican a instalaciones
+                # existentes porque IF NOT EXISTS hace segura la migración.
+                cursor.execute("""
+                    CREATE INDEX IF NOT EXISTS idx_accesos_alumno_fecha_ultimo
+                    ON accesos (alumno_id, fecha, hora DESC, id DESC);
+                """)
+                cursor.execute("""
+                    CREATE INDEX IF NOT EXISTS idx_accesos_personal_fecha_ultimo
+                    ON accesos_personal (personal_id, fecha, hora DESC, id DESC);
+                """)
+                cursor.execute("""
+                    CREATE INDEX IF NOT EXISTS idx_accesos_especial_fecha_ultimo
+                    ON accesos_credenciales_especiales (credencial_id, fecha, hora DESC, id DESC);
+                """)
+
                 cursor.execute("""
                     INSERT INTO configuracion_asistencia (
                         id, hora_entrada, tolerancia_minutos,

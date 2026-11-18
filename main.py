@@ -8485,6 +8485,20 @@ def registrar_escaneo(
                 }
 
 
+                # Serializa movimientos del mismo alumno entre varios
+                # escáneres sin bloquear registros de otros alumnos.
+                cursor.execute(
+                    "SELECT id FROM alumnos WHERE id = %s AND activo = TRUE FOR UPDATE;",
+                    (alumno["id"],),
+                )
+                if cursor.fetchone() is None:
+                    return {
+                        "ok": False,
+                        "mensaje": "El alumno ya no está activo.",
+                        "matricula": matricula,
+                    }
+
+
                 # ====================================================
                 # ÚLTIMO MOVIMIENTO
                 # ====================================================
