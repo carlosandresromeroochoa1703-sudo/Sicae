@@ -286,7 +286,7 @@
             </div>
 
 
-            {% if request.session.get("rol") == "administrador" %}<a
+            {% if usuario_tiene_permiso(request, 'alumnos') %}<a
                 href="/grupos/nuevo"
                 class="new-group-button"
             >

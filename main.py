@@ -119,7 +119,9 @@ from app.services.usuarios_service import (
     obtener_usuario_por_id,
     actualizar_usuario,
     cambiar_estado_usuario,
-    autenticar_usuario
+    autenticar_usuario,
+    PERMISOS_DISPONIBLES,
+    PERMISOS_POR_ROL
 )
 
 from app.services.personal_service import (
@@ -445,17 +447,13 @@ templates.context_processors.append(
 @app.get("/notificaciones/configuracion")
 async def mostrar_configuracion_notificaciones(request: Request):
 
-    if not usuario_es_administrador(request):
+    if not usuario_puede_acceder_a_ruta(request):
 
         return RedirectResponse(
             url="/",
             status_code=303
         )
     configuracion = obtener_configuracion_notificaciones()
-    if request.session.get("rol") == "docente":
-        return RedirectResponse(url="/asistencia-maestro", status_code=303)
-    if request.session.get("rol") == "operador":
-        return RedirectResponse(url="/inicio-plantel", status_code=303)
 
     return templates.TemplateResponse(
         request=request,
@@ -484,7 +482,7 @@ async def guardar_configuracion_notificaciones_ruta(
     correo_prueba: str = Form(""),
     accion: str = Form("guardar")
 ):
-    if not usuario_es_administrador(request):
+    if not usuario_puede_acceder_a_ruta(request):
 
         return RedirectResponse(
             url="/",
@@ -589,6 +587,7 @@ async def iniciar_sesion(
     request.session["nombre"] = usuario_autenticado_resultado["nombre"]
     request.session["rol"] = usuario_autenticado_resultado["rol"]
     request.session["personal_id"] = usuario_autenticado_resultado.get("personal_id")
+    request.session["permisos"] = usuario_autenticado_resultado.get("permisos", [])
 
     return RedirectResponse(
         url="/",
@@ -641,7 +640,76 @@ def usuario_es_administrador(
 
 
 def usuario_puede_operar(request: Request):
-    return request.session.get("rol") in {"administrador", "operador"}
+    return usuario_puede_acceder_a_ruta(request)
+
+
+def usuario_tiene_permiso(request: Request, permiso: str):
+    if usuario_es_administrador(request):
+        return True
+    permisos = request.session.get("permisos")
+    if not isinstance(permisos, list):
+        permisos = PERMISOS_POR_ROL.get(request.session.get("rol"), [])
+    return permiso in permisos
+
+
+def permiso_requerido_para_ruta(path: str):
+    if path in {"/", "/inicio-plantel", "/api/inicio-plantel"}:
+        return "inicio"
+    if path.startswith("/administracion/usuarios"):
+        return None
+    if path.startswith("/administracion/respaldos"):
+        return "respaldos"
+    if path.startswith("/administracion/credenciales-personal"):
+        return "credenciales"
+    if path.startswith("/credencial") or path.startswith("/credenciales") or "/credencial" in path or "/credenciales" in path:
+        return "credenciales"
+    if path.startswith("/administracion/personal"):
+        return "personal"
+    if path.startswith("/alumnos") or path.startswith("/api/alumnos") or path.startswith("/actividad-alumnos") or path.startswith("/correos-alumnos"):
+        return "alumnos"
+    if path.startswith("/grupos"):
+        return "grupos"
+    if path.startswith("/reportes") or path.startswith("/estadisticas"):
+        return "reportes"
+    if path.startswith("/eventos-fuera") or path.startswith("/api/eventos-fuera"):
+        return "eventos"
+    if path.startswith("/clases") or path.startswith("/horarios") or path.startswith("/asistencia-maestro"):
+        return "clases"
+    if path.startswith("/escaner") or path.startswith("/api/escaner"):
+        return "asistencias"
+    if path.startswith("/configuracion/asistencia"):
+        return "configuracion"
+    if path.startswith("/notificaciones"):
+        return "notificaciones"
+    if path.startswith("/configuracion"):
+        return "configuracion"
+    if path.startswith("/administracion") or path.startswith("/informacion"):
+        return None
+    return None
+
+
+def usuario_puede_acceder_a_ruta(request: Request):
+    if usuario_es_administrador(request):
+        return True
+    path = request.url.path
+    if request.session.get("rol") == "docente":
+        if path.startswith("/asistencia-maestro"):
+            return usuario_tiene_permiso(request, "clases")
+        rutas_asistencia_docente = (
+            r"/clases/\d+/asistencia/iniciar",
+            r"/clases/asistencia/\d+",
+            r"/clases/asistencia/\d+/cerrar",
+            r"/api/clases/asistencia/\d+",
+        )
+        if any(re.fullmatch(ruta, path) for ruta in rutas_asistencia_docente):
+            return usuario_tiene_permiso(request, "clases")
+        if path.startswith("/clases") or path.startswith("/horarios"):
+            return False
+    permiso = permiso_requerido_para_ruta(path)
+    return bool(permiso and usuario_tiene_permiso(request, permiso))
+
+
+templates.env.globals["usuario_tiene_permiso"] = usuario_tiene_permiso
 
 
 def normalizar_matricula_escaner(valor):
@@ -1135,10 +1203,25 @@ def inicio(
         )
 
 
-    if request.session.get("rol") == "docente":
+    if request.session.get("rol") == "docente" and usuario_tiene_permiso(request, "clases"):
         return RedirectResponse(url="/asistencia-maestro", status_code=303)
-    if request.session.get("rol") == "operador":
-        return RedirectResponse(url="/inicio-plantel", status_code=303)
+    if not usuario_es_administrador(request):
+        rutas_por_permiso = [
+            ("inicio", "/inicio-plantel"),
+            ("asistencias", "/escaner"),
+            ("alumnos", "/alumnos"),
+            ("grupos", "/grupos"),
+            ("reportes", "/reportes"),
+            ("eventos", "/eventos-fuera"),
+            ("clases", "/horarios"),
+            ("personal", "/administracion/personal"),
+            ("credenciales", "/credencial/configuracion"),
+            ("notificaciones", "/notificaciones/configuracion"),
+            ("configuracion", "/configuracion/sistema"),
+            ("respaldos", "/administracion/respaldos"),
+        ]
+        destino = next((ruta for permiso, ruta in rutas_por_permiso if usuario_tiene_permiso(request, permiso)), "/logout")
+        return RedirectResponse(url=destino, status_code=303)
 
     return templates.TemplateResponse(
 
@@ -1186,7 +1269,7 @@ def inicio_plantel(request: Request):
     if not usuario_autenticado(request):
         return RedirectResponse(url="/login", status_code=303)
     if not usuario_puede_operar(request):
-        return RedirectResponse(url="/asistencia-maestro", status_code=303)
+        return RedirectResponse(url="/", status_code=303)
 
     return templates.TemplateResponse(
         request=request,
@@ -1417,7 +1500,7 @@ def mostrar_correos_alumnos(request: Request):
     if not usuario_autenticado(request):
         return RedirectResponse(url="/login", status_code=303)
 
-    if not usuario_es_administrador(request):
+    if not usuario_puede_acceder_a_ruta(request):
         return RedirectResponse(url="/", status_code=303)
 
     busqueda = request.query_params.get("buscar", "").strip()
@@ -1502,7 +1585,7 @@ async def guardar_correos_alumnos(request: Request):
     if not usuario_autenticado(request):
         return RedirectResponse(url="/login", status_code=303)
 
-    if not usuario_es_administrador(request):
+    if not usuario_puede_acceder_a_ruta(request):
         return RedirectResponse(url="/", status_code=303)
 
     formulario = await request.form()
@@ -1715,7 +1798,7 @@ def alumnos_grupo(
 
 @app.get("/alumnos/grupo/{grupo_id}/editar-masivo")
 def editar_alumnos_masivo(request: Request, grupo_id: int):
-    if not usuario_es_administrador(request):
+    if not usuario_puede_acceder_a_ruta(request):
         return RedirectResponse(url="/alumnos", status_code=303)
 
     grupo = next((item for item in obtener_grupos() if item["id"] == grupo_id), None)
@@ -1734,7 +1817,7 @@ def editar_alumnos_masivo(request: Request, grupo_id: int):
 
 @app.post("/api/alumnos/grupo/{grupo_id}/editar-masivo")
 async def guardar_alumnos_masivo(request: Request, grupo_id: int):
-    if not usuario_es_administrador(request):
+    if not usuario_puede_acceder_a_ruta(request):
         return JSONResponse({"ok": False, "mensaje": "Se requiere una cuenta administradora."}, status_code=403)
 
     try:
@@ -1791,7 +1874,7 @@ def imprimir_credenciales(
 ):
 
     
-    if not usuario_es_administrador(request):
+    if not usuario_puede_acceder_a_ruta(request):
         return RedirectResponse(url="/", status_code=303)
 
     if not usuario_autenticado(request):
@@ -1833,7 +1916,7 @@ def seleccionar_alumnos_impresion(
 ):
 
     
-    if not usuario_es_administrador(request):
+    if not usuario_puede_acceder_a_ruta(request):
         return RedirectResponse(url="/", status_code=303)
 
     if not usuario_autenticado(request):
@@ -1915,7 +1998,7 @@ def generar_credenciales_seleccionadas(
 ):
 
     
-    if not usuario_es_administrador(request):
+    if not usuario_puede_acceder_a_ruta(request):
         return RedirectResponse(url="/", status_code=303)
 
     if not usuario_autenticado(request):
@@ -2112,7 +2195,7 @@ def generar_credenciales_seleccionadas(
 
 @app.get("/credenciales/generacion/{job_id}/estado")
 def estado_generacion_credenciales(request: Request, job_id: str):
-    if not usuario_autenticado(request) or not usuario_es_administrador(request):
+    if not usuario_autenticado(request) or not usuario_puede_acceder_a_ruta(request):
         return JSONResponse({"estado": "error", "mensaje": "Tu sesión expiró. Inicia sesión de nuevo."}, status_code=403)
     with _credenciales_jobs_lock:
         job = _credenciales_jobs.get(job_id)
@@ -2131,7 +2214,7 @@ def estado_generacion_credenciales(request: Request, job_id: str):
 
 @app.get("/credenciales/generacion/{job_id}/pdf")
 def descargar_credenciales_generadas(request: Request, job_id: str):
-    if not usuario_autenticado(request) or not usuario_es_administrador(request):
+    if not usuario_autenticado(request) or not usuario_puede_acceder_a_ruta(request):
         return RedirectResponse(url="/login", status_code=303)
     with _credenciales_jobs_lock:
         job = _credenciales_jobs.get(job_id)
@@ -2164,7 +2247,7 @@ def credenciales_grupo_pdf(
 ):
 
     
-    if not usuario_es_administrador(request):
+    if not usuario_puede_acceder_a_ruta(request):
         return RedirectResponse(url="/", status_code=303)
 
     if not usuario_autenticado(request):
@@ -2303,7 +2386,7 @@ def respaldos(
     request: Request
 ):
 
-    if not usuario_es_administrador(request):
+    if not usuario_puede_acceder_a_ruta(request):
 
         return RedirectResponse(
             url="/",
@@ -2343,7 +2426,7 @@ def generar_respaldo_ruta(
     request: Request
 ):
 
-    if not usuario_es_administrador(request):
+    if not usuario_puede_acceder_a_ruta(request):
 
         return RedirectResponse(
             url="/",
@@ -2409,7 +2492,7 @@ def descargar_respaldo(
 
 ):
 
-    if not usuario_es_administrador(request):
+    if not usuario_puede_acceder_a_ruta(request):
 
         return RedirectResponse(
             url="/",
@@ -2459,7 +2542,7 @@ def eliminar_respaldo_ruta(
 
 ):
 
-    if not usuario_es_administrador(request):
+    if not usuario_puede_acceder_a_ruta(request):
 
         return RedirectResponse(
             url="/",
@@ -2524,7 +2607,7 @@ def respaldos(
     request: Request
 ):
 
-    if not usuario_es_administrador(request):
+    if not usuario_puede_acceder_a_ruta(request):
 
         return RedirectResponse(
 
@@ -2573,7 +2656,7 @@ def crear_respaldo_ruta(
     request: Request
 ):
 
-    if not usuario_es_administrador(request):
+    if not usuario_puede_acceder_a_ruta(request):
 
         return RedirectResponse(
 
@@ -2636,7 +2719,7 @@ def descargar_respaldo(
 
 ):
 
-    if not usuario_es_administrador(request):
+    if not usuario_puede_acceder_a_ruta(request):
 
         return RedirectResponse(
 
@@ -2706,7 +2789,7 @@ def eliminar_respaldo_ruta(
 
 ):
 
-    if not usuario_es_administrador(request):
+    if not usuario_puede_acceder_a_ruta(request):
 
         return RedirectResponse(
 
@@ -2843,6 +2926,8 @@ def nuevo_usuario(
             "maestros": obtener_personal_por_tipo("Docente"),
             "personal_id_seleccionado": personal_id,
             "rol_seleccionado": "docente" if personal_id else "operador",
+            "permisos_disponibles": PERMISOS_DISPONIBLES,
+            "permisos_seleccionados": PERMISOS_POR_ROL.get("docente" if personal_id else "operador", []),
             "error": request.query_params.get("error", ""),
         }
 
@@ -2900,6 +2985,8 @@ def editar_usuario(
             "usuario":
                 usuario,
             "maestros": obtener_personal_por_tipo("Docente"),
+            "permisos_disponibles": PERMISOS_DISPONIBLES,
+            "permisos_seleccionados": usuario.get("permisos") or PERMISOS_POR_ROL.get(usuario.get("rol"), []),
             "error": request.query_params.get("error", ""),
 
         }
@@ -2963,6 +3050,8 @@ def guardar_edicion_usuario(
 
     personal_id: int | None = Form(None),
 
+    permisos: list[str] = Form([]),
+
     password: str = Form("")
 
 ):
@@ -2989,9 +3078,18 @@ def guardar_edicion_usuario(
 
             personal_id=personal_id,
 
+            permisos=permisos,
+
             password=password.strip() or None
 
         )
+
+        if request.session.get("usuario_id") == usuario_id:
+            request.session["usuario"] = usuario.strip()
+            request.session["nombre"] = nombre.strip()
+            request.session["rol"] = rol
+            request.session["personal_id"] = personal_id if rol == "docente" else None
+            request.session["permisos"] = permisos
 
     except psycopg.errors.UniqueViolation:
 
@@ -3006,9 +3104,10 @@ def guardar_edicion_usuario(
 
         )
 
-    except ValueError:
+    except ValueError as error:
+        tipo_error = "docente" if "docente" in str(error).lower() else "permisos"
         return RedirectResponse(
-            url=f"/administracion/usuarios/{usuario_id}/editar?error=docente",
+            url=f"/administracion/usuarios/{usuario_id}/editar?error={tipo_error}",
             status_code=303,
         )
 
@@ -3041,7 +3140,9 @@ def guardar_nuevo_usuario(
 
     rol: str = Form(...),
 
-    personal_id: int | None = Form(None)
+    personal_id: int | None = Form(None),
+
+    permisos: list[str] = Form([])
 
 ):
 
@@ -3063,7 +3164,9 @@ def guardar_nuevo_usuario(
 
             rol=rol,
 
-            personal_id=personal_id
+            personal_id=personal_id,
+
+            permisos=permisos
 
         )
 
@@ -3077,9 +3180,10 @@ def guardar_nuevo_usuario(
 
         )
 
-    except ValueError:
+    except ValueError as error:
+        tipo_error = "docente" if "docente" in str(error).lower() else "permisos"
         return RedirectResponse(
-            url="/administracion/usuarios/nuevo?error=docente",
+            url=f"/administracion/usuarios/nuevo?error={tipo_error}",
             status_code=303,
         )
 
@@ -3103,7 +3207,7 @@ def personal(
     request: Request
 ):
 
-    if not usuario_es_administrador(request):
+    if not usuario_puede_acceder_a_ruta(request):
 
         return RedirectResponse(
             url="/",
@@ -3144,7 +3248,7 @@ def nuevo_personal(
     request: Request
 ):
 
-    if not usuario_es_administrador(request):
+    if not usuario_puede_acceder_a_ruta(request):
 
         return RedirectResponse(
             url="/",
@@ -3174,7 +3278,7 @@ def editar_personal(
     personal_id: int
 ):
 
-    if not usuario_es_administrador(request):
+    if not usuario_puede_acceder_a_ruta(request):
 
         return RedirectResponse(
             url="/",
@@ -3244,7 +3348,7 @@ def guardar_edicion_personal(
 
 ):
 
-    if not usuario_es_administrador(request):
+    if not usuario_puede_acceder_a_ruta(request):
 
         return RedirectResponse(
             url="/",
@@ -3353,7 +3457,7 @@ def guardar_edicion_personal(
 @app.get("/administracion/credenciales-personal")
 def credenciales_personal(request: Request):
 
-    if not usuario_es_administrador(request):
+    if not usuario_puede_acceder_a_ruta(request):
         return RedirectResponse(url="/", status_code=303)
 
     return templates.TemplateResponse(
@@ -3374,7 +3478,7 @@ def pagina_credenciales_especiales(
     actualizado: int = 0,
     error: str = "",
 ):
-    if not usuario_es_administrador(request):
+    if not usuario_puede_acceder_a_ruta(request):
         return RedirectResponse(url="/", status_code=303)
     if tipo not in TIPOS_CREDENCIAL_ESPECIAL:
         tipo = "direccion"
@@ -3413,7 +3517,7 @@ async def crear_credencial_especial_ruta(
     correo_4: str = Form(""),
     foto: UploadFile | None = File(None),
 ):
-    if not usuario_es_administrador(request):
+    if not usuario_puede_acceder_a_ruta(request):
         return RedirectResponse(url="/", status_code=303)
     if tipo not in TIPOS_CREDENCIAL_ESPECIAL:
         return RedirectResponse(url="/credenciales-especiales?error=tipo", status_code=303)
@@ -3468,7 +3572,7 @@ async def crear_credencial_especial_ruta(
 def cambiar_estado_credencial_especial_ruta(
     request: Request, credencial_id: int, activo: bool = Form(...), tipo: str = Form("direccion")
 ):
-    if not usuario_es_administrador(request):
+    if not usuario_puede_acceder_a_ruta(request):
         return RedirectResponse(url="/", status_code=303)
     cambiar_estado_credencial_especial(credencial_id, activo)
     return RedirectResponse(url=f"/credenciales-especiales?tipo={tipo}&actualizado=1", status_code=303)
@@ -3476,7 +3580,7 @@ def cambiar_estado_credencial_especial_ruta(
 
 @app.get("/credenciales-especiales/pdf")
 def pdf_credenciales_especiales(request: Request, tipo: str = "direccion"):
-    if not usuario_es_administrador(request):
+    if not usuario_puede_acceder_a_ruta(request):
         return RedirectResponse(url="/", status_code=303)
     if tipo not in TIPOS_CREDENCIAL_ESPECIAL:
         return RedirectResponse(url="/credenciales-especiales", status_code=303)
@@ -3496,7 +3600,7 @@ def pdf_credenciales_especiales(request: Request, tipo: str = "direccion"):
 
 @app.get("/credenciales-especiales/{credencial_id}/pdf")
 def pdf_credencial_especial(request: Request, credencial_id: int):
-    if not usuario_es_administrador(request):
+    if not usuario_puede_acceder_a_ruta(request):
         return RedirectResponse(url="/", status_code=303)
     credencial = obtener_credencial_especial(credencial_id)
     if not credencial:
@@ -3511,7 +3615,7 @@ def pdf_credencial_especial(request: Request, credencial_id: int):
 
 @app.get("/credenciales-especiales/diseno")
 def diseno_credencial_especial(request: Request, tipo: str = "direccion", guardado: int = 0):
-    if not usuario_es_administrador(request):
+    if not usuario_puede_acceder_a_ruta(request):
         return RedirectResponse(url="/", status_code=303)
     if tipo not in TIPOS_CREDENCIAL_ESPECIAL:
         tipo = "direccion"
@@ -3553,7 +3657,7 @@ async def guardar_diseno_credencial_especial(
     layout_json: str = Form("{}"),
     logo: UploadFile | None = File(None),
 ):
-    if not usuario_es_administrador(request):
+    if not usuario_puede_acceder_a_ruta(request):
         return RedirectResponse(url="/", status_code=303)
     if tipo not in TIPOS_CREDENCIAL_ESPECIAL:
         return RedirectResponse(url="/credenciales-especiales", status_code=303)
@@ -3609,7 +3713,7 @@ def credencial_personal(
     personal_id: int
 ):
 
-    if not usuario_es_administrador(request):
+    if not usuario_puede_acceder_a_ruta(request):
         return RedirectResponse(url="/", status_code=303)
 
     if not usuario_autenticado(request):
@@ -3676,7 +3780,7 @@ def credencial_personal_pdf(
     personal_id: int
 ):
 
-    if not usuario_es_administrador(request):
+    if not usuario_puede_acceder_a_ruta(request):
         return RedirectResponse(url="/", status_code=303)
 
     if not usuario_autenticado(request):
@@ -3810,7 +3914,7 @@ def guardar_nuevo_personal(
 
 ):
 
-    if not usuario_es_administrador(request):
+    if not usuario_puede_acceder_a_ruta(request):
 
         return RedirectResponse(
             url="/",
@@ -3899,7 +4003,7 @@ def eliminar_personal_ruta(
 
 ):
 
-    if not usuario_es_administrador(request):
+    if not usuario_puede_acceder_a_ruta(request):
 
         return RedirectResponse(
             url="/",
@@ -4964,7 +5068,7 @@ def credencial_alumno(
 ):
 
     
-    if not usuario_es_administrador(request):
+    if not usuario_puede_acceder_a_ruta(request):
         return RedirectResponse(url="/", status_code=303)
 
     if not usuario_autenticado(request):
@@ -5036,7 +5140,7 @@ def credencial_pdf(
 
 ):
     
-    if not usuario_es_administrador(request):
+    if not usuario_puede_acceder_a_ruta(request):
         return RedirectResponse(url="/", status_code=303)
 
     if not usuario_autenticado(request):
@@ -5179,7 +5283,7 @@ def credencial_personal_pdf(
     personal_id: int
 ):
 
-    if not usuario_es_administrador(request):
+    if not usuario_puede_acceder_a_ruta(request):
         return RedirectResponse(url="/", status_code=303)
 
     if not usuario_autenticado(request):
@@ -5275,7 +5379,7 @@ def editar_alumno(
 ):
 
 
-    if not usuario_es_administrador(request):
+    if not usuario_puede_acceder_a_ruta(request):
         return RedirectResponse(
             url="/alumnos",
             status_code=303
@@ -5368,7 +5472,7 @@ async def guardar_edicion_alumno(
 
 ):
     
-    if not usuario_es_administrador(request):
+    if not usuario_puede_acceder_a_ruta(request):
         return RedirectResponse(
             url="/alumnos",
             status_code=303
@@ -5593,7 +5697,7 @@ def eliminar_alumno_ruta(
 
 ):
 
-    if not usuario_es_administrador(request):
+    if not usuario_puede_acceder_a_ruta(request):
         return RedirectResponse(
             url="/alumnos",
             status_code=303
@@ -5631,14 +5735,14 @@ def eliminar_alumnos_seleccionados(
 
 ):
 
-    if not usuario_es_administrador(request):
+    if not usuario_puede_acceder_a_ruta(request):
         return RedirectResponse(
             url="/alumnos",
             status_code=303
         )
 
 
-    if not usuario_es_administrador(request):
+    if not usuario_puede_acceder_a_ruta(request):
         return RedirectResponse(
             url="/alumnos",
             status_code=303
@@ -5714,7 +5818,7 @@ def nuevo_grupo(
 
 ):
 
-    if not usuario_es_administrador(request):
+    if not usuario_puede_acceder_a_ruta(request):
         return RedirectResponse(
             url="/grupos",
             status_code=303
@@ -5756,7 +5860,7 @@ def guardar_nuevo_grupo(
 
 ):
 
-    if not usuario_es_administrador(request):
+    if not usuario_puede_acceder_a_ruta(request):
         return RedirectResponse(
             url="/grupos",
             status_code=303
@@ -5843,7 +5947,7 @@ def editar_grupo(
 ):
 
 
-    if not usuario_es_administrador(request):
+    if not usuario_puede_acceder_a_ruta(request):
         return RedirectResponse(
             url="/grupos",
             status_code=303
@@ -5968,7 +6072,7 @@ def guardar_edicion_grupo(
 
 ):
 
-    if not usuario_es_administrador(request):
+    if not usuario_puede_acceder_a_ruta(request):
         return RedirectResponse(url="/grupos", status_code=303)
 
     try:
@@ -6045,7 +6149,7 @@ def eliminar_grupo(
 
 ):
 
-    if not usuario_es_administrador(request):
+    if not usuario_puede_acceder_a_ruta(request):
         return RedirectResponse(
             url="/grupos",
             status_code=303
@@ -6112,7 +6216,7 @@ def nuevo_alumno(
 ):
 
 
-    if not usuario_es_administrador(request):
+    if not usuario_puede_acceder_a_ruta(request):
         return RedirectResponse(
             url="/alumnos",
             status_code=303
@@ -6191,7 +6295,7 @@ async def guardar_nuevo_alumno(
 
 ):
 
-    if not usuario_es_administrador(request):
+    if not usuario_puede_acceder_a_ruta(request):
         return RedirectResponse(
             url="/alumnos",
             status_code=303
@@ -6414,7 +6518,7 @@ async def guardar_nuevo_alumno(
 
 @app.get("/alumnos/grupo/{grupo_id}/plantilla-excel")
 def descargar_plantilla_alumnos_excel(request: Request, grupo_id: int):
-    if not usuario_es_administrador(request):
+    if not usuario_puede_acceder_a_ruta(request):
         return RedirectResponse(url="/alumnos", status_code=303)
 
     grupo = next((item for item in obtener_grupos() if item["id"] == grupo_id), None)
@@ -6483,7 +6587,7 @@ async def importar_alumnos_excel(
 
 ):
 
-    if not usuario_es_administrador(request):
+    if not usuario_puede_acceder_a_ruta(request):
         return RedirectResponse(
             url="/alumnos",
             status_code=303
@@ -6951,7 +7055,7 @@ async def importar_alumnos_excel(
 )
 def configuracion_asistencia(request: Request):
 
-    if not usuario_es_administrador(request):
+    if not usuario_puede_acceder_a_ruta(request):
         return RedirectResponse(
             url="/login",
             status_code=303
@@ -7014,7 +7118,7 @@ async def guardar_configuracion_asistencia(
     activo: str | None = Form(None)
 ):
 
-    if not usuario_es_administrador(request):
+    if not usuario_puede_acceder_a_ruta(request):
         return RedirectResponse(
             url="/login",
             status_code=303
@@ -7072,7 +7176,7 @@ def configuracion_sistema(
     respaldo_error: int = 0,
 ):
 
-    if not usuario_es_administrador(request):
+    if not usuario_puede_acceder_a_ruta(request):
 
         return RedirectResponse(
             url="/login",
@@ -7102,7 +7206,7 @@ async def importar_respaldo_alumnos_ruta(
     request: Request,
     archivo: UploadFile = File(...),
 ):
-    if not usuario_es_administrador(request):
+    if not usuario_puede_acceder_a_ruta(request):
         return RedirectResponse(url="/login", status_code=303)
     try:
         nombre_archivo = archivo.filename or "respaldo.sql"
@@ -7183,7 +7287,7 @@ async def guardar_configuracion_sistema(
 
 ):
 
-    if not usuario_es_administrador(request):
+    if not usuario_puede_acceder_a_ruta(request):
 
         return RedirectResponse(
             url="/login",
@@ -7338,7 +7442,7 @@ async def guardar_configuracion_sistema(
 
 @app.post("/credencial/configuracion/subir-imagen")
 async def subir_imagen_diseno_credencial(request: Request, imagen: UploadFile = File(...)):
-    if not usuario_es_administrador(request):
+    if not usuario_puede_acceder_a_ruta(request):
         return JSONResponse({"error": "No autorizado"}, status_code=403)
     extension = Path(imagen.filename or "").suffix.lower()
     if extension not in {".png", ".jpg", ".jpeg", ".webp"}:
@@ -7361,7 +7465,7 @@ async def subir_imagen_diseno_credencial(request: Request, imagen: UploadFile = 
 
 @app.post("/credencial/configuracion/subir-powerpoint")
 async def subir_powerpoint_diseno_credencial(request: Request, presentacion: UploadFile = File(...)):
-    if not usuario_es_administrador(request):
+    if not usuario_puede_acceder_a_ruta(request):
         return JSONResponse({"error": "No autorizado"}, status_code=403)
     if Path(presentacion.filename or "").suffix.lower() != ".pptx":
         return JSONResponse({"error": "Sube una presentación .pptx"}, status_code=400)
@@ -7481,7 +7585,7 @@ def _validar_layout_credencial(raw):
 
 @app.get("/credencial/plantillas")
 def api_listar_plantillas_credencial(request: Request, tipo: str = "alumno"):
-    if not usuario_es_administrador(request):
+    if not usuario_puede_acceder_a_ruta(request):
         return JSONResponse({"error": "No autorizado"}, status_code=403)
     if tipo not in ({"alumno", "personal", "todas"} | set(TIPOS_CREDENCIAL_ESPECIAL)):
         return JSONResponse({"error": "Tipo de plantilla no válido"}, status_code=400)
@@ -7499,7 +7603,7 @@ def api_guardar_plantilla_credencial(
     nombre: str = Form(...),
     diseño_json: str = Form(...),
 ):
-    if not usuario_es_administrador(request):
+    if not usuario_puede_acceder_a_ruta(request):
         return JSONResponse({"error": "No autorizado"}, status_code=403)
     nombre = nombre.strip()[:100]
     if tipo not in ({"alumno", "personal"} | set(TIPOS_CREDENCIAL_ESPECIAL)) or not nombre:
@@ -7520,7 +7624,7 @@ def api_eliminar_plantilla_credencial(
     plantilla_id: int,
     tipo: str = "alumno",
 ):
-    if not usuario_es_administrador(request):
+    if not usuario_puede_acceder_a_ruta(request):
         return JSONResponse({"error": "No autorizado"}, status_code=403)
     if tipo not in ({"alumno", "personal"} | set(TIPOS_CREDENCIAL_ESPECIAL)):
         return JSONResponse({"error": "Tipo de plantilla no válido"}, status_code=400)
@@ -7546,7 +7650,7 @@ def configuracion_credencial(
 
 ):
 
-    if not usuario_es_administrador(request):
+    if not usuario_puede_acceder_a_ruta(request):
         return RedirectResponse(
             url="/login",
             status_code=303
@@ -7635,7 +7739,7 @@ async def guardar_configuracion_credencial(
         str = Form("{}")
 
 ):
-    if not usuario_es_administrador(request):
+    if not usuario_puede_acceder_a_ruta(request):
 
         return RedirectResponse(
             url="/",
@@ -7837,7 +7941,7 @@ def configuracion_credencial_personal(
 
 ):
 
-    if not usuario_es_administrador(request):
+    if not usuario_puede_acceder_a_ruta(request):
 
         return RedirectResponse(
             url="/login",
@@ -7901,7 +8005,7 @@ async def guardar_configuracion_credencial_personal(
     texto_pie: str = Form(""),
     layout_json: str = Form("{}")
 ):
-    if not usuario_es_administrador(request):
+    if not usuario_puede_acceder_a_ruta(request):
 
         return RedirectResponse(
             url="/",
@@ -8049,8 +8153,6 @@ def escaner(
 def pagina_eventos_fuera(request: Request, error: int = 0, correo_guardado: int = 0, correo_error: int = 0, finalizado: int = 0, correos_fallidos: int = 0, evento_eliminado: int = 0):
     if not usuario_autenticado(request):
         return RedirectResponse(url="/login", status_code=303)
-    if request.session.get("rol") == "docente":
-        return RedirectResponse(url="/asistencia-maestro", status_code=303)
     grupos = [
         {
             "id": fila["id"] if isinstance(fila, dict) else fila[0],
@@ -8088,7 +8190,7 @@ def guardar_notificaciones_eventos(
 ):
     if not usuario_autenticado(request):
         return RedirectResponse(url="/login", status_code=303)
-    if not usuario_es_administrador(request):
+    if not usuario_puede_acceder_a_ruta(request):
         return RedirectResponse(url="/", status_code=303)
     try:
         guardar_configuracion_notificaciones_eventos(activa, asunto, mensaje)
@@ -8109,7 +8211,7 @@ def crear_evento_fuera_plantel(
 ):
     if not usuario_autenticado(request):
         return RedirectResponse(url="/login", status_code=303)
-    if not usuario_es_administrador(request):
+    if not usuario_puede_acceder_a_ruta(request):
         return RedirectResponse(url="/", status_code=303)
     try:
         evento_id = crear_evento_fuera(nombre, fecha_evento, lugar, notas, grupos_ids)
@@ -8127,7 +8229,7 @@ def actualizar_estado_evento_fuera(
 ):
     if not usuario_autenticado(request):
         return RedirectResponse(url="/login", status_code=303)
-    if not usuario_es_administrador(request):
+    if not usuario_puede_acceder_a_ruta(request):
         return RedirectResponse(url="/", status_code=303)
     cambiar_estado_evento_fuera(evento_id, activo)
     return RedirectResponse(url="/eventos-fuera", status_code=303)
@@ -8137,7 +8239,7 @@ def actualizar_estado_evento_fuera(
 def eliminar_evento_fuera_plantel(request: Request, evento_id: int):
     if not usuario_autenticado(request):
         return RedirectResponse(url="/login", status_code=303)
-    if not usuario_es_administrador(request):
+    if not usuario_puede_acceder_a_ruta(request):
         return RedirectResponse(url="/", status_code=303)
     eliminado = eliminar_evento_fuera(evento_id)
     return RedirectResponse(
@@ -8150,7 +8252,7 @@ def eliminar_evento_fuera_plantel(request: Request, evento_id: int):
 def finalizar_evento_fuera_plantel(request: Request, evento_id: int):
     if not usuario_autenticado(request):
         return RedirectResponse(url="/login", status_code=303)
-    if not usuario_es_administrador(request):
+    if not usuario_puede_acceder_a_ruta(request):
         return RedirectResponse(url="/", status_code=303)
     datos, familias = finalizar_evento_fuera(evento_id)
     if datos is None:
@@ -8223,7 +8325,7 @@ def api_registrar_asistencia_evento_fuera(request: Request, evento_id: int, payl
 def pagina_horario_clases(request: Request, guardado: int = 0, error: int = 0, grupo_id: int = 0, detalle: str = "", config_guardada: int = 0, config_error: int = 0):
     if not usuario_autenticado(request):
         return RedirectResponse(url="/login", status_code=303)
-    if not usuario_es_administrador(request):
+    if not usuario_puede_acceder_a_ruta(request):
         return RedirectResponse(url="/", status_code=303)
     return templates.TemplateResponse(
         request=request,
@@ -8249,6 +8351,8 @@ def pagina_horario_clases(request: Request, guardado: int = 0, error: int = 0, g
 def pagina_asistencia_maestro(request: Request, mensaje: str = ""):
     if not usuario_autenticado(request):
         return RedirectResponse(url="/login", status_code=303)
+    if not usuario_puede_acceder_a_ruta(request):
+        return RedirectResponse(url="/", status_code=303)
     if request.session.get("rol") != "docente":
         return RedirectResponse(url="/", status_code=303)
     return templates.TemplateResponse(
@@ -8269,7 +8373,7 @@ def pagina_asistencia_maestro(request: Request, mensaje: str = ""):
 def iniciar_asistencia_clase_ruta(request: Request, clase_id: int):
     if not usuario_autenticado(request):
         return RedirectResponse(url="/login", status_code=303)
-    if request.session.get("rol") not in ("docente", "administrador"):
+    if not usuario_puede_acceder_a_ruta(request):
         return RedirectResponse(url="/", status_code=303)
     resultado = iniciar_sesion_asistencia(
         clase_id, request.session["usuario_id"], usuario_es_administrador(request)
@@ -8284,7 +8388,7 @@ def iniciar_asistencia_clase_ruta(request: Request, clase_id: int):
 def pagina_asistencia_clase(request: Request, sesion_id: int):
     if not usuario_autenticado(request):
         return RedirectResponse(url="/login", status_code=303)
-    if request.session.get("rol") not in ("docente", "administrador"):
+    if not usuario_puede_acceder_a_ruta(request):
         return RedirectResponse(url="/", status_code=303)
     administrador = usuario_es_administrador(request)
     sesion = obtener_sesion_asistencia(sesion_id, request.session["usuario_id"], administrador)
@@ -8308,7 +8412,7 @@ def pagina_asistencia_clase(request: Request, sesion_id: int):
 def cerrar_asistencia_clase_ruta(request: Request, sesion_id: int):
     if not usuario_autenticado(request):
         return RedirectResponse(url="/login", status_code=303)
-    if request.session.get("rol") not in ("docente", "administrador"):
+    if not usuario_puede_acceder_a_ruta(request):
         return RedirectResponse(url="/", status_code=303)
     cerrar_sesion_asistencia(sesion_id, request.session["usuario_id"], usuario_es_administrador(request))
     return RedirectResponse(url=f"/clases/asistencia/{sesion_id}", status_code=303)
@@ -8318,7 +8422,7 @@ def cerrar_asistencia_clase_ruta(request: Request, sesion_id: int):
 def api_registrar_asistencia_clase(request: Request, sesion_id: int, payload: dict):
     if not usuario_autenticado(request):
         return JSONResponse({"ok": False, "mensaje": "La sesión expiró. Inicia sesión de nuevo."}, status_code=401)
-    if request.session.get("rol") not in ("docente", "administrador"):
+    if not usuario_puede_acceder_a_ruta(request):
         return JSONResponse({"ok": False, "mensaje": "No tienes acceso a esta función."}, status_code=403)
     try:
         resultado = registrar_asistencia_clase(
@@ -8345,7 +8449,7 @@ def crear_clase_horario_ruta(
 ):
     if not usuario_autenticado(request):
         return RedirectResponse(url="/login", status_code=303)
-    if not usuario_es_administrador(request):
+    if not usuario_puede_acceder_a_ruta(request):
         return RedirectResponse(url="/", status_code=303)
     try:
         celdas = json.loads(celdas_json)
@@ -8371,7 +8475,7 @@ def guardar_configuracion_tabla_ruta(
 ):
     if not usuario_autenticado(request):
         return RedirectResponse(url="/login", status_code=303)
-    if not usuario_es_administrador(request):
+    if not usuario_puede_acceder_a_ruta(request):
         return RedirectResponse(url="/", status_code=303)
     try:
         guardar_configuracion_tabla(grupo_id, hora_inicio, minutos_por_celda, cantidad_celdas)
@@ -8385,7 +8489,7 @@ def guardar_configuracion_tabla_ruta(
 def eliminar_clase_horario_ruta(request: Request, clase_id: int, grupo_id: int = Form(0)):
     if not usuario_autenticado(request):
         return RedirectResponse(url="/login", status_code=303)
-    if not usuario_es_administrador(request):
+    if not usuario_puede_acceder_a_ruta(request):
         return RedirectResponse(url="/", status_code=303)
     eliminar_clase_horario(clase_id)
     return RedirectResponse(url=f"/clases?grupo_id={grupo_id}", status_code=303)

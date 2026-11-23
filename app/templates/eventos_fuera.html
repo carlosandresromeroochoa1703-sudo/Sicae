@@ -37,7 +37,7 @@
             {% if evento_eliminado %}<div class="mail-saved" role="status">El evento y sus asistencias se eliminaron correctamente.</div>{% endif %}
             {% if evento_finalizado %}<div class="mail-saved" role="status">El evento se finalizó y se enviaron avisos a las familias.{% if correos_fallidos %} No se pudieron enviar {{ correos_fallidos }} correos; revisa la configuración SMTP y los correos de las fichas.{% endif %}</div>{% endif %}
             <div class="events-grid">
-                {% if request.session.get("rol") == "administrador" %}
+                {% if usuario_tiene_permiso(request, 'eventos') %}
                 <section class="event-panel">
                     <h3>Crear evento</h3>
                     {% if error %}<div class="error-note">No se pudo crear el evento. Revisa los datos y selecciona al menos un grupo.</div>{% endif %}
@@ -76,7 +76,7 @@
                                 <span class="badge {{ 'open' if evento.activo else 'closed' }}">{{ 'Abierto' if evento.activo else ('Finalizado' if evento.finalizado_en else 'Cerrado') }}</span>
                                 {% if evento.finalizado_en %}<span class="event-meta">Finalizó: {{ evento.finalizado_en.strftime('%H:%M') }}</span>{% endif %}
                                 <a class="event-link" href="/eventos-fuera/{{ evento.id }}/asistencia">{{ 'Tomar asistencia' if evento.activo else 'Ver registro' }}</a>
-                                {% if request.session.get("rol") == "administrador" %}
+                                {% if usuario_tiene_permiso(request, 'eventos') %}
                                     {% if not evento.finalizado_en %}
                                     <form method="post" action="/eventos-fuera/{{ evento.id }}/finalizar" onsubmit="return confirm('¿Finalizar este evento y enviar un correo a las familias de los alumnos con asistencia registrada?')"><button class="finish-button" type="submit">Finalizar evento</button></form>
                                     <form method="post" action="/eventos-fuera/{{ evento.id }}/estado">
@@ -93,7 +93,7 @@
                     {% else %}<div class="empty">Todavía no hay eventos. Crea uno para comenzar a pasar lista.</div>{% endif %}
                 </section>
             </div>
-            {% if request.session.get("rol") == "administrador" %}<details class="event-panel mail-settings">
+            {% if usuario_tiene_permiso(request, 'eventos') %}<details class="event-panel mail-settings">
                 <summary>Configurar correo para padres de familia</summary>
                 <p>Este aviso se envía cuando se registra por primera vez la asistencia del alumno al evento. Usa el correo guardado en la ficha del alumno y mantiene un mensaje independiente de los avisos de entrada y salida del plantel. Al finalizar un evento también se envía un aviso estándar con la hora de finalización a las familias de los alumnos presentes.</p>
                 {% if correo_guardado %}<div class="mail-saved" role="status">La configuración del correo para eventos se guardó correctamente.</div>{% endif %}

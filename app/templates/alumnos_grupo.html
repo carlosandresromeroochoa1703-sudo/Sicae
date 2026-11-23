@@ -290,7 +290,7 @@
                 </a>
 
 
-                {% if request.session.get("rol") == "administrador" %}
+                {% if usuario_tiene_permiso(request, 'alumnos') %}
                 <a
                     href="/alumnos/grupo/{{ grupo.id }}/editar-masivo"
                     class="btn btn-primary"
@@ -353,7 +353,7 @@
                      GENERAR CREDENCIALES
                      ====================================== -->
 
-                {% if alumnos %}
+                {% if alumnos and usuario_tiene_permiso(request, 'credenciales') %}
 
                     <a
                         href="/credencial/imprimir/grupo/{{ grupo.id }}"
@@ -466,7 +466,7 @@
                 onsubmit="return confirmarEliminacionSeleccionados();"
             >
 
-                {% if request.session.get("rol") == "administrador" %}<div style="margin: 15px 0;">
+                {% if usuario_tiene_permiso(request, 'alumnos') %}<div style="margin: 15px 0;">
 
                     <button
                         type="submit"
@@ -484,7 +484,7 @@
 
                     <tr>
 
-                        {% if request.session.get("rol") == "administrador" %}<th>
+                        {% if usuario_tiene_permiso(request, 'alumnos') %}<th>
                             <input
                                 type="checkbox"
                                 id="seleccionarTodos"
@@ -534,7 +534,7 @@
 
                         <!-- SELECCIONAR -->
 
-                        {% if request.session.get("rol") == "administrador" %}<td>
+                        {% if usuario_tiene_permiso(request, 'alumnos') %}<td>
                             <input
                                 type="checkbox"
                                 name="alumnos_ids"
@@ -671,7 +671,7 @@
 
                                 <!-- ELIMINAR -->
 
-                                {% if request.session.get("rol") == "administrador" %}<a
+                                {% if usuario_tiene_permiso(request, 'alumnos') %}<a
                                     href="/alumnos/{{ alumno.id }}/eliminar"
                                     class="btn btn-danger"
                                     onclick="return confirm('¿Seguro que deseas desactivar este alumno?');"
@@ -719,7 +719,7 @@
 
                 <br>
 
-                {% if request.session.get("rol") == "administrador" %}<a
+                {% if usuario_tiene_permiso(request, 'alumnos') %}<a
                     href="/alumnos/nuevo?grupo_id={{ grupo.id }}"
                     class="btn btn-primary"
                 >

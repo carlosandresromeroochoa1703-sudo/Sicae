@@ -47,6 +47,32 @@ def crear_tablas():
                         sql
                     )
 
+                cursor.execute("""
+                    SELECT EXISTS (
+                        SELECT 1 FROM information_schema.columns
+                        WHERE table_schema = current_schema()
+                          AND table_name = 'usuarios'
+                          AND column_name = 'permisos'
+                    );
+                """)
+                permisos_existian = cursor.fetchone()[0]
+                cursor.execute("""
+                    ALTER TABLE usuarios
+                    ADD COLUMN IF NOT EXISTS permisos JSONB NOT NULL DEFAULT '[]'::jsonb;
+                """)
+                if not permisos_existian:
+                    cursor.execute("""
+                        UPDATE usuarios
+                        SET permisos = CASE
+                            WHEN rol = 'operador' THEN to_jsonb(ARRAY[
+                                'inicio', 'asistencias', 'alumnos', 'grupos',
+                                'reportes', 'eventos', 'clases'
+                            ]::text[])
+                            WHEN rol = 'docente' THEN '["clases"]'::jsonb
+                            ELSE '[]'::jsonb
+                        END;
+                    """)
+
                 # Acelera la consulta del último movimiento durante escaneos
                 # simultáneos. Los índices también se aplican a instalaciones
                 # existentes porque IF NOT EXISTS hace segura la migración.

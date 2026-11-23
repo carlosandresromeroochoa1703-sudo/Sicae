@@ -245,7 +245,7 @@
                 </a>
 
 
-                {% if request.session.get("rol") == "administrador" %}<a
+                {% if usuario_tiene_permiso(request, 'grupos') %}<a
                     href="/grupos/nuevo"
                     class="btn btn-primary"
                 >
@@ -417,7 +417,7 @@
 
                                         <!-- EDITAR -->
 
-                                        {% if request.session.get("rol") == "administrador" %}<a
+                                        {% if usuario_tiene_permiso(request, 'grupos') %}<a
                                             href="/grupos/{{ grupo.id }}/editar"
                                             class="btn btn-warning"
                                         >
@@ -476,7 +476,7 @@
                     <br>
 
 
-                    {% if request.session.get("rol") == "administrador" %}<a
+                    {% if usuario_tiene_permiso(request, 'grupos') %}<a
                         href="/grupos/nuevo"
                         class="btn btn-primary"
                     >

@@ -27,6 +27,8 @@ TABLAS = {
                 NOT NULL
                 DEFAULT 'operador',
 
+            permisos JSONB NOT NULL DEFAULT '[]'::jsonb,
+
             activo BOOLEAN
                 NOT NULL
                 DEFAULT TRUE,

@@ -644,7 +644,7 @@
             <!-- ACCIONES -->
             <!-- ================================================= -->
 
-            {% if request.session.get("rol") == "administrador" %}
+            {% if usuario_tiene_permiso(request, 'alumnos') %}
             <h3 class="section-title">
                 Acciones
             </h3>

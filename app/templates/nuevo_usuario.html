@@ -259,6 +259,8 @@
             <div role="alert" style="margin:0 0 16px;padding:12px 15px;border-radius:9px;background:#fee2e2;color:#991b1b">Selecciona un docente activo que todavía no tenga una cuenta vinculada.</div>
             {% elif error == 'usuario' %}
             <div role="alert" style="margin:0 0 16px;padding:12px 15px;border-radius:9px;background:#fee2e2;color:#991b1b">Ese nombre de usuario ya existe. Elige otro.</div>
+            {% elif error == 'permisos' %}
+            <div role="alert" style="margin:0 0 16px;padding:12px 15px;border-radius:9px;background:#fee2e2;color:#991b1b">Selecciona al menos un permiso válido para la cuenta.</div>
             {% endif %}
 
 
@@ -386,7 +388,7 @@
 
                             <span class="form-help">
 
-                                Administrador: acceso completo. Operador: accesos y asistencias del día. Docente: solo sus propias clases.
+                                El rol asigna una base de acceso. Puedes personalizar las secciones en “Permisos y funciones”.
 
                             </span>
 
@@ -405,6 +407,20 @@
                             <span class="form-help">Esta asociación determina qué clases podrá ver y tomar asistencia esta cuenta.</span>
                             {% if not maestros %}<span class="form-help">Primero registra o activa al maestro desde <a href="/administracion/personal/nuevo">Personal → Nuevo personal</a>, seleccionando el tipo “Docente”.</span>{% endif %}
                         </div>
+
+                        <fieldset class="form-group full" style="border:1px solid #dbe3ef;border-radius:10px;padding:16px">
+                            <legend style="font-weight:700;padding:0 6px">Permisos y funciones</legend>
+                            <span class="form-help">Elige las secciones a las que podrá entrar este usuario. Administrador conserva acceso completo.</span>
+                            <span class="form-help">Los cambios de permisos se aplican cuando el usuario vuelva a iniciar sesión.</span>
+                            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px;margin-top:12px">
+                                {% for permiso, etiqueta in permisos_disponibles.items() %}
+                                <label style="display:flex;align-items:center;gap:9px;padding:9px;border-radius:7px;background:#f8fafc">
+                                    <input type="checkbox" name="permisos" value="{{ permiso }}" {% if permiso in permisos_seleccionados %}checked{% endif %}>
+                                    {{ etiqueta }}
+                                </label>
+                                {% endfor %}
+                            </div>
+                        </fieldset>
 
 
                     </div>
