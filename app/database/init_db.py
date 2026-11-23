@@ -199,10 +199,6 @@ def crear_tablas():
                 if usuario_inicial and password_inicial:
                     cursor.execute("SELECT EXISTS (SELECT 1 FROM usuarios);")
                     if not cursor.fetchone()[0]:
-                        if len(password_inicial) < 12:
-                            raise ValueError(
-                                "SICAE_INITIAL_ADMIN_PASSWORD debe tener al menos 12 caracteres."
-                            )
                         if len(password_inicial.encode("utf-8")) > 72:
                             raise ValueError(
                                 "SICAE_INITIAL_ADMIN_PASSWORD no puede exceder 72 bytes."

@@ -52,8 +52,6 @@ def validar_contrasena(password):
     if not isinstance(password, str):
         raise ValueError("La contraseña no es válida.")
     longitud_bytes = len(password.encode("utf-8"))
-    if len(password) < 12:
-        raise ValueError("La contraseña debe tener al menos 12 caracteres.")
     if longitud_bytes > 72:
         raise ValueError("La contraseña no puede superar 72 bytes.")
 

@@ -219,7 +219,7 @@
             {% elif error == 'permisos' %}
             <div role="alert" style="margin:0 0 16px;padding:12px 15px;border-radius:9px;background:#fee2e2;color:#991b1b">Selecciona al menos un permiso válido para la cuenta.</div>
             {% elif error == 'contrasena' %}
-            <div role="alert" style="margin:0 0 16px;padding:12px 15px;border-radius:9px;background:#fee2e2;color:#991b1b">La nueva contraseña debe tener al menos 12 caracteres y no superar 72 bytes.</div>
+            <div role="alert" style="margin:0 0 16px;padding:12px 15px;border-radius:9px;background:#fee2e2;color:#991b1b">La nueva contraseña no puede superar 72 bytes.</div>
             {% endif %}
 
 
@@ -355,14 +355,13 @@
                                 name="password"
                                 type="password"
                                 placeholder="Dejar vacío para conservar la actual"
-                                minlength="12"
                                 maxlength="72"
                                 autocomplete="new-password"
                                 style="flex:1"
                             >
                             <button type="button" class="button cancel-button" data-toggle-password="password" aria-controls="password" aria-label="Mostrar nueva contraseña">Mostrar</button>
                         </div>
-                        <span class="form-help">La contraseña actual no se puede consultar porque se guarda protegida con hash. Escribe una nueva para reemplazarla; déjala vacía para conservarla. Usa al menos 12 caracteres. Puedes mostrarla mientras la escribes.</span>
+                        <span class="form-help">La contraseña actual no se puede consultar porque se guarda protegida con hash. Escribe una nueva para reemplazarla; déjala vacía para conservarla. Puedes mostrarla mientras la escribes.</span>
 
                     </div>
 

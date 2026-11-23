@@ -262,7 +262,7 @@
             {% elif error == 'permisos' %}
             <div role="alert" style="margin:0 0 16px;padding:12px 15px;border-radius:9px;background:#fee2e2;color:#991b1b">Selecciona al menos un permiso válido para la cuenta.</div>
             {% elif error == 'contrasena' %}
-            <div role="alert" style="margin:0 0 16px;padding:12px 15px;border-radius:9px;background:#fee2e2;color:#991b1b">La contraseña debe tener al menos 12 caracteres y no superar 72 bytes.</div>
+            <div role="alert" style="margin:0 0 16px;padding:12px 15px;border-radius:9px;background:#fee2e2;color:#991b1b">La contraseña no puede superar 72 bytes.</div>
             {% endif %}
 
 
@@ -348,7 +348,6 @@
                                     type="password"
                                     id="password"
                                     name="password"
-                                    minlength="12"
                                     maxlength="72"
                                     required
                                     autocomplete="new-password"
@@ -359,7 +358,7 @@
 
                             <span class="form-help">
 
-                                Usa al menos 12 caracteres. La contraseña se guarda protegida y puedes mostrarla mientras la escribes.
+                                La contraseña se guarda protegida y puedes mostrarla mientras la escribes.
 
                             </span>
 
