@@ -48,6 +48,16 @@ def _validar_rol(rol):
         raise ValueError("Selecciona un rol válido para el usuario.")
 
 
+def validar_contrasena(password):
+    if not isinstance(password, str):
+        raise ValueError("La contraseña no es válida.")
+    longitud_bytes = len(password.encode("utf-8"))
+    if len(password) < 12:
+        raise ValueError("La contraseña debe tener al menos 12 caracteres.")
+    if longitud_bytes > 72:
+        raise ValueError("La contraseña no puede superar 72 bytes.")
+
+
 def _asegurar_vinculo_docente(cursor):
     cursor.execute("""
         ALTER TABLE usuarios
@@ -95,6 +105,7 @@ def obtener_usuarios():
 
 def crear_usuario(usuario, password, nombre, rol, personal_id=None, permisos=None):
     _validar_rol(rol)
+    validar_contrasena(password)
     permisos = normalizar_permisos(permisos, rol)
     if rol == "docente" and not personal_id:
         raise ValueError("Selecciona el registro de personal correspondiente al maestro.")
@@ -143,6 +154,7 @@ def actualizar_usuario(usuario_id, usuario, nombre, rol, password=None, personal
             """
             valores.append(Jsonb(permisos))
             if password:
+                validar_contrasena(password)
                 password_hash = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
                 consulta += ", password = %s"
                 valores.append(password_hash)

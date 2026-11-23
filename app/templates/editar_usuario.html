@@ -218,6 +218,8 @@
             <div role="alert" style="margin:0 0 16px;padding:12px 15px;border-radius:9px;background:#fee2e2;color:#991b1b">Ese nombre de usuario ya existe. Elige otro.</div>
             {% elif error == 'permisos' %}
             <div role="alert" style="margin:0 0 16px;padding:12px 15px;border-radius:9px;background:#fee2e2;color:#991b1b">Selecciona al menos un permiso válido para la cuenta.</div>
+            {% elif error == 'contrasena' %}
+            <div role="alert" style="margin:0 0 16px;padding:12px 15px;border-radius:9px;background:#fee2e2;color:#991b1b">La nueva contraseña debe tener al menos 12 caracteres y no superar 72 bytes.</div>
             {% endif %}
 
 
@@ -347,13 +349,20 @@
                         <label for="password">
                             Nueva contraseña
                         </label>
-
-                        <input
-                            id="password"
-                            name="password"
-                            type="password"
-                            placeholder="Dejar vacío para conservar la actual"
-                        >
+                        <div style="display:flex;gap:8px;align-items:center">
+                            <input
+                                id="password"
+                                name="password"
+                                type="password"
+                                placeholder="Dejar vacío para conservar la actual"
+                                minlength="12"
+                                maxlength="72"
+                                autocomplete="new-password"
+                                style="flex:1"
+                            >
+                            <button type="button" class="button cancel-button" data-toggle-password="password" aria-controls="password" aria-label="Mostrar nueva contraseña">Mostrar</button>
+                        </div>
+                        <span class="form-help">La contraseña actual no se puede consultar porque se guarda protegida con hash. Escribe una nueva para reemplazarla; déjala vacía para conservarla. Usa al menos 12 caracteres. Puedes mostrarla mientras la escribes.</span>
 
                     </div>
 
@@ -397,6 +406,15 @@
 
 
     <script>
+        document.querySelectorAll("[data-toggle-password]").forEach((button) => {
+            button.addEventListener("click", () => {
+                const input = document.getElementById(button.dataset.togglePassword);
+                const mostrar = input.type === "password";
+                input.type = mostrar ? "text" : "password";
+                button.textContent = mostrar ? "Ocultar" : "Mostrar";
+                button.setAttribute("aria-label", `${mostrar ? "Ocultar" : "Mostrar"} nueva contraseña`);
+            });
+        });
         const roleSelect = document.getElementById("rol");
         const teacherSelect = document.getElementById("personal_id");
         const teacherGroup = document.getElementById("docentePersonalGroup");

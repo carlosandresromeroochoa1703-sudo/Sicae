@@ -261,6 +261,8 @@
             <div role="alert" style="margin:0 0 16px;padding:12px 15px;border-radius:9px;background:#fee2e2;color:#991b1b">Ese nombre de usuario ya existe. Elige otro.</div>
             {% elif error == 'permisos' %}
             <div role="alert" style="margin:0 0 16px;padding:12px 15px;border-radius:9px;background:#fee2e2;color:#991b1b">Selecciona al menos un permiso válido para la cuenta.</div>
+            {% elif error == 'contrasena' %}
+            <div role="alert" style="margin:0 0 16px;padding:12px 15px;border-radius:9px;background:#fee2e2;color:#991b1b">La contraseña debe tener al menos 12 caracteres y no superar 72 bytes.</div>
             {% endif %}
 
 
@@ -341,18 +343,23 @@
 
                             </label>
 
-                            <input
-                                type="password"
-                                id="password"
-                                name="password"
-                                maxlength="255"
-                                required
-                                autocomplete="new-password"
-                            >
+                            <div style="display:flex;gap:8px;align-items:center">
+                                <input
+                                    type="password"
+                                    id="password"
+                                    name="password"
+                                    minlength="12"
+                                    maxlength="72"
+                                    required
+                                    autocomplete="new-password"
+                                    style="flex:1"
+                                >
+                                <button type="button" class="form-button secondary" data-toggle-password="password" aria-controls="password" aria-label="Mostrar contraseña">Mostrar</button>
+                            </div>
 
                             <span class="form-help">
 
-                                Contraseña para acceder al sistema.
+                                Usa al menos 12 caracteres. La contraseña se guarda protegida y puedes mostrarla mientras la escribes.
 
                             </span>
 
@@ -469,6 +476,15 @@
 
 
     <script>
+        document.querySelectorAll("[data-toggle-password]").forEach((button) => {
+            button.addEventListener("click", () => {
+                const input = document.getElementById(button.dataset.togglePassword);
+                const mostrar = input.type === "password";
+                input.type = mostrar ? "text" : "password";
+                button.textContent = mostrar ? "Ocultar" : "Mostrar";
+                button.setAttribute("aria-label", `${mostrar ? "Ocultar" : "Mostrar"} contraseña`);
+            });
+        });
         const roleSelect = document.getElementById("rol");
         const teacherSelect = document.getElementById("personal_id");
         const teacherGroup = document.getElementById("docentePersonalGroup");

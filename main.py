@@ -3080,7 +3080,7 @@ def guardar_edicion_usuario(
 
             permisos=permisos,
 
-            password=password.strip() or None
+            password=password or None
 
         )
 
@@ -3105,7 +3105,8 @@ def guardar_edicion_usuario(
         )
 
     except ValueError as error:
-        tipo_error = "docente" if "docente" in str(error).lower() else "permisos"
+        mensaje_error = str(error).lower()
+        tipo_error = "docente" if "docente" in mensaje_error else "contrasena" if "contraseña" in mensaje_error else "permisos"
         return RedirectResponse(
             url=f"/administracion/usuarios/{usuario_id}/editar?error={tipo_error}",
             status_code=303,
@@ -3181,7 +3182,8 @@ def guardar_nuevo_usuario(
         )
 
     except ValueError as error:
-        tipo_error = "docente" if "docente" in str(error).lower() else "permisos"
+        mensaje_error = str(error).lower()
+        tipo_error = "docente" if "docente" in mensaje_error else "contrasena" if "contraseña" in mensaje_error else "permisos"
         return RedirectResponse(
             url=f"/administracion/usuarios/nuevo?error={tipo_error}",
             status_code=303,
