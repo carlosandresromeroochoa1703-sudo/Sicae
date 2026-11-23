@@ -11,7 +11,8 @@ from fastapi.responses import (
     HTMLResponse,
     RedirectResponse,
     FileResponse,
-    JSONResponse
+    JSONResponse,
+    StreamingResponse
 )
 from fastapi.encoders import jsonable_encoder
 
@@ -6410,6 +6411,62 @@ async def guardar_nuevo_alumno(
 # ============================================================
 # IMPORTAR ALUMNOS DESDE EXCEL
 # ============================================================
+
+@app.get("/alumnos/grupo/{grupo_id}/plantilla-excel")
+def descargar_plantilla_alumnos_excel(request: Request, grupo_id: int):
+    if not usuario_es_administrador(request):
+        return RedirectResponse(url="/alumnos", status_code=303)
+
+    grupo = next((item for item in obtener_grupos() if item["id"] == grupo_id), None)
+    if grupo is None:
+        return RedirectResponse(url="/alumnos", status_code=303)
+
+    encabezados = [
+        "matricula",
+        "nombre",
+        "apellido_paterno",
+        "apellido_materno",
+        "fecha_nacimiento",
+        "numero_seguro_social",
+        "nombre_padre",
+        "curp",
+        "correo",
+        "telefono",
+    ]
+    libro = Workbook()
+    hoja = libro.active
+    hoja.title = "Alumnos"
+    hoja.append(encabezados)
+    hoja.freeze_panes = "A2"
+    hoja.auto_filter.ref = "A1:J101"
+    for celda in hoja[1]:
+        celda.font = Font(bold=True, color="FFFFFF")
+        celda.fill = PatternFill("solid", fgColor="1D4ED8")
+        celda.alignment = Alignment(horizontal="center")
+    anchos = [18, 24, 24, 24, 20, 24, 30, 22, 32, 20]
+    for indice, ancho in enumerate(anchos, start=1):
+        hoja.column_dimensions[get_column_letter(indice)].width = ancho
+    borde_celda = Border(
+        left=Side(style="thin", color="D7DEE8"),
+        right=Side(style="thin", color="D7DEE8"),
+        top=Side(style="thin", color="D7DEE8"),
+        bottom=Side(style="thin", color="D7DEE8"),
+    )
+    for fila in range(2, 102):
+        for columna in range(1, len(encabezados) + 1):
+            celda = hoja.cell(row=fila, column=columna)
+            celda.border = borde_celda
+            celda.number_format = "yyyy-mm-dd" if columna == 5 else "@"
+
+    salida = io.BytesIO()
+    libro.save(salida)
+    salida.seek(0)
+    nombre_archivo = f"plantilla_alumnos_grupo_{grupo_id}.xlsx"
+    return StreamingResponse(
+        salida,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f'attachment; filename="{nombre_archivo}"'},
+    )
 
 @app.post(
     "/alumnos/grupo/{grupo_id}/importar-excel"

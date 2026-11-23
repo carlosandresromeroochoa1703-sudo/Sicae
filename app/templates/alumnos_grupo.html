@@ -314,6 +314,13 @@
                      IMPORTAR ALUMNOS DESDE EXCEL
                      ====================================== -->
 
+                <a
+                    href="/alumnos/grupo/{{ grupo.id }}/plantilla-excel"
+                    class="btn btn-secondary"
+                >
+                    📄 Descargar plantilla Excel
+                </a>
+
                 <form
                     action="/alumnos/grupo/{{ grupo.id }}/importar-excel"
                     method="post"
