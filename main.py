@@ -68,6 +68,7 @@ from app.services.alumnos_service import (
     eliminar_alumnos,
     crear_alumno,
     actualizar_alumno,
+    actualizar_alumnos_en_grupo,
     importar_alumno_excel
 )
 
@@ -1709,6 +1710,72 @@ def alumnos_grupo(
         }
 
     )
+
+
+@app.get("/alumnos/grupo/{grupo_id}/editar-masivo")
+def editar_alumnos_masivo(request: Request, grupo_id: int):
+    if not usuario_es_administrador(request):
+        return RedirectResponse(url="/alumnos", status_code=303)
+
+    grupo = next((item for item in obtener_grupos() if item["id"] == grupo_id), None)
+    if grupo is None:
+        return RedirectResponse(url="/alumnos", status_code=303)
+
+    return templates.TemplateResponse(
+        request=request,
+        name="editar_alumnos_masivo.html",
+        context={
+            "grupo": grupo,
+            "alumnos": obtener_alumnos_por_grupo(grupo_id),
+        },
+    )
+
+
+@app.post("/api/alumnos/grupo/{grupo_id}/editar-masivo")
+async def guardar_alumnos_masivo(request: Request, grupo_id: int):
+    if not usuario_es_administrador(request):
+        return JSONResponse({"ok": False, "mensaje": "Se requiere una cuenta administradora."}, status_code=403)
+
+    try:
+        payload = await request.json()
+        if not isinstance(payload, dict):
+            raise ValueError("Los datos enviados no tienen un formato válido.")
+
+        resultado = actualizar_alumnos_en_grupo(grupo_id, payload.get("alumnos"))
+
+        errores_qr = []
+        qr_actualizados = []
+        try:
+            for cambio in resultado["cambios_matricula"]:
+                try:
+                    qr_actualizados.append((cambio["id"], generar_qr_alumno(cambio["matricula"])))
+                except Exception as error:
+                    errores_qr.append(str(cambio["matricula"]))
+                    print("No se pudo regenerar el QR durante edición masiva:", error)
+
+            if qr_actualizados:
+                with psycopg.connect(**DATABASE_CONFIG) as conexion:
+                    with conexion.cursor() as cursor:
+                        cursor.executemany(
+                            "UPDATE alumnos SET qr = %s WHERE id = %s AND grupo_id = %s AND activo = TRUE;",
+                            [(qr, alumno_id, grupo_id) for alumno_id, qr in qr_actualizados],
+                        )
+                    conexion.commit()
+        except Exception as error:
+            errores_qr.append("actualización")
+            print("No se pudo guardar la referencia QR durante edición masiva:", error)
+
+        mensaje = f"Se guardaron los datos de {resultado['actualizados']} alumnos."
+        if errores_qr:
+            mensaje += " No se pudieron regenerar algunos códigos QR; revisa los registros del servidor."
+        return JSONResponse({"ok": True, "mensaje": mensaje})
+    except ValueError as error:
+        return JSONResponse({"ok": False, "mensaje": str(error)}, status_code=400)
+    except UniqueViolation:
+        return JSONResponse({"ok": False, "mensaje": "Una matrícula ya está asignada a otro alumno. No se guardaron los cambios."}, status_code=409)
+    except Exception as error:
+        print("Error guardando alumnos en bloque:", error)
+        return JSONResponse({"ok": False, "mensaje": "No se pudieron guardar los cambios. Intenta nuevamente."}, status_code=500)
 
 
 # ============================================================

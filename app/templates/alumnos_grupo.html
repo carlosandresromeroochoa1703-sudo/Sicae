@@ -291,6 +291,13 @@
 
 
                 {% if request.session.get("rol") == "administrador" %}
+                <a
+                    href="/alumnos/grupo/{{ grupo.id }}/editar-masivo"
+                    class="btn btn-primary"
+                >
+                    ✏️ Editar alumnos en bloque
+                </a>
+
                 <!-- REGISTRAR ALUMNO -->
 
                 <a

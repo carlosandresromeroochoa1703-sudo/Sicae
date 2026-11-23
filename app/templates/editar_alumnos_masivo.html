@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar alumnos · {{ grupo.nombre_grupo }} · SICAE WEB</title>
+    <link rel="stylesheet" href="/static/css/style.css?v=20261018-3">
+    <style>
+        .bulk-header{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;margin-bottom:20px}
+        .bulk-header h1{margin:0;font-size:27px}.bulk-header p{color:#64748b;margin:8px 0 0}
+        .bulk-actions{display:flex;gap:10px;flex-wrap:wrap}.bulk-button{border:0;border-radius:8px;padding:11px 16px;font-weight:700;text-decoration:none;cursor:pointer;background:#2563eb;color:white}
+        .bulk-button.secondary{background:#e2e8f0;color:#1e293b}.bulk-button:disabled{opacity:.6;cursor:wait}
+        .bulk-note,.bulk-status{padding:12px 15px;border-radius:9px;margin:0 0 14px;background:#eff6ff;color:#1e40af}
+        .bulk-status[hidden]{display:none}.bulk-status.error{background:#fef2f2;color:#991b1b}.bulk-status.success{background:#f0fdf4;color:#166534}
+        .table-wrap{background:#fff;border-radius:12px;box-shadow:0 3px 12px #00000012;overflow:auto;max-height:calc(100vh - 250px)}
+        table{border-collapse:separate;border-spacing:0;min-width:2100px;width:100%}
+        th{position:sticky;top:0;z-index:2;background:#f1f5f9;text-align:left;padding:11px 9px;font-size:13px;color:#334155;border-bottom:1px solid #cbd5e1}
+        td{padding:7px;border-bottom:1px solid #e2e8f0}tbody tr:hover{background:#f8fafc}
+        .row-name{position:sticky;left:0;z-index:1;background:#fff;min-width:220px;font-weight:700}
+        tbody tr:hover .row-name{background:#f8fafc}
+        td input{box-sizing:border-box;width:100%;min-width:130px;padding:8px;border:1px solid #cbd5e1;border-radius:6px;font:inherit;font-size:14px;background:white}
+        td input:focus{outline:2px solid #93c5fd;border-color:#2563eb}.empty-state{background:#fff;border-radius:12px;padding:40px;text-align:center;color:#64748b}
+        @media(max-width:760px){.bulk-header{flex-direction:column}.bulk-actions{width:100%}.bulk-actions .bulk-button{flex:1;text-align:center}.table-wrap{max-height:none}}
+    </style>
+</head>
+<body>
+    {% include "_sidebar.html" %}
+    <main class="content">
+        <header class="bulk-header">
+            <div>
+                <h1>Editar alumnos en bloque</h1>
+                <p>{{ grupo.nombre_grupo }} · {{ alumnos|length }} alumnos</p>
+            </div>
+            <div class="bulk-actions">
+                <a class="bulk-button secondary" href="/alumnos/grupo/{{ grupo.id }}">← Volver al grupo</a>
+                {% if alumnos %}<button id="saveBulk" class="bulk-button" type="button">Guardar cambios</button>{% endif %}
+            </div>
+        </header>
+
+        <p class="bulk-note">Edita cualquier celda. Los campos vacíos también están disponibles; déjalos en blanco si no tienes ese dato. Los cambios se guardan juntos para todos los alumnos de este grupo.</p>
+        <div id="bulkStatus" class="bulk-status" role="status" aria-live="polite" hidden></div>
+
+        {% if alumnos %}
+        <div class="table-wrap">
+            <table id="studentsTable">
+                <thead><tr>
+                    <th>Alumno</th><th>Matrícula *</th><th>Nombre *</th><th>Apellido paterno *</th><th>Apellido materno</th>
+                    <th>Fecha de nacimiento</th><th>Número de seguro social</th><th>Nombre del padre</th><th>CURP</th><th>Correo</th><th>Teléfono</th>
+                </tr></thead>
+                <tbody>
+                {% for alumno in alumnos %}
+                    <tr data-student-id="{{ alumno.id }}">
+                        <td class="row-name">{{ alumno.nombre }} {{ alumno.apellido_paterno }} {{ alumno.apellido_materno or '' }}</td>
+                        <td><input data-field="matricula" aria-label="Matrícula de {{ alumno.nombre }}" maxlength="50" required value="{{ alumno.matricula or '' }}"></td>
+                        <td><input data-field="nombre" aria-label="Nombre de {{ alumno.nombre }}" maxlength="100" required value="{{ alumno.nombre or '' }}"></td>
+                        <td><input data-field="apellido_paterno" aria-label="Apellido paterno de {{ alumno.nombre }}" maxlength="100" required value="{{ alumno.apellido_paterno or '' }}"></td>
+                        <td><input data-field="apellido_materno" aria-label="Apellido materno de {{ alumno.nombre }}" maxlength="100" value="{{ alumno.apellido_materno or '' }}"></td>
+                        <td><input data-field="fecha_nacimiento" aria-label="Fecha de nacimiento de {{ alumno.nombre }}" type="date" value="{{ alumno.fecha_nacimiento.isoformat() if alumno.fecha_nacimiento else '' }}"></td>
+                        <td><input data-field="numero_seguro_social" aria-label="Número de seguro social de {{ alumno.nombre }}" maxlength="30" value="{{ alumno.numero_seguro_social or '' }}"></td>
+                        <td><input data-field="nombre_padre" aria-label="Nombre del padre de {{ alumno.nombre }}" maxlength="200" value="{{ alumno.nombre_padre or '' }}"></td>
+                        <td><input data-field="curp" aria-label="CURP de {{ alumno.nombre }}" maxlength="18" style="text-transform:uppercase" value="{{ alumno.curp or '' }}"></td>
+                        <td><input data-field="correo" aria-label="Correo de {{ alumno.nombre }}" type="email" maxlength="150" value="{{ alumno.correo or '' }}"></td>
+                        <td><input data-field="telefono" aria-label="Teléfono de {{ alumno.nombre }}" type="tel" maxlength="30" value="{{ alumno.telefono or '' }}"></td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+            <div class="empty-state">Este grupo no tiene alumnos activos para editar.</div>
+        {% endif %}
+    </main>
+    <script>
+    (() => {
+        const button = document.getElementById("saveBulk");
+        if (!button) return;
+        const status = document.getElementById("bulkStatus");
+        const showStatus = (message, kind) => {
+            status.textContent = message;
+            status.className = "bulk-status " + kind;
+            status.hidden = false;
+            status.scrollIntoView({behavior: "smooth", block: "nearest"});
+        };
+        button.addEventListener("click", async () => {
+            const rows = [...document.querySelectorAll("#studentsTable tbody tr")];
+            const invalid = rows.flatMap(row => [...row.querySelectorAll("input")]).find(input => !input.checkValidity());
+            if (invalid) { invalid.reportValidity(); invalid.focus(); return; }
+            const alumnos = rows.map(row => {
+                const alumno = {id: Number(row.dataset.studentId)};
+                row.querySelectorAll("input[data-field]").forEach(input => alumno[input.dataset.field] = input.value.trim());
+                return alumno;
+            });
+            button.disabled = true;
+            button.textContent = "Guardando…";
+            try {
+                const response = await fetch("/api/alumnos/grupo/{{ grupo.id }}/editar-masivo", {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    credentials: "same-origin",
+                    body: JSON.stringify({alumnos})
+                });
+                const result = await response.json();
+                if (!response.ok || !result.ok) throw new Error(result.mensaje || "No se pudieron guardar los cambios.");
+                showStatus(result.mensaje, "success");
+            } catch (error) {
+                showStatus(error.message || "No se pudo conectar con SICAE.", "error");
+            } finally {
+                button.disabled = false;
+                button.textContent = "Guardar cambios";
+            }
+        });
+    })();
+    </script>
+</body>
+</html>

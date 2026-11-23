@@ -585,6 +585,112 @@ def actualizar_alumno(
         conexion.commit()
 
 
+def actualizar_alumnos_en_grupo(grupo_id, alumnos):
+    """Actualiza en una sola transacción los datos de alumnos activos del grupo."""
+    if not isinstance(alumnos, list) or not alumnos:
+        raise ValueError("No hay cambios de alumnos para guardar.")
+    if len(alumnos) > 5000:
+        raise ValueError("El grupo excede el máximo de 5000 alumnos por guardado.")
+
+    campos_texto = {
+        "matricula": 50,
+        "nombre": 100,
+        "apellido_paterno": 100,
+        "apellido_materno": 100,
+        "numero_seguro_social": 30,
+        "nombre_padre": 200,
+        "curp": 18,
+        "correo": 150,
+        "telefono": 30,
+    }
+    filas = []
+    ids = set()
+
+    for alumno in alumnos:
+        if not isinstance(alumno, dict):
+            raise ValueError("Los datos de un alumno tienen un formato no válido.")
+        try:
+            alumno_id = int(alumno.get("id"))
+        except (TypeError, ValueError):
+            raise ValueError("Hay un alumno con identificador no válido.")
+        if alumno_id <= 0 or alumno_id in ids:
+            raise ValueError("Hay identificadores de alumno inválidos o repetidos.")
+        ids.add(alumno_id)
+
+        valores = {}
+        for campo, maximo in campos_texto.items():
+            valor = str(alumno.get(campo) or "").strip()
+            if campo in {"nombre", "apellido_paterno", "matricula"} and not valor:
+                raise ValueError(f"El campo {campo.replace('_', ' ')} es obligatorio.")
+            if len(valor) > maximo:
+                raise ValueError(f"El campo {campo.replace('_', ' ')} excede {maximo} caracteres.")
+            valores[campo] = valor or None
+
+        valores["curp"] = (valores["curp"] or "").upper() or None
+        fecha = str(alumno.get("fecha_nacimiento") or "").strip()
+        try:
+            valores["fecha_nacimiento"] = date.fromisoformat(fecha) if fecha else None
+        except ValueError:
+            raise ValueError("Una fecha de nacimiento tiene formato no válido.")
+
+        filas.append((alumno_id, valores))
+
+    matriculas = [valores["matricula"] for _, valores in filas]
+    if len(matriculas) != len(set(matriculas)):
+        raise ValueError("Hay matrículas repetidas en los cambios.")
+
+    with psycopg.connect(**DATABASE_CONFIG) as conexion:
+        with conexion.cursor() as cursor:
+            cursor.execute(
+                "SELECT id, matricula FROM alumnos WHERE grupo_id = %s AND activo = TRUE AND id = ANY(%s);",
+                (grupo_id, list(ids)),
+            )
+            actuales = {fila[0]: fila[1] for fila in cursor.fetchall()}
+            ids_validos = set(actuales)
+            if ids_validos != ids:
+                raise ValueError("La lista incluye alumnos que ya no pertenecen a este grupo.")
+
+            for alumno_id, valores in filas:
+                cursor.execute(
+                    """
+                    UPDATE alumnos
+                    SET matricula = %s,
+                        nombre = %s,
+                        apellido_paterno = %s,
+                        apellido_materno = %s,
+                        fecha_nacimiento = %s,
+                        numero_seguro_social = %s,
+                        nombre_padre = %s,
+                        curp = %s,
+                        correo = %s,
+                        telefono = %s
+                    WHERE id = %s AND grupo_id = %s AND activo = TRUE;
+                    """,
+                    (
+                        valores["matricula"],
+                        valores["nombre"],
+                        valores["apellido_paterno"],
+                        valores["apellido_materno"],
+                        valores["fecha_nacimiento"],
+                        valores["numero_seguro_social"],
+                        valores["nombre_padre"],
+                        valores["curp"],
+                        valores["correo"],
+                        valores["telefono"],
+                        alumno_id,
+                        grupo_id,
+                    ),
+                )
+        cambios_matricula = [
+            {"id": alumno_id, "matricula": valores["matricula"]}
+            for alumno_id, valores in filas
+            if actuales[alumno_id] != valores["matricula"]
+        ]
+        conexion.commit()
+
+    return {"actualizados": len(filas), "cambios_matricula": cambios_matricula}
+
+
 # ============================================================
 # ELIMINAR / DESACTIVAR ALUMNO
 # ============================================================
