@@ -1675,6 +1675,62 @@ def alumnos(
     )
 
 
+@app.get("/alumnos/datos-faltantes")
+def alumnos_datos_faltantes(request: Request, grupo_id: int | None = None):
+    if not usuario_autenticado(request):
+        return RedirectResponse(url="/login", status_code=303)
+    if not usuario_puede_operar(request):
+        return RedirectResponse(url="/", status_code=303)
+
+    campos = [
+        ("correo", "Correo electrónico"),
+        ("nombre_padre", "Nombre del padre"),
+        ("curp", "CURP"),
+        ("numero_seguro_social", "Número de seguro social"),
+        ("telefono", "Teléfono"),
+    ]
+    condicion = "AND a.grupo_id = %s" if grupo_id else ""
+    parametros = (grupo_id,) if grupo_id else ()
+    with psycopg.connect(**DATABASE_CONFIG) as conexion:
+        with conexion.cursor() as cursor:
+            cursor.execute(f"""
+                SELECT a.id, a.matricula, a.nombre, a.apellido_paterno,
+                       a.apellido_materno, a.correo, a.nombre_padre, a.curp,
+                       a.numero_seguro_social, a.telefono,
+                       g.nombre, g.grado, g.turno
+                FROM alumnos a
+                LEFT JOIN grupos g ON g.id = a.grupo_id
+                WHERE a.activo = TRUE {condicion}
+                ORDER BY g.grado, g.nombre, a.apellido_paterno,
+                         a.apellido_materno, a.nombre
+            """, parametros)
+            filas = cursor.fetchall()
+
+    alumnos = []
+    conteos = {clave: 0 for clave, _ in campos}
+    indices = {"correo": 5, "nombre_padre": 6, "curp": 7,
+               "numero_seguro_social": 8, "telefono": 9}
+    for fila in filas:
+        faltantes = []
+        for clave, etiqueta in campos:
+            if not str(fila[indices[clave]] or "").strip():
+                faltantes.append(etiqueta)
+                conteos[clave] += 1
+        if faltantes:
+            alumnos.append({
+                "id": fila[0], "matricula": fila[1],
+                "nombre": " ".join(str(valor) for valor in fila[2:5] if valor),
+                "faltantes": faltantes,
+                "grupo": " - ".join(str(valor) for valor in fila[10:13] if valor),
+            })
+    return templates.TemplateResponse(
+        request=request, name="alumnos_datos_faltantes.html",
+        context={"grupos": obtener_grupos(), "grupo_seleccionado": grupo_id,
+                 "campos": campos, "conteos": conteos, "alumnos": alumnos,
+                 "total_activos": len(filas)},
+    )
+
+
 @app.get("/actividad-alumnos")
 def actividad_alumnos(
     request: Request,

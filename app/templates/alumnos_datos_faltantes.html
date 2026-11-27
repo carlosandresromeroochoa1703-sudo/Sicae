@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Datos faltantes de alumnos - SICAE WEB</title>
+    <link rel="stylesheet" href="/static/css/style.css?v=20261018-3">
+    <style>
+        .contenido { margin-left:260px; padding:30px; }
+        .panel { max-width:1200px; margin:auto; background:#fff; padding:25px; border-radius:14px; box-shadow:0 4px 14px rgba(0,0,0,.08); }
+        .muted { color:#64748b; }
+        .filtros { display:flex; gap:10px; margin:20px 0; flex-wrap:wrap; }
+        select, .boton { padding:11px 14px; border:1px solid #cbd5e1; border-radius:7px; background:#fff; }
+        .boton { text-decoration:none; color:#1e293b; cursor:pointer; }
+        .resumen { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; margin:20px 0; }
+        .tarjeta { background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:15px; }
+        .tarjeta strong { display:block; font-size:1.7rem; color:#b45309; }
+        .tabla { overflow-x:auto; }
+        table { width:100%; border-collapse:collapse; }
+        th,td { text-align:left; padding:12px; border-bottom:1px solid #e2e8f0; vertical-align:top; }
+        th { background:#f8fafc; }
+        .faltante { display:inline-block; background:#fff7ed; color:#9a3412; border-radius:20px; padding:4px 9px; margin:2px; font-size:.88rem; }
+        @media(max-width:800px) { .contenido { margin-left:0; padding:15px; } .panel { padding:15px; } }
+    </style>
+</head>
+<body>
+    {% include "_sidebar.html" %}
+    <main class="contenido"><section class="panel">
+        <h1>📋 Datos faltantes de alumnos</h1>
+        <p class="muted">Revisa cuántos alumnos activos no tienen registrados sus datos de contacto e identificación.</p>
+        <form class="filtros" method="get" action="/alumnos/datos-faltantes">
+            <select name="grupo_id" aria-label="Filtrar por grupo">
+                <option value="">Todos los grupos</option>
+                {% for grupo in grupos %}
+                <option value="{{ grupo.id }}" {% if grupo.id == grupo_seleccionado %}selected{% endif %}>{{ grupo.grado }} - {{ grupo.nombre_grupo }} - {{ grupo.turno }}</option>
+                {% endfor %}
+            </select>
+            <button class="boton" type="submit">Filtrar</button>
+            <a class="boton" href="/alumnos/datos-faltantes">Limpiar</a>
+        </form>
+        <p>Alumnos activos: <strong>{{ total_activos }}</strong> · Con al menos un dato faltante: <strong>{{ alumnos|length }}</strong></p>
+        <div class="resumen">
+            {% for clave, etiqueta in campos %}
+            <div class="tarjeta"><span>{{ etiqueta }}</span><strong>{{ conteos[clave] }}</strong><span class="muted">sin registrar</span></div>
+            {% endfor %}
+        </div>
+        <div class="tabla"><table>
+            <thead><tr><th>Matrícula</th><th>Alumno</th><th>Grupo</th><th>Datos faltantes</th></tr></thead>
+            <tbody>
+            {% for alumno in alumnos %}
+            <tr><td>{{ alumno.matricula }}</td><td><a href="/alumnos/detalle/{{ alumno.id }}">{{ alumno.nombre }}</a></td><td>{{ alumno.grupo or "Sin grupo" }}</td>
+                <td>{% for campo in alumno.faltantes %}<span class="faltante">{{ campo }}</span>{% endfor %}</td></tr>
+            {% else %}<tr><td colspan="4">Todos los alumnos del filtro tienen estos datos registrados.</td></tr>{% endfor %}
+            </tbody>
+        </table></div>
+    </section></main>
+</body>
+</html>

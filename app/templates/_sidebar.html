@@ -25,7 +25,7 @@
         {% if usuario_tiene_permiso(request, 'clases') %}<li><a href="/asistencia-maestro" data-active-paths="/asistencia-maestro,/clases/">📋 Mis clases y asistencias</a></li>{% endif %}
         {% if usuario_tiene_permiso(request, 'inicio') %}<li><a href="/inicio-plantel">🏠 Inicio</a></li>{% endif %}
         {% if usuario_tiene_permiso(request, 'asistencias') %}<li><a href="/escaner">📷 Asistencias</a></li>{% endif %}
-        {% if usuario_tiene_permiso(request, 'alumnos') %}<li><a href="/alumnos">👨‍🎓 Alumnos</a></li><li><a href="/actividad-alumnos">🔎 Actividad de alumnos</a></li>{% endif %}
+        {% if usuario_tiene_permiso(request, 'alumnos') %}<li><a href="/alumnos">👨‍🎓 Alumnos</a></li><li><a href="/actividad-alumnos">🔎 Actividad de alumnos</a></li><li><a href="/alumnos/datos-faltantes">📋 Datos faltantes</a></li>{% endif %}
         {% if usuario_tiene_permiso(request, 'grupos') %}<li><a href="/grupos">🏫 Grupos</a></li>{% endif %}
         {% if usuario_tiene_permiso(request, 'reportes') %}<li><a href="/reportes">📊 Reportes</a></li><li><a href="/estadisticas">📈 Estadísticas</a></li>{% endif %}
         {% if usuario_tiene_permiso(request, 'eventos') %}<li><a href="/eventos-fuera">🚌 Eventos</a></li>{% endif %}
@@ -43,6 +43,7 @@
         <li><a href="/alumnos">👨‍🎓 Alumnos</a></li>
         <li><a href="/actividad-alumnos">🔎 Actividad de alumnos</a></li>
         <li><a href="/correos-alumnos">✉️ Correos de alumnos</a></li>
+        <li><a href="/alumnos/datos-faltantes">📋 Datos faltantes</a></li>
         {% endif %}
         {% if usuario_tiene_permiso(request, 'grupos') %}<li><a href="/grupos">🏫 Grupos</a></li>{% endif %}
         {% if usuario_tiene_permiso(request, 'reportes') %}<li><a href="/reportes">📊 Reportes</a></li><li><a href="/estadisticas">📈 Estadísticas</a></li>{% endif %}
@@ -81,6 +82,8 @@
                 ✉️ Correos de alumnos
             </a>
         </li>
+
+        <li><a href="/alumnos/datos-faltantes">📋 Datos faltantes</a></li>
 
         <li>
             <a href="/grupos">
